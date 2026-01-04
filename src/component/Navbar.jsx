@@ -4,17 +4,17 @@ import logo from "../assets/unnamed (1).jpg";
 const links = [
   { label: "Home", href: "/" },
   { label: "Books", href: "/books" },
-  { label: "Testimonials", href: "/testimonials" },
+  { label: "Categories", href: "/categories" },
   { label: "About", href: "/about" },
-  { label: "Become a Reader", href: "/reader" },
-  { label: "Submit Your Book", href: "/submit" },
+  { label: "Become a Reader", href: "/Become-a-reader" },
+  { label: "Submit Your Book", href: "/submit-your-book" },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#6B0C22]/95 backdrop-blur-sm border-b border-white/10">
+    <header className=" bg-[#6B0C22]/95 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <a className="flex items-center gap-3 text-white" href="/">
           <img

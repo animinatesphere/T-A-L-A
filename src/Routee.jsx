@@ -24,7 +24,7 @@ const Routee = () => {
         <Route path="/contact" element={<TALAContactPage />} />
         <Route path="/podcast" element={<TALAPodcastPage />} />
         <Route path="/Tala-admin" element={<AdminDashboard />} />
-        <Route path="/submit" element={<BookSubmissionForm />} />
+        <Route path="/submit-your-book" element={<BookSubmissionForm />} />
         <Route path="*" element={<TALA404Page />} />
       </Routes>
       <Footer />
