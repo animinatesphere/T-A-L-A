@@ -10,6 +10,7 @@ import {
   Mail,
   Star,
   Globe,
+  ArrowBigDown,
 } from "lucide-react";
 
 export default function About() {
@@ -211,6 +212,9 @@ export default function About() {
         }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center hover:animate-bounce mx-auto w-16 h-16 bg-[#6B0C22] rounded-full mb-4">
+            <Target className="w-8 h-8 text-white text-center" />
+          </div>
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
               Mode of Operation
@@ -223,6 +227,9 @@ export default function About() {
               operational aspects of The Africa Laureate Awards. It covers the
               following:
             </p>
+            <div className="flex items-center justify-center animate-bounce mx-auto w-16 h-16 bg-[#6B0C22] rounded-full mb-4">
+              <ArrowBigDown className="w-8 h-8 text-white text-center" />
+            </div>
           </div>
         </div>
       </section>
@@ -279,6 +286,9 @@ export default function About() {
         }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center hover:animate-bounce mx-auto w-16 h-16 bg-[#6B0C22] rounded-full mb-4">
+            <Target className="w-8 h-8 text-white text-center" />
+          </div>
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Our Selection Process

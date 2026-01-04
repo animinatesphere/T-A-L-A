@@ -3,11 +3,11 @@ import logo from "../assets/unnamed (1).jpg";
 
 const links = [
   { label: "Home", href: "/" },
-  { label: "Books", href: "/award-winning-books" },
-  { label: "Testimonials", href: "/book-trailers" },
+  { label: "Books", href: "/books" },
+  { label: "Testimonials", href: "/testimonials" },
   { label: "About", href: "/about" },
-  { label: "Become a Reader", href: "/about" },
-  { label: "Submit Your Book", href: "/contact" },
+  { label: "Become a Reader", href: "/reader" },
+  { label: "Submit Your Book", href: "/submit" },
 ];
 
 export default function Navbar() {

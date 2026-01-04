@@ -5,6 +5,12 @@ import Navbar from "./component/Navbar";
 import About from "./pages/About";
 import Loading from "./component/Loading";
 import TALA404Page from "./pages/TALA404Page";
+import Footer from "./component/Footer";
+import TALAFAQPage from "./component/TALAFAQPage";
+import TALAContactPage from "./pages/TALAContactPage";
+import TALAPodcastPage from "./pages/TALAPodcastPage";
+import AdminDashboard from "./admin/AdminDashboard";
+import BookSubmissionForm from "./pages/BookSubmissionForm";
 
 const Routee = () => {
   return (
@@ -14,8 +20,14 @@ const Routee = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/faq" element={<TALAFAQPage />} />
+        <Route path="/contact" element={<TALAContactPage />} />
+        <Route path="/podcast" element={<TALAPodcastPage />} />
+        <Route path="/Tala-admin" element={<AdminDashboard />} />
+        <Route path="/submit" element={<BookSubmissionForm />} />
         <Route path="*" element={<TALA404Page />} />
       </Routes>
+      <Footer />
     </>
   );
 };
