@@ -25,7 +25,7 @@ export default function TALA404Page() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#6B0C22] via-[#8B1530] to-[#4a0818] relative overflow-hidden flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-[#6B0C22] via-[#8B1530] to-[#4a0818] relative overflow-hidden flex items-center justify-center z-[-1]">
       {/* Floating Books Background */}
       {floatingBooks.map((book) => (
         <div

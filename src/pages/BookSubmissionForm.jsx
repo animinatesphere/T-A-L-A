@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Upload,
   BookOpen,
@@ -33,8 +33,8 @@ export default function BookSubmissionForm() {
     subtitle: "",
     genre: "",
     book_series: "",
-    series_description: "",
-    amazon_url: "",
+    book_description: "",
+    date_of_publication: "",
     barnes_noble_url: "",
   });
 
@@ -59,7 +59,16 @@ export default function BookSubmissionForm() {
       [e.target.name]: e.target.value,
     });
   };
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://js.paystack.co/v1/inline.js";
+    script.async = true;
+    document.body.appendChild(script);
 
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
   const handleFileChange = (fileType, file) => {
     if (file) {
       setFiles({ ...files, [fileType]: file });
@@ -125,8 +134,9 @@ export default function BookSubmissionForm() {
       amount: amount * 100,
       currency: currency,
       ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-      callback: async function (response) {
-        await saveSubmission(response.reference);
+      callback: function (response) {
+        // Remove async from here, call saveSubmission normally
+        saveSubmission(response.reference);
       },
       onClose: function () {
         alert("Payment window closed. Please try again.");
@@ -134,7 +144,6 @@ export default function BookSubmissionForm() {
     });
     handler.openIframe();
   };
-
   const saveSubmission = async (paymentReference) => {
     setLoading(true);
 
@@ -504,12 +513,12 @@ export default function BookSubmissionForm() {
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Amazon URL
+                        Date of Publication
                       </label>
                       <input
                         type="url"
-                        name="amazon_url"
-                        value={formData.amazon_url}
+                        name="date_of_publication"
+                        value={formData.date_of_publication}
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
                       />
@@ -529,11 +538,11 @@ export default function BookSubmissionForm() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Series Description
+                      Book Description
                     </label>
                     <textarea
-                      name="series_description"
-                      value={formData.series_description}
+                      name="book_description"
+                      value={formData.book_description}
                       onChange={handleChange}
                       rows={4}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none resize-none"
@@ -563,7 +572,7 @@ export default function BookSubmissionForm() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Book Cover Image *
+                  Front Cover Image *
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-[#6B0C22] transition-colors">
                   {filePreviews.book_cover_preview ? (
@@ -584,7 +593,7 @@ export default function BookSubmissionForm() {
                     <label className="cursor-pointer block text-center">
                       <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
                       <p className="text-gray-600 mb-2 font-semibold">
-                        Click to upload Book Cover
+                        Click to upload Front Cover
                       </p>
                       <p className="text-xs text-gray-500">
                         PNG or JPG (max 5MB)
@@ -604,7 +613,7 @@ export default function BookSubmissionForm() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  About Book PDF *
+                  Ebook file *
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-[#6B0C22] transition-colors">
                   {filePreviews.about_book_pdf_name ? (
@@ -816,7 +825,7 @@ export default function BookSubmissionForm() {
         </div>
       </div>
 
-      <script src="https://js.paystack.co/v1/inline.js" />
+      {/* <script src="https://js.paystack.co/v1/inline.js" /> */}
     </div>
   );
 }

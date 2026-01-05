@@ -89,7 +89,7 @@ export default function About() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 z-[1]">
       {/* Hero Section */}
       <section
         className={`relative bg-cover bg-center text-white py-20 md:py-32 transition-all duration-1000 ${
@@ -99,7 +99,7 @@ export default function About() {
           backgroundImage: `url(${`https://images.unsplash.com/photo-1755545730104-3cb4545282b1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8d3JpdHRlciUyMGJvb2t8ZW58MHx8MHx8fDA%3D`})`,
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-[#6B0C22]/90 to-[#4a0818]/65" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#6B0C22]/90 to-[#4a0818]/65 z-[-1]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
