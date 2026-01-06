@@ -11,6 +11,8 @@ import TALAContactPage from "./pages/TALAContactPage";
 import TALAPodcastPage from "./pages/TALAPodcastPage";
 import AdminDashboard from "./admin/AdminDashboard";
 import BookSubmissionForm from "./pages/BookSubmissionForm";
+import TALATermsPage from "./pages/TALATermsPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const Routee = () => {
   return (
@@ -25,6 +27,8 @@ const Routee = () => {
         <Route path="/podcast" element={<TALAPodcastPage />} />
         <Route path="/Tala-admin" element={<AdminDashboard />} />
         <Route path="/submit-your-book" element={<BookSubmissionForm />} />
+        <Route path="/terms" element={<TALATermsPage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="*" element={<TALA404Page />} />
       </Routes>
       <Footer />

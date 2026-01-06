@@ -16,7 +16,7 @@ export default function Navbar() {
   return (
     <>
       {/* Header */}
-      <header className=" top-0 bg-[#6B0C22]/95 backdrop-blur-sm border-b border-white/10 z-50">
+      <header className="sticky top-0 bg-[#6B0C22]/95 backdrop-blur-sm border-b border-white/10 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <a
             className="flex items-center gap-3 text-white no-underline"
