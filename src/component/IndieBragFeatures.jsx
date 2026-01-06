@@ -3,13 +3,13 @@ import { Facebook, Instagram, Twitter, Menu } from "lucide-react";
 
 export default function IndieBragFeatures() {
   const features = [
-    "Books",
-    "Foodie Lit Blog",
-    "Writers, Reader & Self Publishing",
-    "From Fact to Fiction",
-    "Novel Conversations",
-    "indieBRAG Praise",
-    "Book Trailers",
+    { label: "Books", href: "/books" },
+    { label: "Categories", href: "/categories" },
+    { label: "The Laureate Journal", href: "/blog" },
+    { label: "The Reading Room", href: "/become-a-reader" },
+    { label: "The Book Desk", href: "/book-desk" },
+    { label: "Testimonials", href: "/testimonials" },
+    { label: "Book Trailers", href: "/book-trailers" },
   ];
 
   return (
@@ -38,10 +38,10 @@ export default function IndieBragFeatures() {
               {features.map((feature, index) => (
                 <div key={index}>
                   <a
-                    href="#"
+                    href={feature.href}
                     className="text-lg lg:text-xl hover:text-gray-200 transition block py-2"
                   >
-                    {feature}
+                    {feature.label}
                   </a>
                   {index < features.length - 1 && (
                     <div className="border-b border-white/30 mt-2"></div>
@@ -55,7 +55,7 @@ export default function IndieBragFeatures() {
         {/* Connect Section */}
         <div className="mt-16 flex flex-col md:flex-row items-center justify-between gap-8">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-800">
-            Connect with indieBRAG
+            Connect with <br /> The Africa Laureate Awards
           </h2>
 
           <div className="flex gap-4">

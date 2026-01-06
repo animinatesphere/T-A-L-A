@@ -107,10 +107,10 @@ const PrivacyPolicy = () => {
           {/* Footer */}
           <footer className="mt-12 pt-8 border-t border-gray-300 text-center">
             <p className="text-gray-600 mb-2">
-              &copy; 2025 The Africa Laureate Awards. All rights reserved.
+              &copy; 2026 The Africa Laureate Awards. All rights reserved.
             </p>
             <p className="text-gray-500 italic text-sm">
-              Last updated: January 2025
+              Last updated: January 2026
             </p>
           </footer>
         </div>

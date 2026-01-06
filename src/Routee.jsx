@@ -13,6 +13,9 @@ import AdminDashboard from "./admin/AdminDashboard";
 import BookSubmissionForm from "./pages/BookSubmissionForm";
 import TALATermsPage from "./pages/TALATermsPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TALACategoriesPage from "./pages/TALACategoriesPage";
+import TALARefundPage from "./pages/TALARefundPage";
+import Books from "./pages/Books";
 
 const Routee = () => {
   return (
@@ -29,6 +32,11 @@ const Routee = () => {
         <Route path="/submit-your-book" element={<BookSubmissionForm />} />
         <Route path="/terms" element={<TALATermsPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/categories" element={<TALACategoriesPage />} />
+        <Route path="/refund" element={<TALARefundPage />} />
+        <Route path="/books" element={<Books />} />
+        <Route path="/nominate" element={<Books />} />
+        <Route path="/meet-the-winners" element={<Books />} />
         <Route path="*" element={<TALA404Page />} />
       </Routes>
       <Footer />
