@@ -1,6 +1,7 @@
 import React from "react";
 import { Facebook, Instagram, Twitter, Menu } from "lucide-react";
-
+import left from "../assets/IMG_9258.PNG";
+import { Link } from "react-router-dom";
 export default function IndieBragFeatures() {
   const features = [
     { label: "Books", href: "/books" },
@@ -22,11 +23,13 @@ export default function IndieBragFeatures() {
           {/* Left Side - Book Image */}
           <div className="bg-[#0a2e3e] p-8 rounded-lg shadow-xl">
             <div className="bg-white p-6 rounded-lg">
-              {/* <img
-                src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=600&h=800&fit=crop"
-                alt="Eat Read Dream Cookbook"
-                className="w-full rounded shadow-2xl"
-              /> */}
+              <Link to="/podcast">
+                <img
+                  src={left}
+                  alt="Eat Read Dream Cookbook"
+                  className="w-full rounded shadow-2xl"
+                />
+              </Link>
             </div>
           </div>
 

@@ -16,6 +16,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TALACategoriesPage from "./pages/TALACategoriesPage";
 import TALARefundPage from "./pages/TALARefundPage";
 import Books from "./pages/Books";
+import BlogListing from "./pages/BlogListing";
+import BlogDetail from "./pages/BlogDetail";
 
 const Routee = () => {
   return (
@@ -37,6 +39,9 @@ const Routee = () => {
         <Route path="/books" element={<Books />} />
         <Route path="/nominate" element={<Books />} />
         <Route path="/meet-the-winners" element={<Books />} />
+        <Route path="/blog" element={<BlogListing />} />
+        <Route path="/blog/:slug" element={<BlogDetail />} />
+
         <Route path="*" element={<TALA404Page />} />
       </Routes>
       <Footer />

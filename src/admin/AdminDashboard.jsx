@@ -19,6 +19,9 @@ import {
 const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
+const SUPABASE_URL2 = "https://pnfebkenxtqfzfbewyiy.supabase.co";
+const SUPABASE_ANON_KEY2 =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuZmVia2VueHRxZnpmYmV3eWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDczMjUsImV4cCI6MjA4MTk4MzMyNX0.xGaevgclohcy1Y8w9J83oZ0cQB2rN5WWEJwrDIDwk70";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("submissions");
@@ -68,13 +71,53 @@ export default function AdminDashboard() {
     is_featured: false,
     display_order: 0,
   });
+  // Blog states
+  const [blogs, setBlogs] = useState([]);
+  const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
+  const [editingBlog, setEditingBlog] = useState(null);
+  const [blogImageFile, setBlogImageFile] = useState(null);
+  const [blogImagePreview, setBlogImagePreview] = useState("");
+  const [blogLoading, setBlogLoading] = useState(false);
 
+  const [blogFormData, setBlogFormData] = useState({
+    title: "",
+    slug: "",
+    excerpt: "",
+    content: "",
+    featured_image_url: "",
+    author_name: "",
+    author_avatar_url: "",
+    category: "",
+    tags: [],
+    is_published: false,
+    is_featured: false,
+    read_time_minutes: 5,
+    published_date: new Date().toISOString().split("T")[0],
+  });
+
+  const fetchBlogs = async () => {
+    try {
+      const response = await fetch(
+        `${SUPABASE_URL2}/rest/v1/blog_posts?order=created_at.desc`,
+        {
+          headers: {
+            apikey: SUPABASE_ANON_KEY2,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setBlogs(data);
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
+    }
+  };
   // Add to existing useEffect
   useEffect(() => {
     fetchSubmissions();
     fetchPodcasts();
     fetchAwardBooks(); // Add this line
-
+    fetchBlogs();
     const interval = setInterval(() => {
       fetchSubmissions();
       fetchAwardBooks(); // Add this line
@@ -83,6 +126,188 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  // Generate slug from title
+  const generateSlug = (title) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
+  const openBlogModal = (blog = null) => {
+    if (blog) {
+      setEditingBlog(blog);
+      setBlogFormData({
+        ...blog,
+        tags: blog.tags || [],
+        published_date: blog.published_date
+          ? new Date(blog.published_date).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
+      });
+      setBlogImagePreview(blog.featured_image_url);
+    } else {
+      setEditingBlog(null);
+      setBlogFormData({
+        title: "",
+        slug: "",
+        excerpt: "",
+        content: "",
+        featured_image_url: "",
+        author_name: "",
+        author_avatar_url: "",
+        category: "",
+        tags: [],
+        is_published: false,
+        is_featured: false,
+        read_time_minutes: 5,
+        published_date: new Date().toISOString().split("T")[0],
+      });
+      setBlogImagePreview("");
+    }
+    setBlogImageFile(null);
+    setIsBlogModalOpen(true);
+  };
+
+  const closeBlogModal = () => {
+    setIsBlogModalOpen(false);
+    setEditingBlog(null);
+    setBlogImageFile(null);
+    setBlogImagePreview("");
+  };
+
+  const handleBlogImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size should be less than 5MB");
+        return;
+      }
+
+      setBlogImageFile(file);
+      setBlogImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadBlogImage = async (file) => {
+    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+
+    try {
+      // Try using FormData instead
+      const formData = new FormData();
+      formData.append("", file); // Empty string as key for Supabase
+
+      const response = await fetch(
+        `${SUPABASE_URL2}/storage/v1/object/blog-images/${fileName}`,
+        {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY2,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
+          },
+          body: formData,
+        }
+      );
+
+      const result = await response.text();
+      console.log("Upload response:", response.status, result);
+
+      if (response.ok) {
+        return `${SUPABASE_URL2}/storage/v1/object/public/blog-images/${fileName}`;
+      } else {
+        console.error("Upload failed:", result);
+        alert(`Upload failed: ${result}`);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    }
+  };
+
+  const handleBlogSubmit = async () => {
+    setBlogLoading(true);
+
+    let featuredImageUrl = blogFormData.featured_image_url;
+
+    if (blogImageFile) {
+      featuredImageUrl = await uploadBlogImage(blogImageFile);
+    }
+
+    // Auto-generate slug if empty
+    const slug = blogFormData.slug || generateSlug(blogFormData.title);
+
+    const blogData = {
+      ...blogFormData,
+      slug,
+      featured_image_url: featuredImageUrl,
+      read_time_minutes: parseInt(blogFormData.read_time_minutes),
+      published_date: blogFormData.is_published
+        ? new Date(blogFormData.published_date).toISOString()
+        : null,
+      updated_at: new Date().toISOString(),
+    };
+
+    try {
+      if (editingBlog) {
+        await fetch(
+          `${SUPABASE_URL2}/rest/v1/blog_posts?id=eq.${editingBlog.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              apikey: SUPABASE_ANON_KEY2,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
+              "Content-Type": "application/json",
+              Prefer: "return=minimal",
+            },
+            body: JSON.stringify(blogData),
+          }
+        );
+      } else {
+        await fetch(`${SUPABASE_URL2}/rest/v1/blog_posts`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY2,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify(blogData),
+        });
+      }
+
+      fetchBlogs();
+      closeBlogModal();
+    } catch (error) {
+      console.error("Error saving blog:", error);
+      alert("Error saving blog post. Please try again.");
+    } finally {
+      setBlogLoading(false);
+    }
+  };
+
+  const deleteBlog = async (id) => {
+    if (window.confirm("Are you sure you want to delete this blog post?")) {
+      try {
+        await fetch(`${SUPABASE_URL2}/rest/v1/blog_posts?id=eq.${id}`, {
+          method: "DELETE",
+          headers: {
+            apikey: SUPABASE_ANON_KEY2,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
+          },
+        });
+        fetchBlogs();
+      } catch (error) {
+        console.error("Error deleting blog:", error);
+      }
+    }
+  };
   // Add this new fetch function
   const fetchAwardBooks = async () => {
     try {
@@ -592,6 +817,20 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Blog Posts</p>
+                <p className="text-3xl font-bold text-[#6B0C22]">
+                  {blogs.length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <Edit className="w-6 h-6 text-indigo-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -640,6 +879,19 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5" />
                   Award-Winning Books
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab("blogs")}
+                className={`px-6 py-4 font-semibold transition-colors ${
+                  activeTab === "blogs"
+                    ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Edit className="w-5 h-5" />
+                  Blog Posts
                 </div>
               </button>
             </div>
@@ -935,6 +1187,122 @@ export default function AdminDashboard() {
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {activeTab === "blogs" && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Manage Blog Posts
+                  </h3>
+                  <button
+                    onClick={() => openBlogModal()}
+                    className="bg-[#6B0C22] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#8B1530] transition-colors flex items-center gap-2"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Create New Post
+                  </button>
+                </div>
+
+                {blogs.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Edit className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">
+                      No blog posts yet. Click "Create New Post" to get started.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {blogs.map((blog) => (
+                      <div
+                        key={blog.id}
+                        className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex gap-4 p-4">
+                          {/* Featured Image */}
+                          <div className="w-48 h-32 flex-shrink-0 bg-gray-200 rounded-lg overflow-hidden">
+                            {blog.featured_image_url ? (
+                              <img
+                                src={blog.featured_image_url}
+                                alt={blog.title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <BookOpen className="w-12 h-12 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="font-bold text-lg line-clamp-1">
+                                    {blog.title}
+                                  </h3>
+                                  {blog.is_published ? (
+                                    <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                      Published
+                                    </span>
+                                  ) : (
+                                    <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                      Draft
+                                    </span>
+                                  )}
+                                  {blog.is_featured && (
+                                    <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                      Featured
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-gray-600 text-sm line-clamp-2 mb-2">
+                                  {blog.excerpt}
+                                </p>
+                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                                  <span>By {blog.author_name}</span>
+                                  {blog.category && (
+                                    <span>• {blog.category}</span>
+                                  )}
+                                  <span>
+                                    • {blog.read_time_minutes} min read
+                                  </span>
+                                  {blog.published_date && (
+                                    <span>
+                                      •{" "}
+                                      {new Date(
+                                        blog.published_date
+                                      ).toLocaleDateString()}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => openBlogModal(blog)}
+                                  className="p-2 bg-[#6B0C22] text-white rounded-lg hover:bg-[#8B1530] transition-colors"
+                                  title="Edit"
+                                >
+                                  <Edit className="w-5 h-5" />
+                                </button>
+                                <button
+                                  onClick={() => deleteBlog(blog.id)}
+                                  className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1621,6 +1989,333 @@ export default function AdminDashboard() {
                   <>
                     <CheckCircle className="w-5 h-5" />
                     {editingBook ? "Update Book" : "Add Book"}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Blog Modal */}
+      {isBlogModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full my-8">
+            <div className="sticky top-0 bg-[#6B0C22] text-white p-6 rounded-t-2xl flex justify-between items-center z-10">
+              <h2 className="text-2xl font-bold">
+                {editingBlog ? "Edit Blog Post" : "Create New Blog Post"}
+              </h2>
+              <button
+                onClick={closeBlogModal}
+                className="hover:bg-white/10 p-2 rounded-lg"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+              {/* Featured Image */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Featured Image *
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-[#6B0C22] transition-colors">
+                  {blogImagePreview ? (
+                    <div className="relative">
+                      <img
+                        src={blogImagePreview}
+                        alt="Preview"
+                        className="w-full h-64 object-cover rounded-lg"
+                      />
+                      <button
+                        onClick={() => {
+                          setBlogImagePreview("");
+                          setBlogImageFile(null);
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer block text-center">
+                      <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                      <p className="text-gray-600">
+                        Click to upload featured image
+                      </p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleBlogImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Post Title *
+                </label>
+                <input
+                  type="text"
+                  value={blogFormData.title}
+                  onChange={(e) => {
+                    const title = e.target.value;
+                    setBlogFormData({
+                      ...blogFormData,
+                      title,
+                      slug: editingBlog
+                        ? blogFormData.slug
+                        : generateSlug(title),
+                    });
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  placeholder="Enter blog post title"
+                  required
+                />
+              </div>
+
+              {/* Slug */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  URL Slug *
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500 text-sm">/blog/</span>
+                  <input
+                    type="text"
+                    value={blogFormData.slug}
+                    onChange={(e) =>
+                      setBlogFormData({
+                        ...blogFormData,
+                        slug: e.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9-]/g, "-"),
+                      })
+                    }
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                    placeholder="post-url-slug"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Auto-generated from title. You can customize it.
+                </p>
+              </div>
+
+              {/* Excerpt */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Excerpt (Short Description)
+                </label>
+                <textarea
+                  value={blogFormData.excerpt}
+                  onChange={(e) =>
+                    setBlogFormData({
+                      ...blogFormData,
+                      excerpt: e.target.value,
+                    })
+                  }
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none resize-none"
+                  placeholder="Brief description for blog listing..."
+                />
+              </div>
+
+              {/* Content */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Content * (Supports Markdown)
+                </label>
+                <textarea
+                  value={blogFormData.content}
+                  onChange={(e) =>
+                    setBlogFormData({
+                      ...blogFormData,
+                      content: e.target.value,
+                    })
+                  }
+                  rows={12}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none resize-none font-mono text-sm"
+                  placeholder="Write your blog post content here...
+
+You can use basic formatting:
+**bold text**
+*italic text*
+[link text](url)
+- bullet point
+
+Or write in plain HTML"
+                  required
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Author Name */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Author Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={blogFormData.author_name}
+                    onChange={(e) =>
+                      setBlogFormData({
+                        ...blogFormData,
+                        author_name: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    value={blogFormData.category}
+                    onChange={(e) =>
+                      setBlogFormData({
+                        ...blogFormData,
+                        category: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                    placeholder="News, Reviews, Tips, etc."
+                  />
+                </div>
+
+                {/* Read Time */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Read Time (minutes)
+                  </label>
+                  <input
+                    type="number"
+                    value={blogFormData.read_time_minutes}
+                    onChange={(e) =>
+                      setBlogFormData({
+                        ...blogFormData,
+                        read_time_minutes: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                    min="1"
+                  />
+                </div>
+
+                {/* Published Date */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Publish Date
+                  </label>
+                  <input
+                    type="date"
+                    value={blogFormData.published_date}
+                    onChange={(e) =>
+                      setBlogFormData({
+                        ...blogFormData,
+                        published_date: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={
+                    Array.isArray(blogFormData.tags)
+                      ? blogFormData.tags.join(", ")
+                      : ""
+                  }
+                  onChange={(e) =>
+                    setBlogFormData({
+                      ...blogFormData,
+                      tags: e.target.value
+                        .split(",")
+                        .map((tag) => tag.trim())
+                        .filter(Boolean),
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  placeholder="writing, books, literature"
+                />
+              </div>
+
+              {/* Toggles */}
+              <div className="flex gap-6">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="is_published"
+                    checked={blogFormData.is_published}
+                    onChange={(e) =>
+                      setBlogFormData({
+                        ...blogFormData,
+                        is_published: e.target.checked,
+                      })
+                    }
+                    className="w-5 h-5 text-[#6B0C22] rounded focus:ring-2 focus:ring-[#6B0C22]"
+                  />
+                  <label
+                    htmlFor="is_published"
+                    className="font-semibold text-gray-700"
+                  >
+                    Publish Post
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="is_featured_blog"
+                    checked={blogFormData.is_featured}
+                    onChange={(e) =>
+                      setBlogFormData({
+                        ...blogFormData,
+                        is_featured: e.target.checked,
+                      })
+                    }
+                    className="w-5 h-5 text-[#6B0C22] rounded focus:ring-2 focus:ring-[#6B0C22]"
+                  />
+                  <label
+                    htmlFor="is_featured_blog"
+                    className="font-semibold text-gray-700"
+                  >
+                    Mark as Featured
+                  </label>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                onClick={handleBlogSubmit}
+                disabled={blogLoading}
+                className="w-full bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {blogLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    {editingBlog ? "Update Post" : "Create Post"}
                   </>
                 )}
               </button>
