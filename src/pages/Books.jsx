@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BookOpen, ExternalLink, Play, X, Filter, Search } from "lucide-react";
+import { BookOpen, ExternalLink, Play, Search, ArrowLeft } from "lucide-react";
 
 const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
 const SUPABASE_ANON_KEY =
@@ -39,7 +39,6 @@ export default function Books() {
       const data = await response.json();
       setBooks(data);
 
-      // Extract unique genres and years
       const uniqueGenres = [
         ...new Set(data.map((book) => book.genre).filter(Boolean)),
       ];
@@ -59,19 +58,16 @@ export default function Books() {
   const filterBooks = () => {
     let filtered = [...books];
 
-    // Filter by genre
     if (selectedGenre !== "all") {
       filtered = filtered.filter((book) => book.genre === selectedGenre);
     }
 
-    // Filter by year
     if (selectedYear !== "all") {
       filtered = filtered.filter(
         (book) => book.year_won === parseInt(selectedYear)
       );
     }
 
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(
         (book) =>
@@ -100,6 +96,170 @@ export default function Books() {
     );
   }
 
+  // Book Detail Page View
+  if (selectedBook) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Back Button Header */}
+        <div className="bg-white border-b border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <button
+              onClick={() => setSelectedBook(null)}
+              className="flex items-center gap-2 text-[#6B0C22] hover:text-[#8B1530] font-semibold transition-all hover:gap-3"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Books
+            </button>
+          </div>
+        </div>
+
+        {/* Book Detail Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="grid md:grid-cols-2 gap-8 p-8 md:p-12">
+              {/* Book Cover */}
+              <div className="flex justify-center">
+                <div className="w-full max-w-md">
+                  <img
+                    src={selectedBook.cover_image_url}
+                    alt={selectedBook.title}
+                    className="w-full rounded-lg shadow-2xl"
+                  />
+                  {selectedBook.is_featured && (
+                    <div className="mt-4 inline-block bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold">
+                      ⭐ Featured Book
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Book Details */}
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-4xl font-bold text-[#6B0C22] mb-3">
+                    {selectedBook.title}
+                  </h1>
+                  <p className="text-2xl text-gray-600 italic mb-3">
+                    by {selectedBook.author}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedBook.genre && (
+                      <span className="inline-block bg-gray-100 text-gray-800 px-4 py-2 rounded-full text-sm font-semibold">
+                        {selectedBook.genre}
+                      </span>
+                    )}
+                    {selectedBook.year_won && (
+                      <span className="inline-block bg-[#6B0C22] text-white px-4 py-2 rounded-full text-sm font-bold">
+                        Winner {selectedBook.year_won}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Synopsis/Description */}
+                {(selectedBook.synopsis || selectedBook.description) && (
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-3">
+                      {selectedBook.synopsis ? "Synopsis" : "Description"}
+                    </h3>
+                    <p className="text-gray-700 leading-relaxed text-lg">
+                      {selectedBook.synopsis || selectedBook.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Buy Links */}
+                {(selectedBook.amazon_url || selectedBook.amazon_uk_url) && (
+                  <div className="space-y-3">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Buy This Book
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {selectedBook.amazon_url && (
+                        <a
+                          href={selectedBook.amazon_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-[#6B0C22] hover:bg-[#8B1530] text-white px-8 py-4 rounded-lg transition flex items-center gap-2 font-bold text-lg shadow-lg hover:shadow-xl"
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                          Amazon.com
+                        </a>
+                      )}
+                      {selectedBook.amazon_uk_url && (
+                        <a
+                          href={selectedBook.amazon_uk_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-[#6B0C22] hover:bg-[#8B1530] text-white px-8 py-4 rounded-lg transition flex items-center gap-2 font-bold text-lg shadow-lg hover:shadow-xl"
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                          Amazon.co.uk
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Video Trailer */}
+                {selectedBook.video_trailer_url && (
+                  <div className="space-y-3">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Video Trailer
+                    </h3>
+                    <a
+                      href={selectedBook.video_trailer_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg transition font-bold text-lg shadow-lg hover:shadow-xl"
+                    >
+                      <Play className="w-5 h-5" />
+                      Watch Trailer
+                    </a>
+                  </div>
+                )}
+
+                {/* Website Links */}
+                {(selectedBook.website_url || selectedBook.blog_url) && (
+                  <div className="space-y-3 pt-6 border-t border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Author Links
+                    </h3>
+                    <div className="flex flex-wrap gap-4">
+                      {selectedBook.website_url && (
+                        <a
+                          href={selectedBook.website_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#6B0C22] hover:text-[#8B1530] font-semibold flex items-center gap-2 text-lg"
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                          Author Website
+                        </a>
+                      )}
+                      {selectedBook.blog_url && (
+                        <a
+                          href={selectedBook.blog_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#6B0C22] hover:text-[#8B1530] font-semibold flex items-center gap-2 text-lg"
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                          Author Blog
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Books List View
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -121,7 +281,6 @@ export default function Books() {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -135,7 +294,6 @@ export default function Books() {
               </div>
             </div>
 
-            {/* Genre Filter */}
             <div className="w-full lg:w-64">
               <select
                 value={selectedGenre}
@@ -151,7 +309,6 @@ export default function Books() {
               </select>
             </div>
 
-            {/* Year Filter */}
             <div className="w-full lg:w-48">
               <select
                 value={selectedYear}
@@ -167,7 +324,6 @@ export default function Books() {
               </select>
             </div>
 
-            {/* Reset Button */}
             {(selectedGenre !== "all" ||
               selectedYear !== "all" ||
               searchTerm) && (
@@ -180,7 +336,6 @@ export default function Books() {
             )}
           </div>
 
-          {/* Results Count */}
           <div className="mt-4 text-gray-600">
             Showing{" "}
             <span className="font-semibold text-[#6B0C22]">
@@ -214,7 +369,10 @@ export default function Books() {
             {filteredBooks.map((book) => (
               <div
                 key={book.id}
-                onClick={() => setSelectedBook(book)}
+                onClick={() => {
+                  setSelectedBook(book);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
                 className="cursor-pointer group"
               >
                 <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
@@ -254,147 +412,6 @@ export default function Books() {
           </div>
         )}
       </div>
-
-      {/* Book Detail Modal */}
-      {selectedBook && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-5xl w-full my-8 relative max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setSelectedBook(null)}
-              className="sticky top-4 float-right bg-white text-gray-600 hover:text-gray-900 p-2 rounded-full shadow-lg z-10 mr-4"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            <div className="grid md:grid-cols-2 gap-8 p-8">
-              {/* Book Cover */}
-              <div className="flex justify-center">
-                <img
-                  src={selectedBook.cover_image_url}
-                  alt={selectedBook.title}
-                  className="w-full max-w-sm rounded-lg shadow-2xl"
-                />
-              </div>
-
-              {/* Book Details */}
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-3xl font-bold text-[#6B0C22] mb-2">
-                    {selectedBook.title}
-                  </h2>
-                  <p className="text-xl text-gray-600 italic mb-2">
-                    by {selectedBook.author}
-                  </p>
-                  {selectedBook.genre && (
-                    <span className="inline-block bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">
-                      {selectedBook.genre}
-                    </span>
-                  )}
-                  {selectedBook.year_won && (
-                    <div className="inline-block bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold mt-3 ml-2">
-                      Winner {selectedBook.year_won}
-                    </div>
-                  )}
-                </div>
-
-                {/* Synopsis/Description */}
-                {(selectedBook.synopsis || selectedBook.description) && (
-                  <div>
-                    <h4 className="font-semibold text-gray-700 mb-2">
-                      {selectedBook.synopsis ? "Synopsis" : "Description"}
-                    </h4>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {selectedBook.synopsis || selectedBook.description}
-                    </p>
-                  </div>
-                )}
-
-                {/* Buy Links */}
-                {(selectedBook.amazon_url || selectedBook.amazon_uk_url) && (
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-gray-700">Buy Now</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {selectedBook.amazon_url && (
-                        <a
-                          href={selectedBook.amazon_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-[#6B0C22] hover:bg-[#8B1530] text-white px-6 py-3 rounded-lg transition flex items-center gap-2 font-semibold"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Amazon.com
-                        </a>
-                      )}
-                      {selectedBook.amazon_uk_url && (
-                        <a
-                          href={selectedBook.amazon_uk_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-[#6B0C22] hover:bg-[#8B1530] text-white px-6 py-3 rounded-lg transition flex items-center gap-2 font-semibold"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Amazon.co.uk
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Website Links */}
-                {(selectedBook.website_url || selectedBook.blog_url) && (
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-gray-700">
-                      Author Links
-                    </h4>
-                    <div className="flex gap-4">
-                      {selectedBook.website_url && (
-                        <a
-                          href={selectedBook.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#6B0C22] hover:underline flex items-center gap-1 font-medium"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Website
-                        </a>
-                      )}
-                      {selectedBook.blog_url && (
-                        <a
-                          href={selectedBook.blog_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#6B0C22] hover:underline flex items-center gap-1 font-medium"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Blog
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Video Trailer */}
-                {selectedBook.video_trailer_url && (
-                  <div>
-                    <h4 className="font-semibold text-gray-700 mb-3">
-                      Video Trailer
-                    </h4>
-                    <a
-                      href={selectedBook.video_trailer_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-[#6B0C22] hover:bg-[#8B1530] text-white px-6 py-3 rounded-lg transition font-semibold"
-                    >
-                      <Play className="w-5 h-5" />
-                      Watch Trailer
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

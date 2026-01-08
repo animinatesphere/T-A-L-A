@@ -132,7 +132,7 @@ export default function AwardWinningBooks() {
                   Celebrating the Latest <br /> Africa Laureate Award Winners
                 </h2>
                 <Link to="/meet-the-winners">
-                  <button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px]">
+                  <button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16]">
                     VIEW ALL
                   </button>
                 </Link>

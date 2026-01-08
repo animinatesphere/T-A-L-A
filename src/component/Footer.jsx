@@ -59,28 +59,28 @@ export default function Footer() {
             {/* Social Media Links */}
             <div className="flex gap-3">
               <a
-                href="#"
+                href="https://www.facebook.com/share/1ZnoT1qGJY/?mibextid=wwlfr"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
               >
                 <Facebook className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href="https://twitter.com/laureateAwards?s=21"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
               >
                 <Twitter className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/theafricalaureteawards?igsh=MWFkNFtlOW95Y2lzeQ%3D"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
               >
                 <Instagram className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href="https://www.threads.net/@theafricalaureateawards"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
               >
-                <Linkedin className="w-5 h-5" />
+                <span className="text-xl font-bold">@</span>
               </a>
               <a
                 href="#"
@@ -146,10 +146,10 @@ export default function Footer() {
               <div className="flex items-start gap-2 text-gray-300">
                 <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <a
-                  href="mailto:info@tala.com"
+                  href="mailto:theafricalaureateawards@gmail.com"
                   className="hover:text-white transition-colors"
                 >
-                  info@tala.com
+                  theafricalaureateaward@gmail.com
                 </a>
               </div>
               <div className="flex items-start gap-2 text-gray-300">

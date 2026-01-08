@@ -16,6 +16,7 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
 
 const PAYSTACK_PUBLIC_KEY = "pk_live_6560af0a81f50cfdd244e08bf2e54169a3e434e9";
+const KORAPAY_PUBLIC_KEY = "pk_live_tVMURvLgbVLgPHjnXnwtJwGCP77yqfKXo4HKeXUr"; // Replace with your actual Korapay key
 
 export default function BookSubmissionForm() {
   const [step, setStep] = useState(1);
@@ -59,16 +60,27 @@ export default function BookSubmissionForm() {
       [e.target.name]: e.target.value,
     });
   };
+
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://js.paystack.co/v1/inline.js";
-    script.async = true;
-    document.body.appendChild(script);
+    // Load Paystack script
+    const paystackScript = document.createElement("script");
+    paystackScript.src = "https://js.paystack.co/v1/inline.js";
+    paystackScript.async = true;
+    document.body.appendChild(paystackScript);
+
+    // Load Korapay script
+    const korapayScript = document.createElement("script");
+    korapayScript.src =
+      "https://korablobstorage.blob.core.windows.net/modal-bucket/korapay-collections.min.js";
+    korapayScript.async = true;
+    document.body.appendChild(korapayScript);
 
     return () => {
-      document.body.removeChild(script);
+      document.body.removeChild(paystackScript);
+      document.body.removeChild(korapayScript);
     };
   }, []);
+
   const handleFileChange = (fileType, file) => {
     if (file) {
       setFiles({ ...files, [fileType]: file });
@@ -127,15 +139,36 @@ export default function BookSubmissionForm() {
     return null;
   };
 
+  const handleKorapayPayment = () => {
+    window.Korapay.initialize({
+      key: KORAPAY_PUBLIC_KEY,
+      reference: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
+      amount: 5000, // $50 in cents
+      currency: "USD",
+      customer: {
+        name: `${formData.first_name} ${formData.last_name}`,
+        email: formData.email,
+      },
+      onClose: function () {
+        alert("Payment window closed. Please try again.");
+      },
+      onSuccess: function (data) {
+        saveSubmission(data.reference);
+      },
+      onFailed: function (data) {
+        alert("Payment failed. Please try again.");
+      },
+    });
+  };
+
   const handlePaystackPayment = () => {
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: formData.email,
-      amount: amount * 100,
-      currency: currency,
+      amount: 3500000, // 35,000 NGN in kobo
+      currency: "NGN",
       ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
       callback: function (response) {
-        // Remove async from here, call saveSubmission normally
         saveSubmission(response.reference);
       },
       onClose: function () {
@@ -144,6 +177,15 @@ export default function BookSubmissionForm() {
     });
     handler.openIframe();
   };
+
+  const handlePayment = () => {
+    if (currency === "USD") {
+      handleKorapayPayment();
+    } else {
+      handlePaystackPayment();
+    }
+  };
+
   const saveSubmission = async (paymentReference) => {
     setLoading(true);
 
@@ -241,7 +283,6 @@ export default function BookSubmissionForm() {
           </p>
         </div>
 
-        {/* Information Section */}
         <div className="bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
             Are You a Self-Published or Indie Author?
@@ -341,6 +382,111 @@ export default function BookSubmissionForm() {
             ))}
           </div>
         </div>
+
+        {step === 3 && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment</h2>
+
+            <div className="bg-gray-50 rounded-xl p-6">
+              <h3 className="font-bold text-lg mb-4">Submission Summary</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Submitter:</span>
+                  <span className="font-semibold">
+                    {formData.first_name} {formData.last_name}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Book Title:</span>
+                  <span className="font-semibold">{formData.book_title}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Author:</span>
+                  <span className="font-semibold">{formData.author_name}</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Select Currency
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setCurrency("USD")}
+                  className={`p-4 border-2 rounded-lg font-semibold ${
+                    currency === "USD"
+                      ? "border-[#6B0C22] bg-[#6B0C22]/5"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <DollarSign className="w-6 h-6 mx-auto mb-2" />
+                  USD $50.00
+                </button>
+                <button
+                  onClick={() => setCurrency("NGN")}
+                  className={`p-4 border-2 rounded-lg font-semibold ${
+                    currency === "NGN"
+                      ? "border-[#6B0C22] bg-[#6B0C22]/5"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <span className="text-2xl">₦</span>
+                  <div className="mt-2">NGN ₦35,000</div>
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+              <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+              <div className="text-sm text-blue-900">
+                <p className="font-semibold mb-1">Secure Payment</p>
+                <p>
+                  Your payment is processed securely through{" "}
+                  {currency === "USD" ? "Korapay" : "Paystack"}.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setStep(2)}
+                className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-300"
+              >
+                Back
+              </button>
+              <button
+                onClick={handlePayment}
+                disabled={loading}
+                className="flex-1 bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <CreditCard className="w-5 h-5" />
+                Pay {currency} {currency === "USD" ? "$50" : "₦35,000"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && submitStatus === "success" && (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="w-8 h-8 text-green-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Submission Successful!
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Thank you for submitting your book to T.A.L.A. We'll review your
+              submission and get back to you within 2-3 weeks.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-[#6B0C22] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#8B1530]"
+            >
+              Submit Another Book
+            </button>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-10">
           {step === 1 && (
@@ -516,7 +662,7 @@ export default function BookSubmissionForm() {
                         Date of Publication
                       </label>
                       <input
-                        type="url"
+                        type="text"
                         name="date_of_publication"
                         value={formData.date_of_publication}
                         onChange={handleChange}
@@ -613,7 +759,7 @@ export default function BookSubmissionForm() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Ebook file *
+                  About Book PDF *
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-[#6B0C22] transition-colors">
                   {filePreviews.about_book_pdf_name ? (
@@ -752,10 +898,10 @@ export default function BookSubmissionForm() {
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => setCurrency("USD")}
-                    className={`p-4 border-2 rounded-lg font-semibold ${
+                    className={`p-4 border-2 rounded-lg font-semibold transition-colors ${
                       currency === "USD"
                         ? "border-[#6B0C22] bg-[#6B0C22]/5"
-                        : "border-gray-300"
+                        : "border-gray-300 hover:border-gray-400"
                     }`}
                   >
                     <DollarSign className="w-6 h-6 mx-auto mb-2" />
@@ -763,10 +909,10 @@ export default function BookSubmissionForm() {
                   </button>
                   <button
                     onClick={() => setCurrency("NGN")}
-                    className={`p-4 border-2 rounded-lg font-semibold ${
+                    className={`p-4 border-2 rounded-lg font-semibold transition-colors ${
                       currency === "NGN"
                         ? "border-[#6B0C22] bg-[#6B0C22]/5"
-                        : "border-gray-300"
+                        : "border-gray-300 hover:border-gray-400"
                     }`}
                   >
                     <span className="text-2xl">₦</span>
@@ -779,24 +925,31 @@ export default function BookSubmissionForm() {
                 <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
                 <div className="text-sm text-blue-900">
                   <p className="font-semibold mb-1">Secure Payment</p>
-                  <p>Your payment is processed securely through Paystack.</p>
+                  <p>
+                    Your payment is processed securely through{" "}
+                    {currency === "USD" ? "Korapay" : "Paystack"}.
+                  </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
                 <button
                   onClick={() => setStep(2)}
-                  className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-300"
+                  className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-300 transition-colors"
                 >
                   Back
                 </button>
                 <button
-                  onClick={handlePaystackPayment}
+                  onClick={handlePayment}
                   disabled={loading}
-                  className="flex-1 bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-1 bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
                 >
                   <CreditCard className="w-5 h-5" />
-                  Pay {currency} {currency === "USD" ? "$50" : "₦35,000"}
+                  {loading
+                    ? "Processing..."
+                    : `Pay ${currency} ${
+                        currency === "USD" ? "$50" : "₦35,000"
+                      }`}
                 </button>
               </div>
             </div>
@@ -816,16 +969,35 @@ export default function BookSubmissionForm() {
               </p>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-[#6B0C22] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#8B1530]"
+                className="bg-[#6B0C22] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#8B1530] transition-colors"
               >
                 Submit Another Book
               </button>
             </div>
           )}
+
+          {step === 4 && submitStatus === "error" && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <X className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Submission Failed
+              </h2>
+              <p className="text-gray-600 mb-6">
+                There was an error processing your submission. Please try again
+                or contact support.
+              </p>
+              <button
+                onClick={() => setStep(3)}
+                className="bg-[#6B0C22] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#8B1530] transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* <script src="https://js.paystack.co/v1/inline.js" /> */}
     </div>
   );
 }
