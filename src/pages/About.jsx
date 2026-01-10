@@ -12,6 +12,7 @@ import {
   Globe,
   ArrowBigDown,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function About() {
   const [isVisible, setIsVisible] = useState(false);
@@ -473,9 +474,11 @@ export default function About() {
           <p className="text-xl md:text-2xl lg:text-3xl text-gray-200 mb-8">
             Join our community of recognized self-published authors
           </p>
-          <button className="bg-white text-[#6B0C22] px-8 md:px-12 py-4 rounded-lg font-bold text-lg md:text-xl hover:bg-gray-100 transition-all duration-300 shadow-lg hover:scale-105">
-            Submit Your Book Now
-          </button>
+          <Link to="/submit-your-book">
+            <button className="bg-white text-[#6B0C22] px-8 md:px-12 py-4 rounded-lg font-bold text-lg md:text-xl hover:bg-gray-100 transition-all duration-300 shadow-lg hover:scale-105">
+              Submit Your Book Now
+            </button>
+          </Link>
         </div>
       </section>
     </div>

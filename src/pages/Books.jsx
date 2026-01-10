@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { BookOpen, ExternalLink, Play, Search, ArrowLeft } from "lucide-react";
 
 const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
 
+// Helper function to create URL-friendly slugs
+const createSlug = (title) => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
 export default function Books() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
   const [books, setBooks] = useState([]);
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [selectedBook, setSelectedBook] = useState(null);
@@ -19,6 +30,15 @@ export default function Books() {
   useEffect(() => {
     fetchBooks();
   }, []);
+
+  useEffect(() => {
+    if (books.length > 0 && slug) {
+      const book = books.find((b) => createSlug(b.title) === slug);
+      if (book) {
+        setSelectedBook(book);
+      }
+    }
+  }, [slug, books]);
 
   useEffect(() => {
     filterBooks();
@@ -85,6 +105,17 @@ export default function Books() {
     setSearchTerm("");
   };
 
+  const handleBookClick = (book) => {
+    const bookSlug = createSlug(book.title);
+    navigate(`/books/${bookSlug}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleBackToBooks = () => {
+    navigate("/books");
+    setSelectedBook(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -104,7 +135,7 @@ export default function Books() {
         <div className="bg-white border-b border-gray-200 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <button
-              onClick={() => setSelectedBook(null)}
+              onClick={handleBackToBooks}
               className="flex items-center gap-2 text-[#6B0C22] hover:text-[#8B1530] font-semibold transition-all hover:gap-3"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -369,10 +400,7 @@ export default function Books() {
             {filteredBooks.map((book) => (
               <div
                 key={book.id}
-                onClick={() => {
-                  setSelectedBook(book);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
+                onClick={() => handleBookClick(book)}
                 className="cursor-pointer group"
               >
                 <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">

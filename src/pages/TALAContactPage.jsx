@@ -109,7 +109,7 @@ export default function TALAContactPage() {
                 href="mailto:info@tala.com"
                 className="text-[#6B0C22] hover:underline"
               >
-                info@tala.com
+                theafricalaureateaward@gmail.com
               </a>
             </div>
 
@@ -122,7 +122,7 @@ export default function TALAContactPage() {
                 href="tel:+2348012345678"
                 className="text-[#6B0C22] hover:underline"
               >
-                +234 9 021 615 849
+                +234 91 6765 2967
               </a>
             </div>
 

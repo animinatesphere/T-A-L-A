@@ -28,6 +28,7 @@ export default function BookSubmissionForm() {
     last_name: "",
     email: "",
     relationship_to_author: "",
+    about_aurthor: "",
     author_name: "",
     pen_name: "",
     book_title: "",
@@ -41,12 +42,14 @@ export default function BookSubmissionForm() {
 
   const [files, setFiles] = useState({
     book_cover: null,
+    author_image: null,
     about_book_pdf: null,
     ebook: null,
   });
 
   const [filePreviews, setFilePreviews] = useState({
     book_cover_preview: "",
+    author_image_preview: "",
     about_book_pdf_name: "",
     ebook_name: "",
   });
@@ -90,6 +93,11 @@ export default function BookSubmissionForm() {
           ...filePreviews,
           book_cover_preview: URL.createObjectURL(file),
         });
+      } else if (fileType === "author_image") {
+        setFilePreviews({
+          ...filePreviews,
+          author_image_preview: URL.createObjectURL(file),
+        });
       } else if (fileType === "about_book_pdf") {
         setFilePreviews({
           ...filePreviews,
@@ -109,6 +117,8 @@ export default function BookSubmissionForm() {
 
     if (fileType === "book_cover") {
       setFilePreviews({ ...filePreviews, book_cover_preview: "" });
+    } else if (fileType === "author_image") {
+      setFilePreviews({ ...filePreviews, author_image_preview: "" });
     } else if (fileType === "about_book_pdf") {
       setFilePreviews({ ...filePreviews, about_book_pdf_name: "" });
     } else if (fileType === "ebook") {
@@ -155,6 +165,7 @@ export default function BookSubmissionForm() {
       onSuccess: function (data) {
         saveSubmission(data.reference);
       },
+      // eslint-disable-next-line no-unused-vars
       onFailed: function (data) {
         alert("Payment failed. Please try again.");
       },
@@ -198,6 +209,13 @@ export default function BookSubmissionForm() {
           files.book_cover,
           `${timestamp}_cover_${files.book_cover.name}`,
           "book-covers"
+        );
+      }
+      if (files.author_image) {
+        fileUrls.author_image_url = await uploadFile(
+          files.author_image,
+          `${timestamp}_author_${files.author_image.name}`,
+          "author-images"
         );
       }
 
@@ -258,6 +276,7 @@ export default function BookSubmissionForm() {
       formData.last_name &&
       formData.email &&
       formData.relationship_to_author &&
+      formData.about_aurthor &&
       formData.author_name &&
       formData.book_title &&
       formData.genre
@@ -265,7 +284,7 @@ export default function BookSubmissionForm() {
   };
 
   const validateStep2 = () => {
-    return files.book_cover && files.about_book_pdf && files.ebook;
+    return files.book_cover && files.author_image && files.ebook;
   };
 
   return (
@@ -543,6 +562,20 @@ export default function BookSubmissionForm() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      About Aurthor *
+                    </label>
+                    <input
+                      type="name"
+                      name="about_aurthor"
+                      value={formData.about_aurthor}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Relationship to Author *
                     </label>
                     <select
@@ -557,7 +590,6 @@ export default function BookSubmissionForm() {
                       <option value="Agent">Agent</option>
                       <option value="Publicist">Publicist</option>
                       <option value="Family Member">Family Member</option>
-                      <option value="Other">Other</option>
                     </select>
                   </div>
                 </div>
@@ -641,7 +673,17 @@ export default function BookSubmissionForm() {
                       <option value="Thriller">Thriller</option>
                       <option value="Biography">Biography</option>
                       <option value="Self-Help">Self-Help</option>
-                      <option value="Other">Other</option>
+                      <option value="Best Author of the Year"> Best Author of the Year</option>
+                      <option value="Best Literary Fiction Book"> Best Literary Fiction Book</option>
+                      <option value="Best Popular Fiction Book"> Best Popular Fiction Book</option>
+                      <option value="Best Debut Novel"> Best Debut Novel</option>
+                      <option value="Best First Book – Fiction"> Best First Book – Fiction</option>
+                      <option value="Best First Book – Non-Fiction"> Best First Book – Non-Fiction</option>
+                      <option value="Best Romance Book"> Best Romance Book</option>
+                      <option value="Best Thriller Book"> Best Thriller Book</option>
+                      <option value="Best Mystery Book"> Best Mystery Book</option>
+                      <option value="Best Historical Fiction Book"> Best Historical Fiction Book</option>
+                    
                     </select>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
@@ -759,41 +801,37 @@ export default function BookSubmissionForm() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  About Book PDF *
+                  Author image *
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-[#6B0C22] transition-colors">
-                  {filePreviews.about_book_pdf_name ? (
-                    <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-8 h-8 text-red-500" />
-                        <div>
-                          <p className="font-semibold text-gray-900">
-                            {filePreviews.about_book_pdf_name}
-                          </p>
-                          <p className="text-xs text-gray-500">PDF Document</p>
-                        </div>
-                      </div>
+                  {filePreviews.author_image_preview ? (
+                    <div className="relative">
+                      <img
+                        src={filePreviews.author_image_preview}
+                        alt="Author image"
+                        className="max-w-xs mx-auto h-64 object-cover rounded-lg"
+                      />
                       <button
-                        onClick={() => removeFile("about_book_pdf")}
-                        className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600"
+                        onClick={() => removeFile("author_image")}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
                     <label className="cursor-pointer block text-center">
-                      <FileText className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                      <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
                       <p className="text-gray-600 mb-2 font-semibold">
-                        Click to upload About Book PDF
+                        Click to upload Author image
                       </p>
                       <p className="text-xs text-gray-500">
-                        PDF file only (max 10MB)
+                        PNG or JPG (max 5MB)
                       </p>
                       <input
                         type="file"
-                        accept=".pdf"
+                        accept="image/*"
                         onChange={(e) =>
-                          handleFileChange("about_book_pdf", e.target.files[0])
+                          handleFileChange("author_image", e.target.files[0])
                         }
                         className="hidden"
                       />

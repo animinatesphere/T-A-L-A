@@ -17,9 +17,9 @@ export default function Footer() {
   const links = [
     { label: "Home", href: "/" },
     { label: "Books", href: "/books" },
-    { label: "Testimonials", href: "/testimonials" },
+    { label: "Judge", href: "/judge" },
     { label: "About", href: "/about" },
-    { label: "Become a Reader", href: "/reader" },
+    { label: "Become a Reader", href: "/become-a-reader" },
     { label: "Submit Your Book", href: "/submit" },
   ];
 
@@ -32,9 +32,8 @@ export default function Footer() {
 
   const supportLinks = [
     { label: "Contact Us", href: "/contact" },
-    { label: "Help Center", href: "/help" },
+
     { label: "Podcast", href: "/podcast" },
-    { label: "Reader Guide", href: "/guide" },
   ];
 
   return (
