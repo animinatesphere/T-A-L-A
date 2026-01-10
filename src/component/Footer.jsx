@@ -58,19 +58,19 @@ export default function Footer() {
             {/* Social Media Links */}
             <div className="flex gap-3">
               <a
-                href="https://www.facebook.com/share/1ZnoT1qGJY/?mibextid=wwlfr"
+                href="https://www.facebook.com/share/1ZnoT1qGJY/?mibextid=wwXIfr"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
               >
                 <Facebook className="w-5 h-5" />
               </a>
               <a
-                href="https://twitter.com/laureateAwards?s=21"
+                href="https://x.com/laureateawards?s=21"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
               >
                 <Twitter className="w-5 h-5" />
               </a>
               <a
-                href="https://www.instagram.com/theafricalaureteawards?igsh=MWFkNFtlOW95Y2lzeQ%3D"
+                href="Instagram: https://www.instagram.com/theafricalaureateawards?igsh=MWFkNGtlOW95Y2lzeQ%3D%3D&utm_source=qr"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
               >
                 <Instagram className="w-5 h-5" />
