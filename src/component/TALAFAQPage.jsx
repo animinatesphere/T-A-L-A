@@ -309,7 +309,7 @@ export default function TALAFAQPage() {
                 Ready to get your book recognized? Start here
               </p>
               <a
-                href="/submit"
+                href="/submit-your-book"
                 className="text-[#6B0C22] font-semibold hover:underline"
               >
                 Submit Now →
@@ -326,7 +326,7 @@ export default function TALAFAQPage() {
                 Join our community of literary evaluators
               </p>
               <a
-                href="/reader"
+                href="/become-a-reader"
                 className="text-[#6B0C22] font-semibold hover:underline"
               >
                 Learn More →
