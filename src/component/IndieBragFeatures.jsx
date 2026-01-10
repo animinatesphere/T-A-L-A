@@ -70,7 +70,7 @@ export default function IndieBragFeatures() {
               <Facebook className="h-6 w-6" />
             </a>
             <a
-              href="https://www.instagram.com/theafricalaureteawards?igsh=MWFkNFtlOW95Y2lzeQ%3D"
+              href="https://www.instagram.com/theafricalaureteawards"
               className="bg-[#6B0C22] hover:bg-[#8B1538] text-white p-4 rounded-full transition shadow-lg"
               aria-label="Instagram"
             >
