@@ -24,7 +24,48 @@ export default function Books() {
   const [searchTerm, setSearchTerm] = useState("");
   const [genres, setGenres] = useState([]);
   const [years, setYears] = useState([]);
+  // Add this near the top with other useState declarations (around line 15)
+  const [selectedAuthor, setSelectedAuthor] = useState(null);
 
+  // Add this helper function to generate slugs
+  const generateSlug = (text) => {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
+  // Update viewAuthor function
+  const viewAuthor = (book) => {
+    const authorSlug = book.author_slug || generateSlug(book.author);
+
+    setSelectedAuthor({
+      name: book.author,
+      slug: authorSlug,
+      bio: book.author_bio || book.about_aurthor,
+      image: book.author_image_url,
+      facebook: book.facebook_url,
+      instagram: book.instagram_url,
+      twitter: book.twitter_url,
+      threads: book.threads_url,
+      website: book.website_url,
+      blog: book.blog_url,
+      books: books.filter((b) => b.author === book.author),
+    });
+
+    window.history.pushState({}, "", `/author/${authorSlug}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Add effect to handle browser back button
+  useEffect(() => {
+    const handlePopState = () => {
+      setSelectedAuthor(null);
+      setSelectedBook(null);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
   useEffect(() => {
     fetchBooks();
   }, []);
@@ -154,8 +195,18 @@ export default function Books() {
                   <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
                     {selectedBook.title}
                   </h1>
+                  {/* Replace the existing author line with this: */}
                   <p className="text-2xl md:text-3xl text-gray-200 italic mb-6">
-                    by {selectedBook.author}
+                    by{" "}
+                    <button
+                      onClick={() => {
+                        setSelectedBook(null); // Close book details
+                        viewAuthor(selectedBook); // Open author page
+                      }}
+                      className="hover:text-yellow-300 underline decoration-2 underline-offset-4 transition-colors cursor-pointer"
+                    >
+                      {selectedBook.author}
+                    </button>
                   </p>
                   {selectedBook.genre && (
                     <div className="inline-block bg-white/10 backdrop-blur-sm border border-white/30 text-white px-6 py-3 rounded-full text-lg font-semibold">
@@ -369,7 +420,300 @@ export default function Books() {
       </div>
     );
   }
+  // Author Detail Page View - ADD THIS BEFORE if (selectedBook)
+  if (selectedAuthor) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        {/* Back Button Header */}
+        <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <button
+              onClick={() => {
+                setSelectedAuthor(null);
+                window.history.pushState({}, "", "/books");
+              }}
+              className="flex items-center gap-2 text-[#6B0C22] hover:text-[#8B1530] font-semibold transition-all hover:gap-3"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Books
+            </button>
+          </div>
+        </div>
 
+        {/* Hero Section */}
+        <div className="bg-gradient-to-br from-[#6B0C22] to-[#4a0818] text-white py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              {/* Author Image */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
+                {selectedAuthor.image ? (
+                  <img
+                    src={selectedAuthor.image}
+                    alt={selectedAuthor.name}
+                    className="relative w-64 h-64 rounded-full object-cover border-8 border-white/20 shadow-2xl"
+                  />
+                ) : (
+                  <div className="relative w-64 h-64 rounded-full bg-white/10 border-8 border-white/20 flex items-center justify-center shadow-2xl">
+                    <span className="text-8xl font-bold text-white/50">
+                      {selectedAuthor.name.charAt(0)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Author Info */}
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+                  {selectedAuthor.name}
+                </h1>
+                <p className="text-xl text-gray-200 mb-6">
+                  Award-Winning Author
+                </p>
+
+                {/* Social Links */}
+                {(selectedAuthor.facebook ||
+                  selectedAuthor.instagram ||
+                  selectedAuthor.twitter ||
+                  selectedAuthor.threads) && (
+                  <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                    {selectedAuthor.facebook && (
+                      <a
+                        href={selectedAuthor.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-5 py-3 rounded-lg transition-all hover:scale-105 shadow-lg"
+                      >
+                        <Facebook className="w-5 h-5" />
+                        <span className="font-semibold">Facebook</span>
+                      </a>
+                    )}
+                    {selectedAuthor.instagram && (
+                      <a
+                        href={selectedAuthor.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-5 py-3 rounded-lg transition-all hover:scale-105 shadow-lg"
+                      >
+                        <Instagram className="w-5 h-5" />
+                        <span className="font-semibold">Instagram</span>
+                      </a>
+                    )}
+                    {selectedAuthor.twitter && (
+                      <a
+                        href={selectedAuthor.twitter}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-5 py-3 rounded-lg transition-all hover:scale-105 shadow-lg"
+                      >
+                        <Twitter className="w-5 h-5" />
+                        <span className="font-semibold">Twitter</span>
+                      </a>
+                    )}
+                    {selectedAuthor.threads && (
+                      <a
+                        href={selectedAuthor.threads}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-5 py-3 rounded-lg transition-all hover:scale-105 shadow-lg"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M12.186 3.995c-.43.011-.86.055-1.285.131-2.266.403-4.205 1.894-5.13 3.944-.437.968-.628 1.985-.628 3.315v.936c0 1.33.191 2.347.628 3.315.925 2.05 2.864 3.541 5.13 3.944 1.394.248 2.817.15 4.125-.286 1.555-.518 2.817-1.494 3.633-2.807.394-.634.655-1.338.783-2.107.064-.385-.23-.739-.619-.739h-.123c-.306 0-.574.206-.653.5-.232.867-.679 1.613-1.313 2.186-.875.79-2.018 1.238-3.318 1.3-1.155.055-2.25-.183-3.156-.687-1.395-.776-2.363-2.14-2.657-3.746-.082-.448-.123-.913-.123-1.426v-.936c0-.513.041-.978.123-1.426.294-1.606 1.262-2.97 2.657-3.746.906-.504 2.001-.742 3.156-.687 1.3.062 2.443.51 3.318 1.3.634.573 1.081 1.319 1.313 2.186.079.294.347.5.653.5h.123c.389 0 .683-.354.619-.739-.128-.769-.389-1.473-.783-2.107-.816-1.313-2.078-2.289-3.633-2.807-.91-.303-1.872-.43-2.841-.413z" />
+                        </svg>
+                        <span className="font-semibold">Threads</span>
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Left Column - Biography */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Biography Section */}
+              {selectedAuthor.bio && (
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div className="w-1 h-8 bg-[#6B0C22] rounded-full"></div>
+                    Biography
+                  </h2>
+                  <div className="prose prose-lg max-w-none">
+                    <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-line">
+                      {selectedAuthor.bio}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Books by Author */}
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <div className="w-1 h-8 bg-[#6B0C22] rounded-full"></div>
+                  Books by {selectedAuthor.name}
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                  {selectedAuthor.books.map((book) => (
+                    <div
+                      key={book.id}
+                      onClick={() => {
+                        setSelectedAuthor(null);
+                        setSelectedBook(book);
+                        window.history.pushState({}, "", `/books/${book.id}`);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="cursor-pointer group"
+                    >
+                      <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+                        <img
+                          src={book.cover_image_url}
+                          alt={book.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        {book.year_won && (
+                          <div className="absolute top-2 right-2 bg-[#6B0C22] text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+                            {book.year_won}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                            <p className="font-bold text-sm line-clamp-2">
+                              {book.title}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Sidebar */}
+            <div className="space-y-6">
+              {/* Quick Stats */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  Quick Stats
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600">Total Books</span>
+                    <span className="text-2xl font-bold text-[#6B0C22]">
+                      {selectedAuthor.books.length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600">Awards Won</span>
+                    <span className="text-2xl font-bold text-[#6B0C22]">
+                      {selectedAuthor.books.filter((b) => b.year_won).length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600">Featured Books</span>
+                    <span className="text-2xl font-bold text-[#6B0C22]">
+                      {selectedAuthor.books.filter((b) => b.is_featured).length}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* External Links */}
+              {/* Social Links */}
+              {(selectedAuthor.facebook ||
+                selectedAuthor.instagram ||
+                selectedAuthor.twitter ||
+                selectedAuthor.threads) && (
+                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                  {selectedAuthor.facebook && (
+                    <a
+                      href={selectedAuthor.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-5 py-3 rounded-lg transition-all hover:scale-105 shadow-lg"
+                    >
+                      <Facebook className="w-5 h-5" />
+                      <span className="font-semibold">Facebook</span>
+                    </a>
+                  )}
+                  {selectedAuthor.instagram && (
+                    <a
+                      href={selectedAuthor.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-5 py-3 rounded-lg transition-all hover:scale-105 shadow-lg"
+                    >
+                      <Instagram className="w-5 h-5" />
+                      <span className="font-semibold">Instagram</span>
+                    </a>
+                  )}
+                  {selectedAuthor.twitter && (
+                    <a
+                      href={selectedAuthor.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-5 py-3 rounded-lg transition-all hover:scale-105 shadow-lg"
+                    >
+                      <Twitter className="w-5 h-5" />
+                      <span className="font-semibold">Twitter</span>
+                    </a>
+                  )}
+                  {selectedAuthor.threads && (
+                    <a
+                      href={selectedAuthor.threads}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-5 py-3 rounded-lg transition-all hover:scale-105 shadow-lg"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M12.186 3.995c-.43.011-.86.055-1.285.131-2.266.403-4.205 1.894-5.13 3.944-.437.968-.628 1.985-.628 3.315v.936c0 1.33.191 2.347.628 3.315.925 2.05 2.864 3.541 5.13 3.944 1.394.248 2.817.15 4.125-.286 1.555-.518 2.817-1.494 3.633-2.807.394-.634.655-1.338.783-2.107.064-.385-.23-.739-.619-.739h-.123c-.306 0-.574.206-.653.5-.232.867-.679 1.613-1.313 2.186-.875.79-2.018 1.238-3.318 1.3-1.155.055-2.25-.183-3.156-.687-1.395-.776-2.363-2.14-2.657-3.746-.082-.448-.123-.913-.123-1.426v-.936c0-.513.041-.978.123-1.426.294-1.606 1.262-2.97 2.657-3.746.906-.504 2.001-.742 3.156-.687 1.3.062 2.443.51 3.318 1.3.634.573 1.081 1.319 1.313 2.186.079.294.347.5.653.5h.123c.389 0 .683-.354.619-.739-.128-.769-.389-1.473-.783-2.107-.816-1.313-2.078-2.289-3.633-2.807-.91-.303-1.872-.43-2.841-.413z" />
+                      </svg>
+                      <span className="font-semibold">Threads</span>
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Genres */}
+              {selectedAuthor.books.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Genres
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      ...new Set(
+                        selectedAuthor.books.map((b) => b.genre).filter(Boolean)
+                      ),
+                    ].map((genre, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-[#6B0C22]/10 text-[#6B0C22] px-4 py-2 rounded-full text-sm font-semibold"
+                      >
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   // Books List View
   return (
     <div className="min-h-screen bg-gray-50">
@@ -482,6 +826,8 @@ export default function Books() {
                 key={book.id}
                 onClick={() => {
                   setSelectedBook(book);
+                  const bookSlug = generateSlug(book.title);
+                  window.history.pushState({}, "", `/books/${bookSlug}`);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 className="cursor-pointer group"

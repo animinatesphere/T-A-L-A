@@ -70,6 +70,10 @@ export default function AdminDashboard() {
     video_trailer_url: "",
     is_featured: false,
     display_order: 0,
+    // ADD THESE NEW FIELDS:
+    author_slug: "",
+    author_bio: "",
+    author_image_url: "",
   });
   // Blog states
   const [blogs, setBlogs] = useState([]);
@@ -1732,7 +1736,58 @@ export default function AdminDashboard() {
                   )}
                 </div>
               </div>
+              {/* After the Book Cover Image upload, add this: */}
 
+              {/* Author Image */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Author Photo
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-[#6B0C22] transition-colors">
+                  {bookFormData.author_image_url ? (
+                    <div className="relative">
+                      <img
+                        src={bookFormData.author_image_url}
+                        alt="Author"
+                        className="w-32 h-32 object-cover rounded-full mx-auto"
+                      />
+                      <button
+                        onClick={() =>
+                          setBookFormData({
+                            ...bookFormData,
+                            author_image_url: "",
+                          })
+                        }
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer block text-center">
+                      <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                      <p className="text-gray-600">
+                        Click to upload author photo
+                      </p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const url = await uploadBookImage(file);
+                            setBookFormData({
+                              ...bookFormData,
+                              author_image_url: url,
+                            });
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Title */}
                 <div className="md:col-span-2">
@@ -1771,7 +1826,50 @@ export default function AdminDashboard() {
                     required
                   />
                 </div>
+                {/* Find the Author Name field and add these after it: */}
 
+                {/* Author Slug */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Author URL Slug
+                  </label>
+                  <input
+                    type="text"
+                    value={bookFormData.author_slug}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        author_slug: e.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9-]/g, "-"),
+                      })
+                    }
+                    placeholder="john-doe"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    URL-friendly version of author name (e.g., john-doe)
+                  </p>
+                </div>
+
+                {/* Author Bio - add this before the Description field */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Author Biography
+                  </label>
+                  <textarea
+                    value={bookFormData.author_bio}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        author_bio: e.target.value,
+                      })
+                    }
+                    rows={4}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none resize-none"
+                    placeholder="Write a brief biography of the author..."
+                  />
+                </div>
                 {/* Genre */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
