@@ -1105,7 +1105,7 @@ export default function BookSubmissionForm() {
                     </p>
                     <p>
                       Authors based in Nigeria are required to complete payment
-                      using the Nigerian Naira (NGN) option.Aurthors based
+                      using the Nigerian Naira (NGN) option.Authors based
                       outside Nigeria can use the US Dollar (USD) option. Please
                       select the appropriate currency at checkout to avoid
                       payment issues or delays inprocessing your submission.

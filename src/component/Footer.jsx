@@ -17,7 +17,7 @@ export default function Footer() {
   const links = [
     { label: "Home", href: "/" },
     { label: "Books", href: "/books" },
-    { label: "Judge", href: "/judge" },
+    { label: "Judges", href: "/judges" },
     { label: "About", href: "/about" },
     { label: "Become a Reader", href: "/become-a-reader" },
     { label: "Submit Your Book", href: "/submit" },
@@ -70,7 +70,7 @@ export default function Footer() {
                 <Twitter className="w-5 h-5" />
               </a>
               <a
-                href="Instagram: https://www.instagram.com/theafricalaureateawards?igsh=MWFkNGtlOW95Y2lzeQ%3D%3D&utm_source=qr"
+                href="Instagram: https://www.instagram.com/theafricalaureateawards"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
               >
                 <Instagram className="w-5 h-5" />

@@ -109,7 +109,7 @@ export default function TALAContactPage() {
                 href="mailto:info@tala.com"
                 className="text-[#6B0C22] hover:underline"
               >
-                theafricalaureateaward@gmail.com
+                theafricalaureateawards@gmail.com
               </a>
             </div>
 
@@ -373,7 +373,7 @@ export default function TALAContactPage() {
                     → Frequently Asked Questions
                   </a>
                   <a
-                    href="/submit"
+                    href="/submit-your-book"
                     className="block text-[#6B0C22] hover:underline font-semibold"
                   >
                     → Submit Your Book
@@ -385,7 +385,7 @@ export default function TALAContactPage() {
                     → About T.A.L.A.
                   </a>
                   <a
-                    href="/reader"
+                    href="/become-a-reader"
                     className="block text-[#6B0C22] hover:underline font-semibold"
                   >
                     → Become a Reader
