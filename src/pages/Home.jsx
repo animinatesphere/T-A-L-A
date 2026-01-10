@@ -24,11 +24,11 @@ export const Home = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center">
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                  <span className="text-[#0a2e3e]">All Award-Winning,</span>
+                  <span className="text-white">All Award-Winning,</span>
                   <br />
-                  <span className="text-[#6b0c22]">Reader-Recommended</span>
+                  <span className="text-white">Reader-Recommended</span>
                   <br />
-                  <span className="text-[#5d4e37]">Books</span>
+                  <span className="text-white">Books</span>
                 </h1>
               </div>
             </div>
