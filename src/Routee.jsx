@@ -52,7 +52,7 @@ const Routee = () => {
 
         <Route path="/blog/:slug" element={<BlogDetail />} />
         <Route path="/book/:authorName" element={<Bookme />} />
-        <Route path="/judge" element={<OurJudges />} />
+        <Route path="/judges" element={<OurJudges />} />
         <Route path="/become-a-reader" element={<BecomeAReader />} />
 
         <Route path="*" element={<TALA404Page />} />

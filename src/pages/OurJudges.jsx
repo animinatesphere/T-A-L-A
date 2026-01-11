@@ -1,31 +1,41 @@
-import React from "react";
-import { BookOpen, Award, Mail, Phone } from "lucide-react";
-import judge1 from "../assets/IMG_9341.PNG";
-import judge2 from "../assets/IMG_0232.JPG";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-export default function OurJudges() {
-  const judges = [
-    {
-      id: 1,
-      name: "Joshua Ìdòwú Omídire",
-      title: "Biographer, Poet & Publisher",
-      bio: "Joshua Ìdòwú Omídire is a biographer, poet, language enthusiast, logophile, headitor, ghostwriter, movie critic, book reviewer, publisher, and digital media strategist. He leads Famecliff Digital PRO, a creative hub powered by a team of content gurus dedicated to solving writing, editing, publishing, and branding puzzles for individuals and organisations alike.",
-      img: judge1,
-    },
-    {
-      id: 2,
-      name: "Ayodeji Ajagbe",
-      title: "Award-Winning Author",
-      bio: "Ayodeji Ajagbe is an award-winning author. He finished as the first runner-up in the 2020 National Essay Writing competition. His books have received great reviews and recognitions from retailers and bookstores such as Reader Central, Miray Books, Litireso Reviews, Romelia Lungu, and many more. Litireso listed his book – Reflection: Rulers and Preys – as one of its top-10 most-rated books of 2020. He writes thrillers for both adults and teens, these include Sad Love Story and his young adult debut, What Happened to Helen. He was born in Ibadan, Oyo State, and has lived most of his life there. When he is not writing, he can be found reading a book, taking a walk, or hunting for local bookstores around.",
+import { Award } from "lucide-react";
 
-      img: judge2,
-    },
-  ];
+const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
+
+export default function OurJudges() {
+  const [judges, setJudges] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchJudges();
+  }, []);
+
+  const fetchJudges = async () => {
+    try {
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/judges?is_active=eq.true&order=display_order.asc`,
+        {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setJudges(data);
+    } catch (error) {
+      console.error("Error fetching judges:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header Navigation */}
-
       {/* Hero Section */}
       <div className="bg-gradient-to-b from-gray-50 to-white py-12 sm:py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -54,49 +64,69 @@ export default function OurJudges() {
 
       {/* Judges Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-        <div className="space-y-12 lg:space-y-16">
-          {judges.map((judge, index) => (
-            <div
-              key={judge.id}
-              className={`flex flex-col ${
-                index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
-              } gap-8 lg:gap-12 items-center`}
-            >
-              {/* Image Section */}
-              <div className="w-full lg:w-2/5 flex-shrink-0">
-                <div className="relative">
-                  <div className="aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden shadow-lg">
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                      <img src={judge.img} alt="" />
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="w-12 h-12 border-4 border-gray-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Loading judges...</p>
+          </div>
+        ) : judges.length === 0 ? (
+          <div className="text-center py-12">
+            <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600">No judges available at the moment.</p>
+          </div>
+        ) : (
+          <div className="space-y-12 lg:space-y-16">
+            {judges.map((judge, index) => (
+              <div
+                key={judge.id}
+                className={`flex flex-col ${
+                  index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
+                } gap-8 lg:gap-12 items-center`}
+              >
+                {/* Image Section */}
+                <div className="w-full lg:w-2/5 flex-shrink-0">
+                  <div className="relative">
+                    <div className="aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden shadow-lg">
+                      {judge.image_url ? (
+                        <img
+                          src={judge.image_url}
+                          alt={judge.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                          <Award className="w-24 h-24 text-gray-300" />
+                        </div>
+                      )}
+                    </div>
+                    {/* Number Badge */}
+                    <div className="absolute -top-4 -left-4 w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-3xl font-bold text-white">
+                        {index + 1}
+                      </span>
                     </div>
                   </div>
-                  {/* Number Badge */}
-                  <div className="absolute -top-4 -left-4 w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center shadow-lg">
-                    <span className="text-3xl font-bold text-white">
-                      {judge.id}
-                    </span>
+                </div>
+
+                {/* Content Section */}
+                <div className="w-full lg:w-3/5">
+                  <div className="space-y-4">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                      {judge.name}
+                    </h2>
+                    <p className="text-xl text-gray-600 font-medium">
+                      {judge.title}
+                    </p>
+                    <div className="w-24 h-1 bg-gray-900"></div>
+                    <p className="text-gray-700 text-base sm:text-lg leading-relaxed whitespace-pre-wrap">
+                      {judge.bio}
+                    </p>
                   </div>
                 </div>
               </div>
-
-              {/* Content Section */}
-              <div className="w-full lg:w-3/5">
-                <div className="space-y-4">
-                  <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-                    {judge.name}
-                  </h2>
-                  <p className="text-xl text-gray-600 font-medium">
-                    {judge.title}
-                  </p>
-                  <div className="w-24 h-1 bg-gray-900"></div>
-                  <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
-                    {judge.bio}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* CTA Section */}

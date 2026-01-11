@@ -14,6 +14,7 @@ import {
   Upload,
   Plus,
   Filter,
+  Award, // ADD THIS LINE
 } from "lucide-react";
 
 const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
@@ -98,7 +99,39 @@ export default function AdminDashboard() {
     read_time_minutes: 5,
     published_date: new Date().toISOString().split("T")[0],
   });
+  // Judge states
+  const [judges, setJudges] = useState([]);
+  const [isJudgeModalOpen, setIsJudgeModalOpen] = useState(false);
+  const [editingJudge, setEditingJudge] = useState(null);
+  const [judgeImageFile, setJudgeImageFile] = useState(null);
+  const [judgeImagePreview, setJudgeImagePreview] = useState("");
+  const [judgeLoading, setJudgeLoading] = useState(false);
+  const [judgeFormData, setJudgeFormData] = useState({
+    name: "",
+    title: "",
+    bio: "",
+    image_url: "",
+    display_order: 0,
+    is_active: true,
+  });
 
+  const fetchJudges = async () => {
+    try {
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/judges?order=display_order.asc`,
+        {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setJudges(data);
+    } catch (error) {
+      console.error("Error fetching judges:", error);
+    }
+  };
   const fetchBlogs = async () => {
     try {
       const response = await fetch(
@@ -121,10 +154,12 @@ export default function AdminDashboard() {
     fetchSubmissions();
     fetchPodcasts();
     fetchAwardBooks(); // Add this line
+    fetchJudges(); // ADD THIS LINE
     fetchBlogs();
     const interval = setInterval(() => {
       fetchSubmissions();
       fetchAwardBooks(); // Add this line
+      fetchJudges(); // ADD THIS LINE
     }, 30000);
 
     return () => clearInterval(interval);
@@ -402,7 +437,142 @@ export default function AdminDashboard() {
       console.error("Error updating submission:", error);
     }
   };
+  // Judge management functions
+  const openJudgeModal = (judge = null) => {
+    if (judge) {
+      setEditingJudge(judge);
+      setJudgeFormData(judge);
+      setJudgeImagePreview(judge.image_url);
+    } else {
+      setEditingJudge(null);
+      setJudgeFormData({
+        name: "",
+        title: "",
+        bio: "",
+        image_url: "",
+        display_order: 0,
+        is_active: true,
+      });
+      setJudgeImagePreview("");
+    }
+    setJudgeImageFile(null);
+    setIsJudgeModalOpen(true);
+  };
 
+  const closeJudgeModal = () => {
+    setIsJudgeModalOpen(false);
+    setEditingJudge(null);
+    setJudgeImageFile(null);
+    setJudgeImagePreview("");
+  };
+
+  const handleJudgeImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size should be less than 5MB");
+        return;
+      }
+      setJudgeImageFile(file);
+      setJudgeImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadJudgeImage = async (file) => {
+    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+    try {
+      const response = await fetch(
+        `${SUPABASE_URL}/storage/v1/object/judge-images/${fileName}`,
+        {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: file,
+        }
+      );
+
+      if (response.ok) {
+        return `${SUPABASE_URL}/storage/v1/object/public/judge-images/${fileName}`;
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+    return null;
+  };
+
+  const handleJudgeSubmit = async () => {
+    setJudgeLoading(true);
+
+    let imageUrl = judgeFormData.image_url;
+
+    if (judgeImageFile) {
+      imageUrl = await uploadJudgeImage(judgeImageFile);
+    }
+
+    const judgeData = {
+      ...judgeFormData,
+      image_url: imageUrl,
+      display_order: parseInt(judgeFormData.display_order),
+      updated_at: new Date().toISOString(),
+    };
+
+    try {
+      if (editingJudge) {
+        await fetch(`${SUPABASE_URL}/rest/v1/judges?id=eq.${editingJudge.id}`, {
+          method: "PATCH",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify(judgeData),
+        });
+      } else {
+        await fetch(`${SUPABASE_URL}/rest/v1/judges`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify(judgeData),
+        });
+      }
+
+      fetchJudges();
+      closeJudgeModal();
+    } catch (error) {
+      console.error("Error saving judge:", error);
+      alert("Error saving judge. Please try again.");
+    } finally {
+      setJudgeLoading(false);
+    }
+  };
+
+  const deleteJudge = async (id) => {
+    if (window.confirm("Are you sure you want to delete this judge?")) {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/judges?id=eq.${id}`, {
+          method: "DELETE",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+        });
+        fetchJudges();
+      } catch (error) {
+        console.error("Error deleting judge:", error);
+      }
+    }
+  };
   const deleteSubmission = async (id) => {
     if (window.confirm("Are you sure you want to delete this submission?")) {
       try {
@@ -835,6 +1005,19 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Judges</p>
+                <p className="text-3xl font-bold text-[#6B0C22]">
+                  {judges.length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <Award className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -896,6 +1079,20 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-2">
                   <Edit className="w-5 h-5" />
                   Blog Posts
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("judges")}
+                className={`px-6 py-4 font-semibold transition-colors ${
+                  activeTab === "judges"
+                    ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Award className="w-5 h-5" />
+                  Judges
                 </div>
               </button>
             </div>
@@ -1300,6 +1497,103 @@ export default function AdminDashboard() {
                                 </button>
                                 <button
                                   onClick={() => deleteBlog(blog.id)}
+                                  className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "judges" && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Manage Judges
+                  </h3>
+                  <button
+                    onClick={() => openJudgeModal()}
+                    className="bg-[#6B0C22] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#8B1530] transition-colors flex items-center gap-2"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Add New Judge
+                  </button>
+                </div>
+
+                {judges.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">
+                      No judges yet. Click "Add New Judge" to get started.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {judges.map((judge) => (
+                      <div
+                        key={judge.id}
+                        className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex gap-6 p-6">
+                          {/* Judge Image */}
+                          <div className="w-32 h-32 flex-shrink-0 bg-gray-200 rounded-lg overflow-hidden">
+                            {judge.image_url ? (
+                              <img
+                                src={judge.image_url}
+                                alt={judge.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Award className="w-12 h-12 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-bold text-xl">
+                                    {judge.name}
+                                  </h3>
+                                  {!judge.is_active && (
+                                    <span className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                      Inactive
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[#6B0C22] font-medium mb-2">
+                                  {judge.title}
+                                </p>
+                                <p className="text-gray-600 text-sm line-clamp-3">
+                                  {judge.bio}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-2">
+                                  Display Order: {judge.display_order}
+                                </p>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => openJudgeModal(judge)}
+                                  className="p-2 bg-[#6B0C22] text-white rounded-lg hover:bg-[#8B1530] transition-colors"
+                                  title="Edit"
+                                >
+                                  <Edit className="w-5 h-5" />
+                                </button>
+                                <button
+                                  onClick={() => deleteJudge(judge.id)}
                                   className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                                   title="Delete"
                                 >
@@ -2414,6 +2708,190 @@ Or write in plain HTML"
                   <>
                     <CheckCircle className="w-5 h-5" />
                     {editingBlog ? "Update Post" : "Create Post"}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Judge Modal */}
+      {isJudgeModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full my-8">
+            <div className="sticky top-0 bg-[#6B0C22] text-white p-6 rounded-t-2xl flex justify-between items-center z-10">
+              <h2 className="text-2xl font-bold">
+                {editingJudge ? "Edit Judge" : "Add New Judge"}
+              </h2>
+              <button
+                onClick={closeJudgeModal}
+                className="hover:bg-white/10 p-2 rounded-lg"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+              {/* Judge Image */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Judge Photo *
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-[#6B0C22] transition-colors">
+                  {judgeImagePreview ? (
+                    <div className="relative">
+                      <img
+                        src={judgeImagePreview}
+                        alt="Preview"
+                        className="w-full h-64 object-cover rounded-lg"
+                      />
+                      <button
+                        onClick={() => {
+                          setJudgeImagePreview("");
+                          setJudgeImageFile(null);
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer block text-center">
+                      <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                      <p className="text-gray-600">
+                        Click to upload judge photo
+                      </p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleJudgeImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={judgeFormData.name}
+                  onChange={(e) =>
+                    setJudgeFormData({
+                      ...judgeFormData,
+                      name: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  placeholder="Joshua Ìdòwú Omídire"
+                  required
+                />
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Professional Title *
+                </label>
+                <input
+                  type="text"
+                  value={judgeFormData.title}
+                  onChange={(e) =>
+                    setJudgeFormData({
+                      ...judgeFormData,
+                      title: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  placeholder="Biographer, Poet & Publisher"
+                  required
+                />
+              </div>
+
+              {/* Bio */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Biography *
+                </label>
+                <textarea
+                  value={judgeFormData.bio}
+                  onChange={(e) =>
+                    setJudgeFormData({
+                      ...judgeFormData,
+                      bio: e.target.value,
+                    })
+                  }
+                  rows={8}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none resize-none"
+                  placeholder="Write a detailed biography of the judge..."
+                  required
+                />
+              </div>
+
+              {/* Display Order */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Display Order
+                </label>
+                <input
+                  type="number"
+                  value={judgeFormData.display_order}
+                  onChange={(e) =>
+                    setJudgeFormData({
+                      ...judgeFormData,
+                      display_order: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  min="0"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Lower numbers appear first (0, 1, 2, ...)
+                </p>
+              </div>
+
+              {/* Active Toggle */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={judgeFormData.is_active}
+                  onChange={(e) =>
+                    setJudgeFormData({
+                      ...judgeFormData,
+                      is_active: e.target.checked,
+                    })
+                  }
+                  className="w-5 h-5 text-[#6B0C22] rounded focus:ring-2 focus:ring-[#6B0C22]"
+                />
+                <label
+                  htmlFor="is_active"
+                  className="font-semibold text-gray-700"
+                >
+                  Active Judge (Show on website)
+                </label>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                onClick={handleJudgeSubmit}
+                disabled={judgeLoading}
+                className="w-full bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {judgeLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    {editingJudge ? "Update Judge" : "Add Judge"}
                   </>
                 )}
               </button>
