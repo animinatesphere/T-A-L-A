@@ -148,7 +148,7 @@ export default function Footer() {
                   href="mailto:theafricalaureateawards@gmail.com"
                   className="hover:text-white transition-colors"
                 >
-                  theafricalaureateaward@gmail.com
+                  theafricalaureateawards@gmail.com
                 </a>
               </div>
               <div className="flex items-start gap-2 text-gray-300">

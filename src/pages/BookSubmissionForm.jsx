@@ -516,7 +516,7 @@ export default function BookSubmissionForm() {
                     }`}
                   >
                     <span className="text-2xl">₦</span>
-                    <div className="mt-2">NGN ₦35,000</div>
+                    <div className="mt-2">NGN ₦30,000</div>
                   </button>
                 </div>
               </div>
@@ -545,7 +545,7 @@ export default function BookSubmissionForm() {
                   className="flex-1 bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <CreditCard className="w-5 h-5" />
-                  Pay {currency} {currency === "USD" ? "$50" : "₦35,000"}
+                  Pay {currency} {currency === "USD" ? "$50" : "₦30,000"}
                 </button>
               </div>
             </div>
@@ -1082,7 +1082,7 @@ export default function BookSubmissionForm() {
                       }`}
                     >
                       <span className="text-2xl">₦</span>
-                      <div className="mt-2">NGN ₦35,000</div>
+                      <div className="mt-2">NGN ₦30,000</div>
                     </button>
                   </div>
                 </div>
@@ -1133,7 +1133,7 @@ export default function BookSubmissionForm() {
                     {loading
                       ? "Processing..."
                       : `Pay ${currency} ${
-                          currency === "USD" ? "$50" : "₦35,000"
+                          currency === "USD" ? "$50" : "₦30,000"
                         }`}
                   </button>
                 </div>
