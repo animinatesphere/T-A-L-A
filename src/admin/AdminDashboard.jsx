@@ -1022,19 +1022,20 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <div className="bg-white rounded-xl shadow-md mb-6">
-          <div className="border-b border-gray-200">
-            <div className="flex">
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <div className="flex min-w-max md:min-w-0">
               <button
                 onClick={() => setActiveTab("submissions")}
-                className={`px-6 py-4 font-semibold transition-colors ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
                   activeTab === "submissions"
                     ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
-                  Book Submissions
+                  <BookOpen className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="hidden sm:inline">Book Submissions</span>
+                  <span className="sm:hidden">Submissions</span>
                   {pendingCount > 0 && (
                     <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                       {pendingCount}
@@ -1044,55 +1045,58 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("podcasts")}
-                className={`px-6 py-4 font-semibold transition-colors ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
                   activeTab === "podcasts"
                     ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Podcast className="w-5 h-5" />
-                  Manage Podcasts
+                  <Podcast className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="hidden sm:inline">Manage Podcasts</span>
+                  <span className="sm:hidden">Podcasts</span>
                 </div>
               </button>
               <button
                 onClick={() => setActiveTab("books")}
-                className={`px-6 py-4 font-semibold transition-colors ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
                   activeTab === "books"
                     ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
-                  Award-Winning Books
+                  <BookOpen className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="hidden sm:inline">Award-Winning Books</span>
+                  <span className="sm:hidden">Awards</span>
                 </div>
               </button>
               <button
                 onClick={() => setActiveTab("blogs")}
-                className={`px-6 py-4 font-semibold transition-colors ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
                   activeTab === "blogs"
                     ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Edit className="w-5 h-5" />
-                  Blog Posts
+                  <Edit className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="hidden sm:inline">Blog Posts</span>
+                  <span className="sm:hidden">Blogs</span>
                 </div>
               </button>
 
               <button
                 onClick={() => setActiveTab("judges")}
-                className={`px-6 py-4 font-semibold transition-colors ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
                   activeTab === "judges"
                     ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5" />
-                  Judges
+                  <Award className="w-4 h-4 md:w-5 md:h-5" />
+                  <span>Judges</span>
                 </div>
               </button>
             </div>
@@ -1615,9 +1619,9 @@ export default function AdminDashboard() {
 
       {/* Submission Details Modal */}
       {selectedSubmission && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-4xl w-full my-8">
-            <div className="sticky top-0 bg-[#6B0C22] text-white p-6 rounded-t-2xl flex justify-between items-center">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-4xl my-4 sm:my-8 max-h-[95vh] flex flex-col">
+            <div className="sticky top-0 bg-[#6B0C22] text-white p-4 sm:p-6 rounded-t-2xl flex justify-between items-center">
               <h2 className="text-2xl font-bold">Submission Details</h2>
               <button
                 onClick={() => setSelectedSubmission(null)}
@@ -1758,9 +1762,9 @@ export default function AdminDashboard() {
 
       {/* Podcast Modal */}
       {isPodcastModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full my-8">
-            <div className="sticky top-0 bg-[#6B0C22] text-white p-6 rounded-t-2xl flex justify-between items-center">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-2xl my-4 sm:my-8 max-h-[95vh] flex flex-col">
+            <div className="sticky top-0 bg-[#6B0C22] text-white p-4 sm:p-6 rounded-t-2xl flex justify-between items-center z-10">
               <h2 className="text-2xl font-bold">
                 {editingPodcast ? "Edit Episode" : "Add New Episode"}
               </h2>
@@ -2390,10 +2394,10 @@ export default function AdminDashboard() {
       )}
       {/* Blog Modal */}
       {isBlogModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-4xl w-full my-8">
-            <div className="sticky top-0 bg-[#6B0C22] text-white p-6 rounded-t-2xl flex justify-between items-center z-10">
-              <h2 className="text-2xl font-bold">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-4xl my-4 sm:my-8 max-h-[95vh] flex flex-col">
+            <div className="sticky top-0 bg-[#6B0C22] text-white p-4 sm:p-6 rounded-t-2xl flex justify-between items-center z-10">
+              <h2 className="text-xl sm:text-2xl font-bold">
                 {editingBlog ? "Edit Blog Post" : "Create New Blog Post"}
               </h2>
               <button
@@ -2404,7 +2408,7 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
               {/* Featured Image */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -2717,22 +2721,23 @@ Or write in plain HTML"
       )}
 
       {/* Judge Modal */}
+      {/* Judge Modal - RESPONSIVE */}
       {isJudgeModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full my-8">
-            <div className="sticky top-0 bg-[#6B0C22] text-white p-6 rounded-t-2xl flex justify-between items-center z-10">
-              <h2 className="text-2xl font-bold">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-2xl my-4 sm:my-8 max-h-[95vh] flex flex-col">
+            <div className="sticky top-0 bg-[#6B0C22] text-white p-4 sm:p-6 rounded-t-2xl flex justify-between items-center z-10">
+              <h2 className="text-xl sm:text-2xl font-bold">
                 {editingJudge ? "Edit Judge" : "Add New Judge"}
               </h2>
               <button
                 onClick={closeJudgeModal}
                 className="hover:bg-white/10 p-2 rounded-lg"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
               {/* Judge Image */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -2744,7 +2749,7 @@ Or write in plain HTML"
                       <img
                         src={judgeImagePreview}
                         alt="Preview"
-                        className="w-full h-64 object-cover rounded-lg"
+                        className="w-full h-48 sm:h-64 object-cover rounded-lg"
                       />
                       <button
                         onClick={() => {
@@ -2758,8 +2763,8 @@ Or write in plain HTML"
                     </div>
                   ) : (
                     <label className="cursor-pointer block text-center">
-                      <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-                      <p className="text-gray-600">
+                      <Upload className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm sm:text-base text-gray-600">
                         Click to upload judge photo
                       </p>
                       <input
@@ -2787,7 +2792,7 @@ Or write in plain HTML"
                       name: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none text-sm sm:text-base"
                   placeholder="Joshua Ìdòwú Omídire"
                   required
                 />
@@ -2807,7 +2812,7 @@ Or write in plain HTML"
                       title: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none text-sm sm:text-base"
                   placeholder="Biographer, Poet & Publisher"
                   required
                 />
@@ -2826,8 +2831,8 @@ Or write in plain HTML"
                       bio: e.target.value,
                     })
                   }
-                  rows={8}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none resize-none"
+                  rows={6}
+                  className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none resize-none text-sm sm:text-base"
                   placeholder="Write a detailed biography of the judge..."
                   required
                 />
@@ -2847,7 +2852,7 @@ Or write in plain HTML"
                       display_order: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none text-sm sm:text-base"
                   min="0"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -2871,7 +2876,7 @@ Or write in plain HTML"
                 />
                 <label
                   htmlFor="is_active"
-                  className="font-semibold text-gray-700"
+                  className="font-semibold text-gray-700 text-sm sm:text-base"
                 >
                   Active Judge (Show on website)
                 </label>
@@ -2881,7 +2886,7 @@ Or write in plain HTML"
               <button
                 onClick={handleJudgeSubmit}
                 disabled={judgeLoading}
-                className="w-full bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 {judgeLoading ? (
                   <>
