@@ -425,7 +425,7 @@ export default function Books() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         {/* Back Button Header */}
-        <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        <div className="bg-white border-b border-gray-200 shadow-sm  z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <button
               onClick={() => {
@@ -544,7 +544,7 @@ export default function Books() {
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                     <div className="w-1 h-8 bg-[#6B0C22] rounded-full"></div>
-                    Biography
+                    About {selectedAuthor.name}
                   </h2>
                   <div className="prose prose-lg max-w-none">
                     <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-line">

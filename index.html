@@ -9,21 +9,44 @@
       class="rounded-full"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>(T.A.L.A.)</title>
+
+    <!-- IMPROVED TITLE - More descriptive for SEO -->
+    <title>
+      The Africa Laureate Awards (T.A.L.A.) - Supporting Independent African
+      Authors
+    </title>
+
+    <!-- ADD THESE META TAGS -->
+    <meta
+      name="description"
+      content="T.A.L.A. recognizes and supports quality self-published books and independent African authors. Discover award-winning literature from Africa."
+    />
+    <meta
+      name="keywords"
+      content="African authors, self-published books, literary awards, Africa Laureate Awards, TALA, independent authors, African literature"
+    />
+    <meta name="author" content="The Africa Laureate Awards" />
+    <link rel="canonical" href="https://theafricalaureateawards.org" />
+
     <!-- Open Graph / Social Preview -->
-    <!-- Place your preview image at public/og-image.jpg so it's served at /og-image.jpg -->
     <meta property="og:title" content="The Africa Laureate Awards (T.A.L.A.)" />
     <meta
       property="og:description"
       content="Recognising and supporting quality self-published books and independent authors."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="/" />
+    <meta property="og:url" content="https://theafricalaureateawards.org/" />
     <meta
       property="og:image"
-      content="https://t-a-l-a.vercel.app/og-image.jpg"
+      content="https://theafricalaureateawards.org/og-image.jpg"
     />
-    <meta property="og:image:alt" content="indieBRAG / T.A.L.A. hero image" />
+    <meta
+      property="og:image:alt"
+      content="The Africa Laureate Awards hero image"
+    />
+    <meta property="og:site_name" content="T.A.L.A." />
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
@@ -33,7 +56,54 @@
       name="twitter:description"
       content="Recognising and supporting quality self-published books and independent authors."
     />
-    <meta name="twitter:image" content="/og-image.jpg" />
+    <meta
+      name="twitter:image"
+      content="https://theafricalaureateawards.org/og-image.jpg"
+    />
+    <meta
+      name="google-site-verification"
+      content="chM-nn3oJThmOy7jcHBdPpGQdQGfPRCYMzAn_V8s62o"
+    />
+    <!-- STRUCTURED DATA - THIS IS THE KEY FOR CHROME SUGGESTIONS! -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "The Africa Laureate Awards",
+        "alternateName": "T.A.L.A.",
+        "url": "https://theafricalaureateawards.org",
+        "logo": "https://theafricalaureateawards.org/src/assets/unnamed (1).jpg",
+        "description": "Recognising and supporting quality self-published books and independent African authors",
+        "sameAs": [
+          "https://www.facebook.com/share/1ZnoT1qGJY/?mibextid=wwXIfr",
+          "https://x.com/laureateawards?s=21",
+          "https://www.instagram.com/theafricalaureateawards"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "Customer Service",
+          "email": "theafricalaureateaward@gmail.com"
+        }
+      }
+    </script>
+
+    <!-- Website Search Action Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "The Africa Laureate Awards",
+        "url": "https://theafricalaureateawards.org",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://theafricalaureateawards.org/search?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
