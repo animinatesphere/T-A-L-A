@@ -221,7 +221,82 @@ export default function BookSubmissionForm() {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
   };
+  // Add this function before saveSubmission
+  const sendEmailNotification = async (submissionData, fileUrls) => {
+    try {
+      const formData = new FormData();
 
+      // Web3Forms API key - replace with your actual key
+      formData.append("access_key", "7ad34e05-087f-49d6-b593-0a57134ddf96");
+
+      // Email details
+      formData.append(
+        "subject",
+        `New Book Submission: ${submissionData.book_title}`
+      );
+      formData.append("from_name", "T.A.L.A. Submission System");
+
+      // Prepare email body with all submission details
+      const emailBody = `
+New Book Submission Received
+
+SUBMITTER INFORMATION:
+- Name: ${submissionData.first_name} ${submissionData.last_name}
+- Email: ${submissionData.email}
+- Relationship to Author: ${submissionData.relationship_to_author}
+
+AUTHOR INFORMATION:
+- Author Name: ${submissionData.author_name}
+- Pen Name: ${submissionData.pen_name || "N/A"}
+- About Author: ${submissionData.about_aurthor}
+
+BOOK DETAILS:
+- Title: ${submissionData.book_title}
+- Subtitle: ${submissionData.subtitle || "N/A"}
+- Genre: ${submissionData.genre}
+- Book Series: ${submissionData.book_series || "N/A"}
+- Description: ${submissionData.book_description || "N/A"}
+- Date of Publication: ${submissionData.date_of_publication || "N/A"}
+
+LINKS:
+- Barnes & Noble: ${submissionData.barnes_noble_url || "N/A"}
+- Facebook: ${submissionData.facebook_url || "N/A"}
+- Instagram: ${submissionData.instagram_url || "N/A"}
+- Twitter: ${submissionData.twitter_url || "N/A"}
+- Threads: ${submissionData.threads_url || "N/A"}
+
+UPLOADED FILES:
+- Book Cover: ${fileUrls.cover_image_url || "Not uploaded"}
+- Author Image: ${fileUrls.author_image_url || "Not uploaded"}
+- About Book PDF: ${fileUrls.about_book_pdf_url || "Not uploaded"}
+- eBook: ${fileUrls.ebook_url || "Not uploaded"}
+
+PAYMENT INFORMATION:
+- Amount: ${submissionData.payment_currency} ${submissionData.payment_amount}
+- Reference: ${submissionData.payment_reference}
+- Status: ${submissionData.payment_status}
+
+View submission in admin dashboard.
+    `;
+
+      formData.append("message", emailBody);
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log("Email notification sent successfully");
+      } else {
+        console.error("Failed to send email notification");
+      }
+    } catch (error) {
+      console.error("Error sending email notification:", error);
+    }
+  };
   const saveSubmission = async (paymentReference) => {
     setLoading(true);
 
@@ -320,7 +395,11 @@ export default function BookSubmissionForm() {
         }
       );
 
+      // Inside saveSubmission function, after both submissionResponse.ok && awardResponse.ok
       if (submissionResponse.ok && awardResponse.ok) {
+        // Send email notification
+        await sendEmailNotification(submissionData, fileUrls);
+
         setSubmitStatus("success");
         setStep(4);
         window.scrollTo({ top: 0, behavior: "smooth" });

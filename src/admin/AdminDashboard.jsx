@@ -14,7 +14,8 @@ import {
   Upload,
   Plus,
   Filter,
-  Award, // ADD THIS LINE
+  Award,
+  File, // ADD THIS LINE
 } from "lucide-react";
 
 const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
@@ -58,23 +59,32 @@ export default function AdminDashboard() {
   });
   const [bookFormData, setBookFormData] = useState({
     title: "",
+    subtitle: "",
     author: "",
+    pen_name: "",
     cover_image_url: "",
+    author_image_url: "",
     description: "",
     synopsis: "",
     genre: "",
+    book_series: "",
+    date_of_publication: "",
     year_won: new Date().getFullYear(),
+    author_slug: "",
+    author_bio: "",
     website_url: "",
     blog_url: "",
     amazon_url: "",
     amazon_uk_url: "",
     video_trailer_url: "",
+    facebook_url: "",
+    instagram_url: "",
+    twitter_url: "",
+    threads_url: "",
+    about_book_pdf_url: "",
+    ebook_url: "",
     is_featured: false,
     display_order: 0,
-    // ADD THESE NEW FIELDS:
-    author_slug: "",
-    author_bio: "",
-    author_image_url: "",
   });
   // Blog states
   const [blogs, setBlogs] = useState([]);
@@ -165,6 +175,122 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  // Add this function after updateSubmissionStatus
+  const approveAndAddToAwards = async (submission) => {
+    if (
+      !window.confirm(
+        `Approve "${submission.book_title}" and add to Award-Winning Books?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      // 1. Update submission status to approved
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/book_submissions?id=eq.${submission.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify({
+            submission_status: "approved",
+            updated_at: new Date().toISOString(),
+          }),
+        }
+      );
+
+      // 2. Add to award_winning_books table with ALL fields from submission
+      const awardBookData = {
+        // Basic book info
+        title: submission.book_title,
+        subtitle: submission.subtitle || "",
+        author: submission.author_name,
+        pen_name: submission.pen_name || "",
+
+        // Images
+        cover_image_url: submission.cover_image_url || "",
+        author_image_url: submission.author_image_url || "",
+
+        // Descriptions
+        description: submission.book_description || "",
+        synopsis: submission.book_description || "",
+        author_bio: submission.about_aurthor || "",
+
+        // Book details
+        genre: submission.genre || "",
+        book_series: submission.book_series || "",
+        date_of_publication: submission.date_of_publication || "",
+        year_won: new Date().getFullYear(),
+
+        // Author info
+        author_slug: generateAuthorSlug(submission.author_name),
+
+        // URLs - Purchase links
+        amazon_url: submission.barnes_noble_url || "",
+        amazon_uk_url: "",
+        website_url: "",
+        blog_url: "",
+        video_trailer_url: "",
+
+        // Social media URLs
+        facebook_url: submission.facebook_url || "",
+        instagram_url: submission.instagram_url || "",
+        twitter_url: submission.twitter_url || "",
+        threads_url: submission.threads_url || "",
+
+        // Files
+        about_book_pdf_url: submission.about_book_pdf_url || "",
+        ebook_url: submission.ebook_url || "",
+
+        // Display settings
+        is_featured: false,
+        display_order: 999,
+      };
+
+      const awardResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/award_winning_books`,
+        {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal",
+          },
+          body: JSON.stringify(awardBookData),
+        }
+      );
+
+      if (awardResponse.ok) {
+        alert("✅ Submission approved and added to Award-Winning Books!");
+        fetchSubmissions();
+        fetchAwardBooks();
+        setSelectedSubmission(null);
+      } else {
+        const errorText = await awardResponse.text();
+        console.error("Failed to add to award books:", errorText);
+        alert(
+          "Approved submission but failed to add to awards. Check console for details."
+        );
+      }
+    } catch (error) {
+      console.error("Error approving submission:", error);
+      alert("Error approving submission. Please try again.");
+    }
+  };
+
+  // Helper function for author slug
+  const generateAuthorSlug = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
   // Generate slug from title
   const generateSlug = (title) => {
     return title
@@ -1193,7 +1319,8 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="flex gap-2">
+                        {/* Quick Actions */}
+                        <div className="flex gap-2 flex-wrap">
                           {submission.submission_status === "pending" && (
                             <>
                               <button
@@ -1209,14 +1336,11 @@ export default function AdminDashboard() {
                               </button>
                               <button
                                 onClick={() =>
-                                  updateSubmissionStatus(
-                                    submission.id,
-                                    "approved"
-                                  )
+                                  approveAndAddToAwards(submission)
                                 }
                                 className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition-colors"
                               >
-                                Approve
+                                ✅ Approve & Add to Awards
                               </button>
                               <button
                                 onClick={() =>
@@ -1231,6 +1355,11 @@ export default function AdminDashboard() {
                               </button>
                             </>
                           )}
+                          {submission.submission_status === "approved" && (
+                            <div className="px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-semibold">
+                              ✅ Approved & In Awards
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1238,7 +1367,6 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
-
             {activeTab === "podcasts" && (
               <div>
                 <div className="flex justify-between items-center mb-6">
@@ -1317,6 +1445,7 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
+            // In the "books" tab section, update the book card display:
             {activeTab === "books" && (
               <div>
                 <div className="flex justify-between items-center mb-6">
@@ -1378,6 +1507,37 @@ export default function AdminDashboard() {
                           <p className="text-gray-500 text-sm line-clamp-2 mb-3">
                             {book.description}
                           </p>
+
+                          {/* ADD THIS: Download buttons for files */}
+                          {(book.about_book_pdf_url || book.ebook_url) && (
+                            <div className="mb-3 space-y-2">
+                              {book.about_book_pdf_url && (
+                                <a
+                                  href={book.about_book_pdf_url}
+                                  download
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                                >
+                                  <File className="w-4 h-4" />
+                                  Download About Book PDF
+                                </a>
+                              )}
+                              {book.ebook_url && (
+                                <a
+                                  href={book.ebook_url}
+                                  download
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                                >
+                                  <File className="w-4 h-4" />
+                                  Download eBook
+                                </a>
+                              )}
+                            </div>
+                          )}
+
                           <div className="flex gap-2">
                             <button
                               onClick={() => openBookModal(book)}
@@ -1516,7 +1676,6 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
-
             {activeTab === "judges" && (
               <div>
                 <div className="flex justify-between items-center mb-6">
@@ -1733,17 +1892,48 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
-
-              {/* Action Buttons */}
+              {/* // In the selectedSubmission modal, add this section before the Action Buttons: */}
+              {/* Files Section - ADD THIS */}
+              {(selectedSubmission.about_book_pdf_url ||
+                selectedSubmission.ebook_url) && (
+                <div className="border-t pt-6">
+                  <h3 className="font-bold text-lg mb-3">Submitted Files</h3>
+                  <div className="space-y-2">
+                    {selectedSubmission.about_book_pdf_url && (
+                      <a
+                        href={selectedSubmission.about_book_pdf_url}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        <File className="w-5 h-5" />
+                        Download About Book PDF
+                      </a>
+                    )}
+                    {selectedSubmission.ebook_url && (
+                      <a
+                        href={selectedSubmission.ebook_url}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        <File className="w-5 h-5" />
+                        Download eBook File
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+              {/* Action Buttons in Modal */}
               <div className="flex gap-3 pt-6 border-t">
                 <button
-                  onClick={() =>
-                    updateSubmissionStatus(selectedSubmission.id, "approved")
-                  }
+                  onClick={() => approveAndAddToAwards(selectedSubmission)}
                   className="flex-1 bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
                 >
                   <CheckCircle className="w-5 h-5" />
-                  Approve
+                  Approve & Add to Awards
                 </button>
                 <button
                   onClick={() =>
@@ -2125,7 +2315,198 @@ export default function AdminDashboard() {
                   />
                 </div>
                 {/* Find the Author Name field and add these after it: */}
+                {/* After the Author Name and Year Won fields, add: */}
 
+                {/* Pen Name */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Pen Name
+                  </label>
+                  <input
+                    type="text"
+                    value={bookFormData.pen_name || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        pen_name: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                </div>
+
+                {/* Subtitle */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={bookFormData.subtitle || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        subtitle: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                </div>
+
+                {/* Book Series */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Book Series
+                  </label>
+                  <input
+                    type="text"
+                    value={bookFormData.book_series || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        book_series: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                </div>
+
+                {/* Date of Publication */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Date of Publication
+                  </label>
+                  <input
+                    type="text"
+                    value={bookFormData.date_of_publication || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        date_of_publication: e.target.value,
+                      })
+                    }
+                    placeholder="e.g., January 2024"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                </div>
+
+                {/* After the existing URL fields (video_trailer_url), add: */}
+
+                {/* Social Media URLs */}
+                <div className="md:col-span-2">
+                  <h4 className="font-bold text-gray-900 mb-3 mt-4">
+                    Social Media Links
+                  </h4>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Facebook URL
+                  </label>
+                  <input
+                    type="url"
+                    value={bookFormData.facebook_url || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        facebook_url: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Instagram URL
+                  </label>
+                  <input
+                    type="url"
+                    value={bookFormData.instagram_url || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        instagram_url: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Twitter/X URL
+                  </label>
+                  <input
+                    type="url"
+                    value={bookFormData.twitter_url || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        twitter_url: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Threads URL
+                  </label>
+                  <input
+                    type="url"
+                    value={bookFormData.threads_url || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        threads_url: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                  />
+                </div>
+
+                {/* File URLs (read-only, from submission) */}
+                <div className="md:col-span-2">
+                  <h4 className="font-bold text-gray-900 mb-3 mt-4">
+                    Submitted Files
+                  </h4>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    About Book PDF URL
+                  </label>
+                  <input
+                    type="url"
+                    value={bookFormData.about_book_pdf_url || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        about_book_pdf_url: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    eBook URL
+                  </label>
+                  <input
+                    type="url"
+                    value={bookFormData.ebook_url || ""}
+                    onChange={(e) =>
+                      setBookFormData({
+                        ...bookFormData,
+                        ebook_url: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none bg-gray-50"
+                  />
+                </div>
                 {/* Author Slug */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -2537,13 +2918,13 @@ export default function AdminDashboard() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none resize-none font-mono text-sm"
                   placeholder="Write your blog post content here...
 
-You can use basic formatting:
-**bold text**
-*italic text*
-[link text](url)
-- bullet point
+  You can use basic formatting:
+  **bold text**
+  *italic text*
+  [link text](url)
+  - bullet point
 
-Or write in plain HTML"
+  Or write in plain HTML"
                   required
                 />
               </div>
