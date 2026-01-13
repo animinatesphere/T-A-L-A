@@ -75,7 +75,7 @@ export default function BookSubmissionForm() {
   });
 
   const [currency, setCurrency] = useState("USD");
-  const amount = currency === "USD" ? 50 : 100;
+  const amount = currency === "USD" ? 50 : 20000;
 
   const handleChange = (e) => {
     setFormData({
@@ -194,7 +194,7 @@ export default function BookSubmissionForm() {
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: formData.email,
-      amount: 2000000,
+      amount: 1000,
       currency: "NGN",
       ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
       callback: function (response) {
