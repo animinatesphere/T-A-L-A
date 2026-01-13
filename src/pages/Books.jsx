@@ -135,7 +135,6 @@ export default function Books() {
     setSearchTerm("");
   };
 
-  // Handle initial page load based on URL
   useEffect(() => {
     if (books.length === 0) return; // Wait for books to load
 
@@ -167,9 +166,7 @@ export default function Books() {
         setSelectedBook(book);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [books]); // Run when books are loaded
-
+  }, [books]);
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
