@@ -1449,7 +1449,7 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
-            // In the "books" tab section, update the book card display:
+            {/* // In the "books" tab section, update the book card display: */}
             {activeTab === "books" && (
               <div>
                 <div className="flex justify-between items-center mb-6">
