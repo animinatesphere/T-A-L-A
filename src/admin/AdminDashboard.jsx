@@ -187,7 +187,7 @@ export default function AdminDashboard() {
 
     try {
       // 1. Update submission status to approved
-      await fetch(
+      const updateResponse = await fetch(
         `${SUPABASE_URL}/rest/v1/book_submissions?id=eq.${submission.id}`,
         {
           method: "PATCH",
@@ -203,6 +203,10 @@ export default function AdminDashboard() {
           }),
         }
       );
+
+      if (!updateResponse.ok) {
+        throw new Error("Failed to update submission status");
+      }
 
       // 2. Add to award_winning_books table with ALL fields from submission
       const awardBookData = {
@@ -275,7 +279,7 @@ export default function AdminDashboard() {
         const errorText = await awardResponse.text();
         console.error("Failed to add to award books:", errorText);
         alert(
-          "Approved submission but failed to add to awards. Check console for details."
+          "Submission approved but failed to add to awards. Check console for details."
         );
       }
     } catch (error) {

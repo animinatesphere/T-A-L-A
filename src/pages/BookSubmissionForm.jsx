@@ -215,12 +215,12 @@ export default function BookSubmissionForm() {
     }
   };
 
-  const generateAuthorSlug = (name) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  };
+  // const generateAuthorSlug = (name) => {
+  //   return name
+  //     .toLowerCase()
+  //     .replace(/[^a-z0-9]+/g, "-")
+  //     .replace(/(^-|-$)/g, "");
+  // };
   // Add this function before saveSubmission
   const sendEmailNotification = async (submissionData, fileUrls) => {
     try {
@@ -335,7 +335,8 @@ View submission in admin dashboard.
         );
       }
 
-      // 1. Save to book_submissions table
+      // Save to book_submissions table only
+      // Admin will approve and add to award_winning_books from dashboard
       const submissionData = {
         ...formData,
         ...fileUrls,
@@ -360,43 +361,7 @@ View submission in admin dashboard.
         }
       );
 
-      // 2. Also add to award_winning_books table
-      const awardBookData = {
-        title: formData.book_title,
-        author: formData.author_name,
-        cover_image_url: fileUrls.cover_image_url || "",
-        author_image_url: fileUrls.author_image_url || "",
-        description: formData.book_description || "",
-        synopsis: formData.book_description || "",
-        genre: formData.genre,
-        year_won: new Date().getFullYear(),
-        author_slug: generateAuthorSlug(formData.author_name),
-        author_bio: formData.about_aurthor || "",
-        website_url: "",
-        blog_url: "",
-        amazon_url: formData.barnes_noble_url || "",
-        amazon_uk_url: "",
-        video_trailer_url: "",
-        is_featured: false,
-        display_order: 999,
-      };
-
-      const awardResponse = await fetch(
-        `${SUPABASE_URL}/rest/v1/award_winning_books`,
-        {
-          method: "POST",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            Prefer: "return=minimal",
-          },
-          body: JSON.stringify(awardBookData),
-        }
-      );
-
-      // Inside saveSubmission function, after both submissionResponse.ok && awardResponse.ok
-      if (submissionResponse.ok && awardResponse.ok) {
+      if (submissionResponse.ok) {
         // Send email notification
         await sendEmailNotification(submissionData, fileUrls);
 
