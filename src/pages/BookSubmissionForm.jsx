@@ -237,7 +237,7 @@ export default function BookSubmissionForm() {
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: formData.email,
-      amount: 3500000, // 35,000 NGN in kobo
+      amount: 2000000, // 20,000 NGN in kobo
       currency: "NGN",
       ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
       callback: function (response) {
@@ -1000,7 +1000,7 @@ export default function BookSubmissionForm() {
                 </div>
 
                 <div className="flex gap-4">
-                  // When going back from step 2 to step 1
+                  {/* // When going back from step 2 to step 1 */}
                   <button
                     onClick={() => {
                       setStep(1);

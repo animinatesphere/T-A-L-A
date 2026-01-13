@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  BookOpen,
-  CheckCircle,
-  Mail,
-  User,
-  Globe,
-  Book,
-  Award,
-} from "lucide-react";
+import { BookOpen, CheckCircle, Award } from "lucide-react";
 
 export default function BecomeAReader() {
   const [formData, setFormData] = useState({
@@ -25,6 +17,7 @@ export default function BecomeAReader() {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const genres = [
     "Fiction",
@@ -61,31 +54,79 @@ export default function BecomeAReader() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // Validation
     if (
-      formData.firstName &&
-      formData.lastName &&
-      formData.email &&
-      formData.confirmEmail &&
-      formData.country &&
-      formData.city &&
-      formData.genres.length > 0 &&
-      formData.readingDevice &&
-      formData.experience &&
-      formData.whyJoin &&
-      formData.agree
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.confirmEmail ||
+      !formData.country ||
+      !formData.city ||
+      formData.genres.length === 0 ||
+      !formData.readingDevice ||
+      !formData.experience ||
+      !formData.whyJoin ||
+      !formData.agree
     ) {
-      setSubmitted(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
       alert("Please fill in all required fields");
+      return;
+    }
+
+    // Email matching validation
+    if (formData.email !== formData.confirmEmail) {
+      alert("Email addresses do not match");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "7ad34e05-087f-49d6-b593-0a57134ddf96", // Replace with your Web3Forms access key
+          subject: "New Reader Application - TALA",
+          from_name: `${formData.firstName} ${formData.lastName}`,
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          country: formData.country,
+          city: formData.city,
+          genres: formData.genres.join(", "),
+          reading_device: formData.readingDevice,
+          experience: formData.experience,
+          why_join: formData.whyJoin,
+          agreement: formData.agree ? "Yes" : "No",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSubmitted(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        alert(
+          "There was an error submitting your application. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert(
+        "There was an error submitting your application. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (submitted) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="bg-gradient-to-br from-[#6B0C22] to-[#4a0818] text-white py-16">
+        <div className="bg-gradient-to-br from-red-900 to-red-950 text-white py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <CheckCircle className="w-20 h-20 mx-auto mb-6" />
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -110,7 +151,7 @@ export default function BecomeAReader() {
             </p>
             <button
               onClick={() => setSubmitted(false)}
-              className="bg-[#6B0C22] hover:bg-[#8B1530] text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-red-900 hover:bg-red-800 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
             >
               Submit Another Application
             </button>
@@ -123,7 +164,7 @@ export default function BecomeAReader() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#6B0C22] to-[#4a0818] text-white py-16 md:py-20">
+      <div className="bg-gradient-to-br from-red-900 to-red-950 text-white py-16 md:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <BookOpen className="w-16 h-16 mx-auto mb-6" />
@@ -140,7 +181,7 @@ export default function BecomeAReader() {
       {/* Introduction Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-lg shadow-lg p-8 md:p-12 mb-8">
-          <h2 className="text-3xl font-bold text-[#6B0C22] mb-6">
+          <h2 className="text-3xl font-bold text-red-900 mb-6">
             Do you love to read?
           </h2>
 
@@ -163,20 +204,20 @@ export default function BecomeAReader() {
           {/* Requirements */}
           <div className="mt-8 bg-gray-50 rounded-lg p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <CheckCircle className="w-6 h-6 text-[#6B0C22]" />
+              <CheckCircle className="w-6 h-6 text-red-900" />
               Requirements
             </h3>
             <ul className="space-y-3 text-gray-700">
               <li className="flex items-start gap-3">
-                <span className="text-[#6B0C22] font-bold">•</span>
+                <span className="text-red-900 font-bold">•</span>
                 <span>Be at least 18 years old</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-[#6B0C22] font-bold">•</span>
+                <span className="text-red-900 font-bold">•</span>
                 <span>Have completed secondary school</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-[#6B0C22] font-bold">•</span>
+                <span className="text-red-900 font-bold">•</span>
                 <span>
                   Have access to an ebook reader, or the ability to read ebooks
                   on your computer or mobile device
@@ -194,7 +235,7 @@ export default function BecomeAReader() {
 
         {/* Application Form */}
         <div className="bg-white rounded-lg shadow-lg p-8 md:p-12">
-          <h2 className="text-3xl font-bold text-[#6B0C22] mb-8">
+          <h2 className="text-3xl font-bold text-red-900 mb-8">
             Application Form
           </h2>
 
@@ -215,7 +256,7 @@ export default function BecomeAReader() {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none"
                   />
                 </div>
 
@@ -228,7 +269,7 @@ export default function BecomeAReader() {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
@@ -243,7 +284,7 @@ export default function BecomeAReader() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none"
                   />
                 </div>
 
@@ -256,7 +297,7 @@ export default function BecomeAReader() {
                     name="confirmEmail"
                     value={formData.confirmEmail}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
@@ -271,7 +312,7 @@ export default function BecomeAReader() {
                     name="country"
                     value={formData.country}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none"
                   />
                 </div>
 
@@ -284,7 +325,7 @@ export default function BecomeAReader() {
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
@@ -310,7 +351,7 @@ export default function BecomeAReader() {
                         type="checkbox"
                         checked={formData.genres.includes(genre)}
                         onChange={() => handleGenreToggle(genre)}
-                        className="w-4 h-4 text-[#6B0C22] border-gray-300 rounded focus:ring-[#6B0C22]"
+                        className="w-4 h-4 text-red-900 border-gray-300 rounded focus:ring-red-900"
                       />
                       <span className="text-sm text-gray-700">{genre}</span>
                     </label>
@@ -326,7 +367,7 @@ export default function BecomeAReader() {
                   name="readingDevice"
                   value={formData.readingDevice}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none bg-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none bg-white"
                 >
                   <option value="">Select a device</option>
                   <option value="kindle">Kindle</option>
@@ -348,7 +389,7 @@ export default function BecomeAReader() {
                   onChange={handleChange}
                   rows="4"
                   placeholder="Please describe any relevant experience, including blog reviews, Goodreads reviews, book clubs, etc."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none resize-none"
                 />
               </div>
 
@@ -363,7 +404,7 @@ export default function BecomeAReader() {
                   onChange={handleChange}
                   rows="4"
                   placeholder="Tell us what motivates you to become a reader for TALA..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none resize-none"
                 />
               </div>
             </div>
@@ -376,7 +417,7 @@ export default function BecomeAReader() {
                   name="agree"
                   checked={formData.agree}
                   onChange={handleChange}
-                  className="w-5 h-5 text-[#6B0C22] border-gray-300 rounded focus:ring-[#6B0C22] mt-1"
+                  className="w-5 h-5 text-red-900 border-gray-300 rounded focus:ring-red-900 mt-1"
                 />
                 <span className="text-sm text-gray-700">
                   I confirm that I am at least 18 years old, have completed
@@ -391,9 +432,10 @@ export default function BecomeAReader() {
             <div className="pt-6">
               <button
                 onClick={handleSubmit}
-                className="w-full bg-[#6B0C22] hover:bg-[#8B1530] text-white px-8 py-4 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+                disabled={isSubmitting}
+                className="w-full bg-red-900 hover:bg-red-800 text-white px-8 py-4 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Application
+                {isSubmitting ? "Submitting..." : "Submit Application"}
               </button>
             </div>
           </div>
@@ -401,31 +443,31 @@ export default function BecomeAReader() {
 
         {/* Additional Information */}
         <div className="mt-8 bg-white rounded-lg shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-[#6B0C22] mb-4 flex items-center gap-2">
+          <h3 className="text-2xl font-bold text-red-900 mb-4 flex items-center gap-2">
             <Award className="w-7 h-7" />
             What You'll Receive
           </h3>
           <ul className="space-y-3 text-gray-700">
             <li className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-[#6B0C22] mt-1 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-red-900 mt-1 flex-shrink-0" />
               <span>
                 Free access to selected self-published books in digital format
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-[#6B0C22] mt-1 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-red-900 mt-1 flex-shrink-0" />
               <span>
                 The opportunity to discover new authors and diverse stories
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-[#6B0C22] mt-1 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-red-900 mt-1 flex-shrink-0" />
               <span>
                 A chance to contribute to recognizing literary excellence
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-[#6B0C22] mt-1 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-red-900 mt-1 flex-shrink-0" />
               <span>Recognition as part of our global readers' community</span>
             </li>
           </ul>

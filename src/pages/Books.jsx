@@ -135,6 +135,41 @@ export default function Books() {
     setSearchTerm("");
   };
 
+  // Handle initial page load based on URL
+  useEffect(() => {
+    if (books.length === 0) return; // Wait for books to load
+
+    const path = window.location.pathname;
+
+    // Check if we're on an author page
+    if (path.startsWith("/author/")) {
+      const authorSlug = path.split("/author/")[1];
+
+      // Find the first book by this author
+      const authorBook = books.find((book) => {
+        const bookAuthorSlug = book.author_slug || generateSlug(book.author);
+        return bookAuthorSlug === authorSlug;
+      });
+
+      if (authorBook) {
+        viewAuthor(authorBook);
+      }
+    }
+
+    // Check if we're on a book page
+    if (path.startsWith("/books/")) {
+      const bookSlug = path.split("/books/")[1];
+
+      // Find book by slug
+      const book = books.find((b) => generateSlug(b.title) === bookSlug);
+
+      if (book) {
+        setSelectedBook(book);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [books]); // Run when books are loaded
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
