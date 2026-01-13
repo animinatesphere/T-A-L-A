@@ -239,7 +239,7 @@ export default function BookSubmissionForm() {
       email: formData.email,
       amount: 100, // 20,000 NGN in kobo
       currency: "NGN",
-      ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
+      // ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
       callback: function (response) {
         saveSubmission(response.reference);
       },
