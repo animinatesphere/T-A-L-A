@@ -10,6 +10,7 @@ import {
   BookOpen,
   Users,
 } from "lucide-react";
+import { Link, Route } from "react-router-dom";
 
 export default function TALAFAQPage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -256,12 +257,16 @@ export default function TALAFAQPage() {
               you with any inquiries about The Africa Laureate Awards.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-[#6B0C22] px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all duration-300 shadow-lg hover:scale-105">
-                Contact Support
-              </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-[#6B0C22] transition-all duration-300 shadow-lg hover:scale-105">
-                Submit Your Book
-              </button>
+              <Link to="/contact">
+                <button className="bg-white text-[#6B0C22] px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all duration-300 shadow-lg hover:scale-105">
+                  Contact Support
+                </button>
+              </Link>
+              <Link to="/submit-your-book">
+                <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-[#6B0C22] transition-all duration-300 shadow-lg hover:scale-105">
+                  Submit Your Book
+                </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -50,8 +50,8 @@ const Routee = () => {
         <Route path="/book-desk" element={<BlogListing />} />
         <Route path="/book" element={<AwardWinningBooks />} />
 
-        <Route path="/blog/:slug" element={<BlogDetail />} />
-        <Route path="/book/:authorName" element={<Bookme />} />
+        <Route path="/books/:slug" element={<Books />} />
+        <Route path="/author/:slug" element={<Books />} />
         <Route path="/judges" element={<OurJudges />} />
         <Route path="/become-a-reader" element={<BecomeAReader />} />
 
