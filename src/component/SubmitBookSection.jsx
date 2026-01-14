@@ -12,7 +12,7 @@ export default function SubmitBookSection() {
             </h2>
             <p className="text-lg md:text-xl text-gray-200">
               Are you a self-published author? Interested in submitting your
-              book to indieBRAG?
+              book to The Africa Laureate Awards?
             </p>
           </div>
           <Link to="/submit-your-book">
