@@ -63,14 +63,14 @@ export default function IndieBragFeatures() {
 
           <div className="flex gap-4">
             <a
-              href="https://www.facebook.com/share/1ZnoT1qGJY/?mibextid=wwlfr"
+              href="https://www.facebook.com/share/1DpEKeNpV8/?mibextid=wwXlfr"
               className="bg-[#6B0C22] hover:bg-[#8B1538] text-white p-4 rounded-full transition shadow-lg"
               aria-label="Facebook"
             >
               <Facebook className="h-6 w-6" />
             </a>
             <a
-              href="https://www.instagram.com/theafricalaureteawards"
+              href="https://www.instagram.com/theafricalaureateawards?igsh=ajhnbTFnbDNjb2lr"
               className="bg-[#6B0C22] hover:bg-[#8B1538] text-white p-4 rounded-full transition shadow-lg"
               aria-label="Instagram"
             >
