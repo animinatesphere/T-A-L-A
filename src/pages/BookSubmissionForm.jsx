@@ -302,7 +302,12 @@ View submission in admin dashboard.
 
     try {
       const timestamp = Date.now();
-      let fileUrls = {};
+      let fileUrls = {
+        cover_image_url: null,
+        author_image_url: null,
+        about_book_pdf_url: null,
+        ebook_url: null,
+      };
 
       if (files.book_cover) {
         fileUrls.cover_image_url = await uploadFile(
@@ -310,13 +315,16 @@ View submission in admin dashboard.
           `${timestamp}_cover_${files.book_cover.name}`,
           "book-covers"
         );
+        console.log("Book cover uploaded:", fileUrls.cover_image_url);
       }
+
       if (files.author_image) {
         fileUrls.author_image_url = await uploadFile(
           files.author_image,
           `${timestamp}_author_${files.author_image.name}`,
           "author-images"
         );
+        console.log("Author image uploaded:", fileUrls.author_image_url);
       }
 
       if (files.about_book_pdf) {
@@ -325,6 +333,7 @@ View submission in admin dashboard.
           `${timestamp}_about_${files.about_book_pdf.name}`,
           "book-documents"
         );
+        console.log("About book PDF uploaded:", fileUrls.about_book_pdf_url);
       }
 
       if (files.ebook) {
@@ -333,7 +342,10 @@ View submission in admin dashboard.
           `${timestamp}_ebook_${files.ebook.name}`,
           "book-documents"
         );
+        console.log("eBook uploaded:", fileUrls.ebook_url);
       }
+
+      console.log("All file URLs:", fileUrls);
 
       // Save to book_submissions table only
       // Admin will approve and add to award_winning_books from dashboard
