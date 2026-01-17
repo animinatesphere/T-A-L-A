@@ -196,7 +196,7 @@ export default function Books() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         {/* Back Button Header */}
-        <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        {/* <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <button
               onClick={() => navigate("/books")}
@@ -206,7 +206,7 @@ export default function Books() {
               Back to Books
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* Hero Section with Cover */}
         <div className="bg-gradient-to-br from-[#6B0C22] to-[#4a0818] text-white">

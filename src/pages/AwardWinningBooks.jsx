@@ -79,7 +79,7 @@ export default function AwardWinningBooks() {
             <h2 className="text-3xl md:text-4xl font-bold text-[#6B0C22] mb-4">
               Nominations Now Open <br /> for the 2026 Book Awards
             </h2>
-            <Link to="/nominate">
+            <Link to="/submit-your-book">
               <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
                 VIEW ALL
               </button>

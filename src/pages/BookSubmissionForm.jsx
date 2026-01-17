@@ -58,6 +58,52 @@ export default function BookSubmissionForm() {
     "Horror",
     "Young Adult",
     "Children's Fiction",
+    "Poetry",
+    "Graphic Novel",
+    "Best Biography Book",
+    "Best Autobiography or Memoir – Public Life & Influence",
+    "Best Autobiography or Memoir – Family & Identity",
+    "Best Autobiography or Memoir – Personal Struggle & Recovery",
+    "Best Multicultural Non-Fiction Book",
+    "Best LGBTQ+ Non-Fiction Book",
+    "Best Juvenile & Young Adult Non-Fiction Book",
+    "Best Book Series – Fiction",
+    "Best Book Series – Non-Fiction",
+    "Best Cover Design – Fiction",
+    "Best Cover Design – Non-Fiction",
+    "Best Audiobook Narration – Fiction",
+    "Best Audiobook Narration – Mystery / Thriller",
+    "Best Audiobook Narration – Non-Fiction",
+    "Best Juvenile Fiction Book",
+    "Best Young Adult Fiction Book – General",
+    "Best Young Adult Fiction Book – Fantasy",
+    "Best Novella or Short Fiction Book",
+    "Best Short Story Collection",
+
+    "Best Poetry Collection",
+    "Best Themed Poetry Collection",
+    "Best Anthology Book",
+    "Best Romance Book",
+    "Best Thriller Book",
+    "Best Suspense / Thriller Book",
+    "Best Mystery Book",
+    "Best Historical Fiction Book",
+    "Best Fantasy Book",
+    "Best Science Fiction Book",
+    "Best Horror Book",
+    "Best Military & Wartime Fiction Book",
+    "Best Faith-Based Fiction Book",
+    "Best Visionary & New Age Fiction Book",
+    "Best Humor Book",
+    "Best Erotica Book",
+    "Best LGBTQ+ Fiction Book",
+    "Best Multicultural Fiction Book",
+    "Best Author of the Year",
+    "Best Literary Fiction Book",
+    "Best Popular Fiction Book",
+    "Best Debut Novel",
+    "Best First Book – Fiction",
+    "Best First Book – Non-Fiction",
   ];
 
   const [files, setFiles] = useState({
@@ -143,76 +189,97 @@ export default function BookSubmissionForm() {
       setFilePreviews({ ...filePreviews, ebook_name: "" });
     }
   };
-
   const uploadFile = async (file, fileName, bucket) => {
     try {
+      // URL encode the filename to handle spaces and special characters
+      const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+      const arrayBuffer = await file.arrayBuffer();
+
+      console.log(`Uploading to bucket: ${bucket}, file: ${sanitizedFileName}`);
+
       const response = await fetch(
-        `${SUPABASE_URL}/storage/v1/object/${bucket}/${fileName}`,
+        `${SUPABASE_URL}/storage/v1/object/${bucket}/${sanitizedFileName}`,
         {
           method: "POST",
           headers: {
             apikey: SUPABASE_ANON_KEY,
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": file.type || "application/octet-stream",
           },
-          body: file,
+          body: arrayBuffer,
         }
       );
 
+      const result = await response.json();
+
       if (response.ok) {
-        return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${fileName}`;
+        console.log("Upload successful:", result);
+        // Return URL-encoded path
+        return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${encodeURIComponent(
+          sanitizedFileName
+        )}`;
+      } else {
+        console.error("Upload failed:", result);
+        alert(`Upload failed for ${bucket}: ${result.message || result.error}`);
+        return null;
       }
     } catch (error) {
       console.error("Error uploading file:", error);
+      alert(`Error uploading file: ${error.message}`);
+      return null;
     }
-    return null;
   };
+  // const handleKorapayPayment = () => {
+  //   window.Korapay.initialize({
+  //     key: KORAPAY_PUBLIC_KEY,
+  //     reference: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
+  //     amount: 5000,
+  //     currency: "USD",
+  //     customer: {
+  //       name: `${formData.first_name} ${formData.last_name}`,
+  //       email: formData.email,
+  //     },
+  //     onClose: function () {
+  //       alert("Payment window closed. Please try again.");
+  //     },
+  //     onSuccess: function (data) {
+  //       saveSubmission(data.reference);
+  //     },
+  //     // eslint-disable-next-line no-unused-vars
+  //     onFailed: function (data) {
+  //       alert("Payment failed. Please try again.");
+  //     },
+  //   });
+  // };
 
-  const handleKorapayPayment = () => {
-    window.Korapay.initialize({
-      key: KORAPAY_PUBLIC_KEY,
-      reference: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-      amount: 5000,
-      currency: "USD",
-      customer: {
-        name: `${formData.first_name} ${formData.last_name}`,
-        email: formData.email,
-      },
-      onClose: function () {
-        alert("Payment window closed. Please try again.");
-      },
-      onSuccess: function (data) {
-        saveSubmission(data.reference);
-      },
-      // eslint-disable-next-line no-unused-vars
-      onFailed: function (data) {
-        alert("Payment failed. Please try again.");
-      },
-    });
-  };
-
-  const handlePaystackPayment = () => {
-    const handler = window.PaystackPop.setup({
-      key: PAYSTACK_PUBLIC_KEY,
-      email: formData.email,
-      amount: 10000,
-      currency: "NGN",
-      ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-      callback: function (response) {
-        saveSubmission(response.reference);
-      },
-      onClose: function () {
-        alert("Payment window closed. Please try again.");
-      },
-    });
-    handler.openIframe();
-  };
+  // const handlePaystackPayment = () => {
+  //   const handler = window.PaystackPop.setup({
+  //     key: PAYSTACK_PUBLIC_KEY,
+  //     email: formData.email,
+  //     amount: 10000,
+  //     currency: "NGN",
+  //     ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
+  //     callback: function (response) {
+  //       saveSubmission(response.reference);
+  //     },
+  //     onClose: function () {
+  //       alert("Payment window closed. Please try again.");
+  //     },
+  //   });
+  //   handler.openIframe();
+  // };
 
   const handlePayment = () => {
-    if (currency === "USD") {
-      handleKorapayPayment();
-    } else {
-      handlePaystackPayment();
-    }
+    // Comment out payment functions for testing
+    // if (currency === "USD") {
+    //   handleKorapayPayment();
+    // } else {
+    //   handlePaystackPayment();
+    // }
+
+    // Directly call saveSubmission with a test reference for testing
+    saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
   };
 
   // const generateAuthorSlug = (name) => {

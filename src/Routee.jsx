@@ -47,6 +47,7 @@ const Routee = () => {
         <Route path="/nominate" element={<Books />} />
         <Route path="/meet-the-winners" element={<Books />} />
         <Route path="/blog" element={<BlogListing />} />
+        <Route path="/blog/:slug" element={<BlogDetail />} />
         <Route path="/book-desk" element={<BlogListing />} />
         <Route path="/book" element={<AwardWinningBooks />} />
 
