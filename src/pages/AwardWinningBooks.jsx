@@ -7,12 +7,12 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
 
 // Helper function to create URL-friendly slug
-const createSlug = (text) => {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-};
+// const createSlug = (text) => {
+//   return text
+//     .toLowerCase()
+//     .replace(/[^a-z0-9]+/g, "-")
+//     .replace(/^-+|-+$/g, "");
+// };
 
 export default function AwardWinningBooks() {
   const [books, setBooks] = useState([]);
@@ -53,9 +53,8 @@ export default function AwardWinningBooks() {
   };
 
   // Navigate to book detail page with author name slug
-  const handleBookClick = (book) => {
-    const authorSlug = createSlug(book.author);
-    navigate(`/book/${authorSlug}`);
+  const handleBookClick = () => {
+    navigate(`/books`);
   };
 
   if (loading) {

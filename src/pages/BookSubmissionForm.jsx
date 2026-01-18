@@ -15,8 +15,8 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
 
 const PAYSTACK_PUBLIC_KEY = "pk_live_6560af0a81f50cfdd244e08bf2e54169a3e434e9";
-const KORAPAY_PUBLIC_KEY = "pk_live_tVMURvLgbVLgPHjnXnwtJwGCP77yqfKXo4HKeXUr";
-
+// Add Flutterwave public key at the top with other constants
+const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK-454bd6769e18e2102daaf9a567da00b3-X";
 export default function BookSubmissionForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -130,24 +130,40 @@ export default function BookSubmissionForm() {
     });
   };
 
+  // useEffect(() => {
+  //   const paystackScript = document.createElement("script");
+  //   paystackScript.src = "https://js.paystack.co/v1/inline.js";
+  //   paystackScript.async = true;
+  //   document.body.appendChild(paystackScript);
+
+  //   const korapayScript = document.createElement("script");
+  //   korapayScript.src =
+  //     "https://korablobstorage.blob.core.windows.net/modal-bucket/korapay-collections.min.js";
+  //   korapayScript.async = true;
+  //   document.body.appendChild(korapayScript);
+
+  //   return () => {
+  //     document.body.removeChild(paystackScript);
+  //     document.body.removeChild(korapayScript);
+  //   };
+  // }, []);
+  // Update the useEffect to load Flutterwave script
   useEffect(() => {
     const paystackScript = document.createElement("script");
     paystackScript.src = "https://js.paystack.co/v1/inline.js";
     paystackScript.async = true;
     document.body.appendChild(paystackScript);
 
-    const korapayScript = document.createElement("script");
-    korapayScript.src =
-      "https://korablobstorage.blob.core.windows.net/modal-bucket/korapay-collections.min.js";
-    korapayScript.async = true;
-    document.body.appendChild(korapayScript);
+    const flutterwaveScript = document.createElement("script");
+    flutterwaveScript.src = "https://checkout.flutterwave.com/v3.js";
+    flutterwaveScript.async = true;
+    document.body.appendChild(flutterwaveScript);
 
     return () => {
       document.body.removeChild(paystackScript);
-      document.body.removeChild(korapayScript);
+      document.body.removeChild(flutterwaveScript);
     };
   }, []);
-
   const handleFileChange = (fileType, file) => {
     if (file) {
       setFiles({ ...files, [fileType]: file });
@@ -230,56 +246,65 @@ export default function BookSubmissionForm() {
       return null;
     }
   };
-  // const handleKorapayPayment = () => {
-  //   window.Korapay.initialize({
-  //     key: KORAPAY_PUBLIC_KEY,
-  //     reference: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-  //     amount: 5000,
-  //     currency: "USD",
-  //     customer: {
-  //       name: `${formData.first_name} ${formData.last_name}`,
-  //       email: formData.email,
-  //     },
-  //     onClose: function () {
-  //       alert("Payment window closed. Please try again.");
-  //     },
-  //     onSuccess: function (data) {
-  //       saveSubmission(data.reference);
-  //     },
-  //     // eslint-disable-next-line no-unused-vars
-  //     onFailed: function (data) {
-  //       alert("Payment failed. Please try again.");
-  //     },
-  //   });
-  // };
-
-  // const handlePaystackPayment = () => {
-  //   const handler = window.PaystackPop.setup({
-  //     key: PAYSTACK_PUBLIC_KEY,
-  //     email: formData.email,
-  //     amount: 10000,
-  //     currency: "NGN",
-  //     ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-  //     callback: function (response) {
-  //       saveSubmission(response.reference);
-  //     },
-  //     onClose: function () {
-  //       alert("Payment window closed. Please try again.");
-  //     },
-  //   });
-  //   handler.openIframe();
-  // };
+  // Replace handleKorapayPayment with this Flutterwave function
+  const handleFlutterwavePayment = () => {
+    const modal = window.FlutterwaveCheckout({
+      public_key: FLUTTERWAVE_PUBLIC_KEY,
+      tx_ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
+      amount: 50,
+      currency: "USD",
+      payment_options: "card,ussd,banktransfer",
+      customer: {
+        email: formData.email,
+        name: `${formData.first_name} ${formData.last_name}`,
+      },
+      customizations: {
+        title: "T.A.L.A. Book Submission",
+        description: "Book submission processing fee",
+        logo: "https://your-logo-url.com/logo.png", // Optional: Add your logo URL
+      },
+      callback: function (data) {
+        console.log("Payment successful:", data);
+        if (data.status === "successful") {
+          saveSubmission(data.tx_ref);
+        }
+        modal.close();
+      },
+      onclose: function () {
+        console.log("Payment window closed");
+        alert(
+          "Payment window closed. Please try again if payment was not completed."
+        );
+      },
+    });
+  };
+  const handlePaystackPayment = () => {
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_PUBLIC_KEY,
+      email: formData.email,
+      amount: 2000000,
+      currency: "NGN",
+      ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
+      callback: function (response) {
+        saveSubmission(response.reference);
+      },
+      onClose: function () {
+        alert("Payment window closed. Please try again.");
+      },
+    });
+    handler.openIframe();
+  };
 
   const handlePayment = () => {
     // Comment out payment functions for testing
-    // if (currency === "USD") {
-    //   handleKorapayPayment();
-    // } else {
-    //   handlePaystackPayment();
-    // }
+    if (currency === "USD") {
+      handleFlutterwavePayment();
+    } else {
+      handlePaystackPayment();
+    }
 
     // Directly call saveSubmission with a test reference for testing
-    saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+    // saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
   };
 
   // const generateAuthorSlug = (name) => {
@@ -514,7 +539,9 @@ View submission in admin dashboard.
             </h3>
             <p className="mb-4 text-gray-200">
               To submit your book, please complete the nomination form below. A
-              processing fee of $50.00 applies.
+              processing fee of $50.00 applies. Note:when you submit your book
+              details and payment please make sure you wait until the submission
+              is complete before navigating away from the page.
             </p>
           </div>
         </div>
