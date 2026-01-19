@@ -6,7 +6,7 @@ const links = [
   { label: "Books", href: "/books" },
   { label: "Categories", href: "/categories" },
   { label: "About", href: "/about" },
-  { label: "Become a Reader", href: "/Become-a-reader" },
+  { label: "Become a Reader", href: "/become-a-reader" },
   { label: "Submit Your Book", href: "/submit-your-book" },
 ];
 

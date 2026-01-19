@@ -251,7 +251,7 @@ export default function BookSubmissionForm() {
     const modal = window.FlutterwaveCheckout({
       public_key: FLUTTERWAVE_PUBLIC_KEY,
       tx_ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-      amount: 50,
+      amount: 1,
       currency: "USD",
       payment_options: "card,ussd,banktransfer",
       customer: {
@@ -539,9 +539,16 @@ View submission in admin dashboard.
             </h3>
             <p className="mb-4 text-gray-200">
               To submit your book, please complete the nomination form below. A
-              processing fee of $50.00 applies. Note:when you submit your book
-              details and payment please make sure you wait until the submission
-              is complete before navigating away from the page.
+              processing fee of $50.00 applies.
+            </p>
+          </div>
+          <div className="mt-8 bg-gradient-to-r from-[#6B0C22] to-[#4a0818] text-white rounded-xl p-6">
+            <h3 className="text-xl font-bold ">Note</h3>
+            <p className="mb-4 text-gray-200">
+              <br />
+              when you submit your book details and payment please make sure you
+              wait until the submission is complete before navigating away from
+              the page.
             </p>
           </div>
         </div>
@@ -996,7 +1003,22 @@ View submission in admin dashboard.
                   <p className="font-semibold mb-1">Secure Payment</p>
                   <p>
                     Your payment is processed securely through{" "}
-                    {currency === "USD" ? "Korapay" : "Paystack"}.
+                    {currency === "USD" ? "flutterwave" : "Paystack"}.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <div className="text-sm text-blue-900">
+                  <p className="font-semibold mb-1">Payment Currency Notice</p>
+                  <p>
+                    Authors based in Nigeria are required to complete payment
+                    using the Nigerian Naira (NGN) Option.Authors based outside
+                    Nigeria should complete payment using the US Dollar (USD)
+                    option
+                    <br />
+                    Please select the appropriate currency at checkout to avoid
+                    payment issues or delays in processing your submission.
                   </p>
                 </div>
               </div>
