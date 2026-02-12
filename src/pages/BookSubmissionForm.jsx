@@ -21,6 +21,8 @@ export default function BookSubmissionForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [showUSDPaymentModal, setShowUSDPaymentModal] = useState(false);
+  const [isLinkPaid, setIsLinkPaid] = useState(false);
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -224,7 +226,7 @@ export default function BookSubmissionForm() {
             "Content-Type": file.type || "application/octet-stream",
           },
           body: arrayBuffer,
-        }
+        },
       );
 
       const result = await response.json();
@@ -233,7 +235,7 @@ export default function BookSubmissionForm() {
         console.log("Upload successful:", result);
         // Return URL-encoded path
         return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${encodeURIComponent(
-          sanitizedFileName
+          sanitizedFileName,
         )}`;
       } else {
         console.error("Upload failed:", result);
@@ -251,7 +253,7 @@ export default function BookSubmissionForm() {
     const modal = window.FlutterwaveCheckout({
       public_key: FLUTTERWAVE_PUBLIC_KEY,
       tx_ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-      amount: 1,
+      amount: 50,
       currency: "USD",
       payment_options: "card,ussd,banktransfer",
       customer: {
@@ -266,17 +268,20 @@ export default function BookSubmissionForm() {
       callback: function (data) {
         console.log("Payment successful:", data);
         if (data.status === "successful") {
+          setShowUSDPaymentModal(false);
           saveSubmission(data.tx_ref);
         }
         modal.close();
       },
       onclose: function () {
         console.log("Payment window closed");
-        alert(
-          "Payment window closed. Please try again if payment was not completed."
-        );
       },
     });
+  };
+
+  const handleLinkPayment = () => {
+    window.open("https://flutterwave.com/pay/3891yfvgpcih", "_blank");
+    setIsLinkPaid(true);
   };
   const handlePaystackPayment = () => {
     const handler = window.PaystackPop.setup({
@@ -295,17 +300,25 @@ export default function BookSubmissionForm() {
     handler.openIframe();
   };
 
-  const handlePayment = () => {
-    // Comment out payment functions for testing
-    if (currency === "USD") {
-      handleFlutterwavePayment();
-    } else {
-      handlePaystackPayment();
-    }
+const handlePayment = () => {
+  if (currency === "USD") {
+    setShowUSDPaymentModal(true);
+  } else {
+    handlePaystackPayment();
+  }
+};
 
-    // Directly call saveSubmission with a test reference for testing
-    // saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
-  };
+  // const handlePayment = () => {
+  //   // Comment out payment functions for testing
+  //   if (currency === "USD") {
+  //     handleFlutterwavePayment();
+  //   } else {
+  //     handlePaystackPayment();
+  //   }
+
+  //   // Directly call saveSubmission with a test reference for testing
+  //   // saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+  // };
 
   // const generateAuthorSlug = (name) => {
   //   return name
@@ -324,7 +337,7 @@ export default function BookSubmissionForm() {
       // Email details
       formData.append(
         "subject",
-        `New Book Submission: ${submissionData.book_title}`
+        `New Book Submission: ${submissionData.book_title}`,
       );
       formData.append("from_name", "T.A.L.A. Submission System");
 
@@ -405,7 +418,7 @@ View submission in admin dashboard.
         fileUrls.cover_image_url = await uploadFile(
           files.book_cover,
           `${timestamp}_cover_${files.book_cover.name}`,
-          "book-covers"
+          "book-covers",
         );
         console.log("Book cover uploaded:", fileUrls.cover_image_url);
       }
@@ -414,7 +427,7 @@ View submission in admin dashboard.
         fileUrls.author_image_url = await uploadFile(
           files.author_image,
           `${timestamp}_author_${files.author_image.name}`,
-          "author-images"
+          "author-images",
         );
         console.log("Author image uploaded:", fileUrls.author_image_url);
       }
@@ -423,7 +436,7 @@ View submission in admin dashboard.
         fileUrls.about_book_pdf_url = await uploadFile(
           files.about_book_pdf,
           `${timestamp}_about_${files.about_book_pdf.name}`,
-          "book-documents"
+          "book-documents",
         );
         console.log("About book PDF uploaded:", fileUrls.about_book_pdf_url);
       }
@@ -432,7 +445,7 @@ View submission in admin dashboard.
         fileUrls.ebook_url = await uploadFile(
           files.ebook,
           `${timestamp}_ebook_${files.ebook.name}`,
-          "book-documents"
+          "book-documents",
         );
         console.log("eBook uploaded:", fileUrls.ebook_url);
       }
@@ -462,7 +475,7 @@ View submission in admin dashboard.
             Prefer: "return=minimal",
           },
           body: JSON.stringify(submissionData),
-        }
+        },
       );
 
       if (submissionResponse.ok) {
@@ -539,10 +552,11 @@ View submission in admin dashboard.
             </h3>
             <p className="mb-4 text-gray-200">
               To submit your book, please complete the nomination form below. A
-              processing fee of $50.00 applies.
+              processing fee of $50.00 applies for authors living outside of
+              Nigeria and N20,000 for authors based in Nigeria
             </p>
           </div>
-          <div className="mt-8 bg-gradient-to-r from-[#6B0C22] to-[#4a0818] text-white rounded-xl p-6">
+          {/* <div className="mt-8 bg-gradient-to-r from-[#6B0C22] to-[#4a0818] text-white rounded-xl p-6">
             <h3 className="text-xl font-bold ">Note</h3>
             <p className="mb-4 text-gray-200">
               <br />
@@ -550,7 +564,7 @@ View submission in admin dashboard.
               wait until the submission is complete before navigating away from
               the page.
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className="mb-8">
@@ -575,10 +589,10 @@ View submission in admin dashboard.
                     {stepNum === 1
                       ? "Book Info"
                       : stepNum === 2
-                      ? "Upload Files"
-                      : stepNum === 3
-                      ? "Payment"
-                      : "Complete"}
+                        ? "Upload Files"
+                        : stepNum === 3
+                          ? "Payment"
+                          : "Complete"}
                   </span>
                 </div>
                 {stepNum < 4 && (
@@ -763,6 +777,65 @@ View submission in admin dashboard.
                       onChange={handleChange}
                       rows={4}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  Social Media Links (Optional)
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Facebook URL
+                    </label>
+                    <input
+                      type="url"
+                      name="facebook_url"
+                      value={formData.facebook_url}
+                      onChange={handleChange}
+                      placeholder="https://facebook.com/yourpage"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Instagram URL
+                    </label>
+                    <input
+                      type="url"
+                      name="instagram_url"
+                      value={formData.instagram_url}
+                      onChange={handleChange}
+                      placeholder="https://instagram.com/yourprofile"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Twitter URL
+                    </label>
+                    <input
+                      type="url"
+                      name="twitter_url"
+                      value={formData.twitter_url}
+                      onChange={handleChange}
+                      placeholder="https://twitter.com/yourhandle"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Threads URL
+                    </label>
+                    <input
+                      type="url"
+                      name="threads_url"
+                      value={formData.threads_url}
+                      onChange={handleChange}
+                      placeholder="https://threads.net/@yourhandle"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] focus:border-transparent outline-none"
                     />
                   </div>
                 </div>
@@ -1022,6 +1095,17 @@ View submission in admin dashboard.
                   </p>
                 </div>
               </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <div className="text-sm text-blue-900">
+                  <p className="font-semibold mb-1">Note</p>
+                  <p>
+                    when you submit your book details and payment please make
+                    sure you wait until the submission is complete before
+                    navigating away from the page.
+                  </p>
+                </div>
+              </div>
 
               <div className="flex gap-4">
                 <button
@@ -1125,6 +1209,87 @@ View submission in admin dashboard.
           )}
         </div>
       </div>
+
+      {/* USD Payment Modal */}
+      {showUSDPaymentModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="bg-[#6B0C22] p-6 text-white flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-bold">USD Payment Options</h3>
+                <p className="text-sm text-gray-200 mt-1">Select your preferred payment method</p>
+              </div>
+              <button 
+                onClick={() => setShowUSDPaymentModal(false)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-8 space-y-6">
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-blue-800 text-sm leading-relaxed">
+                <p className="font-bold flex items-center gap-2 mb-2">
+                  <AlertCircle className="w-4 h-4" /> Instructions
+                </p>
+                <p>
+                  We provide two ways to pay the $50 USD processing fee via Flutterwave. Choose "Direct Pay" for an inline selection, or use the "Payment Link" to pay on the Flutterwave hosted page.
+                </p>
+              </div>
+
+              <div className="grid gap-4">
+                <button
+                  onClick={handleFlutterwavePayment}
+                  className="flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-[#6B0C22] hover:bg-[#6B0C22]/5 transition-all group text-left"
+                >
+                  <div>
+                    <p className="font-bold text-gray-900">Direct Online Pay</p>
+                    <p className="text-sm text-gray-500">Pay directly on this page (Recommended)</p>
+                  </div>
+                  <Check className="w-5 h-5 text-gray-300 group-hover:text-[#6B0C22]" />
+                </button>
+
+                <button
+                  onClick={handleLinkPayment}
+                  className="flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-[#6B0C22] hover:bg-[#6B0C22]/5 transition-all group text-left"
+                >
+                  <div>
+                    <p className="font-bold text-gray-900">Flutterwave Payment Link</p>
+                    <p className="text-sm text-gray-500">Open hosted payment page in new tab</p>
+                  </div>
+                  <Upload className="w-5 h-5 text-gray-300 group-hover:text-[#6B0C22]" />
+                </button>
+              </div>
+
+              {isLinkPaid && (
+                <div className="pt-4 border-t border-gray-100">
+                  <p className="text-sm text-center text-gray-600 mb-4 italic">
+                    If you have successfully completed payment on the Flutterwave page, click below to finalize your submission.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setShowUSDPaymentModal(false);
+                      saveSubmission("FLW_LINK_PAYMENT_" + Date.now());
+                    }}
+                    className="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    I have paid - Complete Submission
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="bg-gray-50 p-4 text-center">
+              <button 
+                onClick={() => setShowUSDPaymentModal(false)}
+                className="text-gray-500 text-sm font-medium hover:text-gray-700"
+              >
+                Cancel and return
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1017,24 +1017,29 @@ export default function AdminDashboard() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-[#6B0C22] to-[#4a0818] text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold">
+      <header className="bg-gradient-to-r from-[#6B0C22] via-[#8B1530] to-[#4a0818] text-white shadow-2xl relative overflow-hidden">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" style={{animationDelay: '1s'}}></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
                 T.A.L.A. Admin Dashboard
               </h1>
-              <p className="text-sm text-gray-200 mt-1">
-                Manage book submissions and podcasts
+              <p className="text-sm md:text-base text-gray-200">
+                Manage submissions, podcasts, books, blogs, and judges
               </p>
             </div>
             <div className="relative">
-              <button className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors relative">
-                <Bell className="w-6 h-6" />
+              <button className="p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110 relative group">
+                <Bell className="w-6 h-6 group-hover:animate-bounce" />
                 {pendingCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold animate-pulse shadow-lg">
                     {pendingCount}
                   </span>
                 )}
@@ -1046,40 +1051,43 @@ export default function AdminDashboard() {
 
       {/* Stats Overview */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-md p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+          {/* Total Submissions Card */}
+          <div className="group bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-gray-100">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Total Submissions</p>
-                <p className="text-3xl font-bold text-gray-900">
+              <div className="flex-1">
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Total Submissions</p>
+                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#6B0C22] to-[#8B1530] bg-clip-text text-transparent">
                   {submissions.length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-[#6B0C22] rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
+              <div className="w-14 h-14 bg-gradient-to-br from-[#6B0C22] to-[#8B1530] rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <BookOpen className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          {/* Pending Review Card */}
+          <div className="group bg-gradient-to-br from-white to-yellow-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-yellow-100">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Pending Review</p>
-                <p className="text-3xl font-bold text-yellow-600">
+              <div className="flex-1">
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Pending Review</p>
+                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
                   {pendingCount}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-600" />
+              <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Clock className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          {/* Approved Card */}
+          <div className="group bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-green-100">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Approved</p>
-                <p className="text-3xl font-bold text-green-600">
+              <div className="flex-1">
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Approved</p>
+                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                   {
                     submissions.filter(
                       (s) => s.submission_status === "approved"
@@ -1087,79 +1095,83 @@ export default function AdminDashboard() {
                   }
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          {/* Total Podcasts Card */}
+          <div className="group bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-purple-100">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Total Podcasts</p>
-                <p className="text-3xl font-bold text-[#6B0C22]">
+              <div className="flex-1">
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Total Podcasts</p>
+                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   {podcasts.length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Podcast className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">
-                  Award-Winning Books
-                </p>
-                <p className="text-3xl font-bold text-[#6B0C22]">
-                  {awardBooks.length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-blue-600" />
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Podcast className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
+          {/* Award-Winning Books Card */}
+          <div className="group bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-blue-100">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Blog Posts</p>
-                <p className="text-3xl font-bold text-[#6B0C22]">
-                  {blogs.length}
+              <div className="flex-1">
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Award Books</p>
+                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  {awardBooks.length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <Edit className="w-6 h-6 text-indigo-600" />
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <BookOpen className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl shadow-md p-6">
+
+          {/* Blog Posts Card */}
+          <div className="group bg-gradient-to-br from-white to-indigo-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-indigo-100">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Judges</p>
-                <p className="text-3xl font-bold text-[#6B0C22]">
+              <div className="flex-1">
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Blog Posts</p>
+                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  {blogs.length}
+                </p>
+              </div>
+              <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Edit className="w-7 h-7 text-white" />
+              </div>
+            </div>
+          </div>
+
+          {/* Judges Card */}
+          <div className="group bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-orange-100">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Judges</p>
+                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                   {judges.length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Award className="w-6 h-6 text-orange-600" />
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Award className="w-7 h-7 text-white" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-xl shadow-md mb-6">
+        <div className="bg-white rounded-2xl shadow-xl mb-6 overflow-hidden">
           <div className="border-b border-gray-200 overflow-x-auto">
             <div className="flex min-w-max md:min-w-0">
               <button
                 onClick={() => setActiveTab("submissions")}
-                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-all duration-300 whitespace-nowrap relative ${
                   activeTab === "submissions"
-                    ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-white bg-gradient-to-r from-[#6B0C22] to-[#8B1530]"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -1167,7 +1179,7 @@ export default function AdminDashboard() {
                   <span className="hidden sm:inline">Book Submissions</span>
                   <span className="sm:hidden">Submissions</span>
                   {pendingCount > 0 && (
-                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">
                       {pendingCount}
                     </span>
                   )}
@@ -1175,10 +1187,10 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("podcasts")}
-                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-all duration-300 whitespace-nowrap ${
                   activeTab === "podcasts"
-                    ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-white bg-gradient-to-r from-[#6B0C22] to-[#8B1530]"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -1189,10 +1201,10 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("books")}
-                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-all duration-300 whitespace-nowrap ${
                   activeTab === "books"
-                    ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-white bg-gradient-to-r from-[#6B0C22] to-[#8B1530]"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -1203,10 +1215,10 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("blogs")}
-                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-all duration-300 whitespace-nowrap ${
                   activeTab === "blogs"
-                    ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-white bg-gradient-to-r from-[#6B0C22] to-[#8B1530]"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -1218,10 +1230,10 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveTab("judges")}
-                className={`px-4 md:px-6 py-4 font-semibold transition-colors whitespace-nowrap ${
+                className={`px-4 md:px-6 py-4 font-semibold transition-all duration-300 whitespace-nowrap ${
                   activeTab === "judges"
-                    ? "text-[#6B0C22] border-b-2 border-[#6B0C22]"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "text-white bg-gradient-to-r from-[#6B0C22] to-[#8B1530]"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -1267,16 +1279,16 @@ export default function AdminDashboard() {
                     {filteredSubmissions.map((submission) => (
                       <div
                         key={submission.id}
-                        className="bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow"
+                        className="group bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-gray-200"
                       >
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-xl font-bold text-gray-900">
+                        <div className="flex flex-col lg:flex-row justify-between items-start gap-4 mb-4">
+                          <div className="flex-1 w-full lg:w-auto">
+                            <div className="flex flex-wrap items-center gap-3 mb-3">
+                              <h3 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#6B0C22] to-[#8B1530] bg-clip-text text-transparent">
                                 {submission.book_title}
                               </h3>
                               <span
-                                className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
+                                className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${getStatusColor(
                                   submission.submission_status
                                 )}`}
                               >
@@ -1285,36 +1297,39 @@ export default function AdminDashboard() {
                                   .toUpperCase()}
                               </span>
                             </div>
-                            <p className="text-gray-600 mb-1">
+                            <p className="text-gray-700 font-medium mb-2">
                               by {submission.author_name}
                             </p>
-                            <p className="text-sm text-gray-500">
-                              Submitted by: {submission.first_name}{" "}
-                              {submission.last_name} ({submission.email})
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              Genre: {submission.genre} | Payment:{" "}
-                              {submission.payment_currency}{" "}
-                              {submission.payment_amount}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-2">
-                              Submitted:{" "}
-                              {new Date(
-                                submission.created_at
-                              ).toLocaleDateString()}
-                            </p>
+                            <div className="space-y-1 text-sm text-gray-600">
+                              <p>
+                                <span className="font-semibold">Submitted by:</span> {submission.first_name}{" "}
+                                {submission.last_name} ({submission.email})
+                              </p>
+                              <p>
+                                <span className="font-semibold">Genre:</span> {submission.genre} | 
+                                <span className="font-semibold"> Payment:</span>{" "}
+                                {submission.payment_currency}{" "}
+                                {submission.payment_amount}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Submitted:{" "}
+                                {new Date(
+                                  submission.created_at
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
                           </div>
                           <div className="flex gap-2">
                             <button
                               onClick={() => setSelectedSubmission(submission)}
-                              className="p-2 bg-[#6B0C22] text-white rounded-lg hover:bg-[#8B1530] transition-colors"
+                              className="p-3 bg-gradient-to-r from-[#6B0C22] to-[#8B1530] text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-110"
                               title="View Details"
                             >
                               <Eye className="w-5 h-5" />
                             </button>
                             <button
                               onClick={() => deleteSubmission(submission.id)}
-                              className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                              className="p-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-110"
                               title="Delete"
                             >
                               <Trash2 className="w-5 h-5" />

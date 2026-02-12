@@ -70,7 +70,7 @@ export default function Footer() {
                 <Twitter className="w-5 h-5" />
               </a>
               <a
-                href="https://www.instagram.com/theafricalaureateawards?igsh=ajhnbTFnbDNjb2lr"
+                href="https://www.instagram.com/theafricalaureate?igsh=eTBpZ3oyZHNyM3l1&utm_source=qr"
                 className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors duration-300"
               >
                 <Instagram className="w-5 h-5" />
