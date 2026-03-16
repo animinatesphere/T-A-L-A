@@ -17,6 +17,8 @@ const SUPABASE_ANON_KEY =
 const PAYSTACK_PUBLIC_KEY = "pk_live_6560af0a81f50cfdd244e08bf2e54169a3e434e9";
 // Add Flutterwave public key at the top with other constants
 const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK-454bd6769e18e2102daaf9a567da00b3-X";
+
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 export default function BookSubmissionForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -168,6 +170,10 @@ export default function BookSubmissionForm() {
   }, []);
   const handleFileChange = (fileType, file) => {
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        alert("File size should be less than 100MB");
+        return;
+      }
       setFiles({ ...files, [fileType]: file });
 
       if (fileType === "book_cover") {

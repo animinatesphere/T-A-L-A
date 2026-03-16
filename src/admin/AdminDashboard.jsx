@@ -25,6 +25,8 @@ const SUPABASE_URL2 = "https://pnfebkenxtqfzfbewyiy.supabase.co";
 const SUPABASE_ANON_KEY2 =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuZmVia2VueHRxZnpmYmV3eWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDczMjUsImV4cCI6MjA4MTk4MzMyNX0.xGaevgclohcy1Y8w9J83oZ0cQB2rN5WWEJwrDIDwk70";
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("submissions");
   const [submissions, setSubmissions] = useState([]);
@@ -353,9 +355,9 @@ export default function AdminDashboard() {
         return;
       }
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Image size should be less than 5MB");
+      // Validate file size (max 100MB)
+      if (file.size > MAX_FILE_SIZE) {
+        alert("Image size should be less than 100MB");
         return;
       }
 
@@ -603,8 +605,8 @@ export default function AdminDashboard() {
         alert("Please select an image file");
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Image size should be less than 5MB");
+      if (file.size > MAX_FILE_SIZE) {
+        alert("Image size should be less than 100MB");
         return;
       }
       setJudgeImageFile(file);
@@ -770,6 +772,10 @@ export default function AdminDashboard() {
   const handlePodcastImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        alert("Image size should be less than 100MB");
+        return;
+      }
       setPodcastImageFile(file);
       setPodcastImagePreview(URL.createObjectURL(file));
     }
@@ -889,6 +895,10 @@ export default function AdminDashboard() {
   const handleBookImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        alert("Image size should be less than 100MB");
+        return;
+      }
       setBookImageFile(file);
       setBookImagePreview(URL.createObjectURL(file));
     }
