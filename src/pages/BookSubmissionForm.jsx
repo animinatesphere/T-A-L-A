@@ -307,11 +307,15 @@ export default function BookSubmissionForm() {
   };
 
 const handlePayment = () => {
-  if (currency === "USD") {
-    setShowUSDPaymentModal(true);
-  } else {
-    handlePaystackPayment();
-  }
+  // if (currency === "USD") {
+  //   setShowUSDPaymentModal(true);
+  // } else {
+  //   handlePaystackPayment();
+  // }
+  
+  // Directly call saveSubmission with a free reference
+  const freeRef = "FREE_" + Date.now();
+  saveSubmission(freeRef);
 };
 
   // const handlePayment = () => {
@@ -557,9 +561,9 @@ View submission in admin dashboard.
               Ready to Submit Your Book?
             </h3>
             <p className="mb-4 text-gray-200">
-              To submit your book, please complete the nomination form below. A
-              processing fee of $50.00 applies for authors living outside of
-              Nigeria and N20,000 for authors based in Nigeria
+              To submit your book, please complete the nomination form below. 
+              {/* A processing fee of $50.00 applies for authors living outside of Nigeria and N20,000 for authors based in Nigeria */}
+              Submission is currently free.
             </p>
           </div>
           {/* <div className="mt-8 bg-gradient-to-r from-[#6B0C22] to-[#4a0818] text-white rounded-xl p-6">
@@ -1045,68 +1049,20 @@ View submission in admin dashboard.
                   </div>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Select Currency
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={() => setCurrency("USD")}
-                    className={`p-4 border-2 rounded-lg font-semibold ${
-                      currency === "USD"
-                        ? "border-[#6B0C22] bg-[#6B0C22]/5"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <DollarSign className="w-6 h-6 mx-auto mb-2" />
-                    USD $50.00
-                  </button>
-                  <button
-                    onClick={() => setCurrency("NGN")}
-                    className={`p-4 border-2 rounded-lg font-semibold ${
-                      currency === "NGN"
-                        ? "border-[#6B0C22] bg-[#6B0C22]/5"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <span className="text-2xl">₦</span>
-                    <div className="mt-2">NGN ₦20,000</div>
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                <div className="text-sm text-blue-900">
-                  <p className="font-semibold mb-1">Secure Payment</p>
-                  <p>
-                    Your payment is processed securely through{" "}
-                    {currency === "USD" ? "flutterwave" : "Paystack"}.
-                  </p>
-                </div>
-              </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                <div className="text-sm text-blue-900">
-                  <p className="font-semibold mb-1">Payment Currency Notice</p>
-                  <p>
-                    Authors based in Nigeria are required to complete payment
-                    using the Nigerian Naira (NGN) Option.Authors based outside
-                    Nigeria should complete payment using the US Dollar (USD)
-                    option
-                    <br />
-                    Please select the appropriate currency at checkout to avoid
-                    payment issues or delays in processing your submission.
-                  </p>
-                </div>
+              {/* Payment Section Commented Out */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                <Check className="w-12 h-12 text-green-600 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Free Submission</h3>
+                <p className="text-gray-600">
+                  You can now submit your book for review at no cost. Click the button below to complete your submission.
+                </p>
               </div>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
                 <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
                 <div className="text-sm text-blue-900">
                   <p className="font-semibold mb-1">Note</p>
                   <p>
-                    when you submit your book details and payment please make
+                    when you submit your book details please make
                     sure you wait until the submission is complete before
                     navigating away from the page.
                   </p>
@@ -1128,12 +1084,10 @@ View submission in admin dashboard.
                   disabled={loading}
                   className="flex-1 bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <CreditCard className="w-5 h-5" />
+                  <Check className="w-5 h-5" />
                   {loading
                     ? "Processing..."
-                    : `Pay ${currency} ${
-                        currency === "USD" ? "$50" : "₦20,000"
-                      }`}
+                    : "Complete Submission"}
                 </button>
               </div>
             </div>
