@@ -17,6 +17,8 @@ const SUPABASE_ANON_KEY =
 export default function AwardWinningBooks() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,6 +45,21 @@ export default function AwardWinningBooks() {
     }
   };
 
+  // Pagination Logic
+  const totalPages = Math.ceil(books.length / itemsPerPage);
+  const currentBooks = books.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    const element = document.getElementById("award-books");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const getYouTubeEmbedUrl = (url) => {
     if (!url) return null;
     const videoId = url.match(
@@ -52,7 +69,7 @@ export default function AwardWinningBooks() {
     return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
   };
 
-  // Navigate to book detail page with author name slug
+  // Navigate to book detail page
   const handleBookClick = () => {
     navigate(`/books`);
   };
@@ -69,73 +86,125 @@ export default function AwardWinningBooks() {
   }
 
   return (
-    <div className="bg-white">
+    <div id="award-books" className="bg-white">
       {/* Books Section */}
-      <div className="py-16 bg-gray-50">
+      <div className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
           {/* Header */}
-          <div className="mb-12 flex items-center justify-between border-b-2 border-gray-200 pb-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#6B0C22] mb-4">
-              Nominations Now Open <br /> for the 2026 Book Awards
-            </h2>
-            <Link to="/submit-your-book">
-              <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
-                VIEW ALL
+          <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-2xl">
+              <h2 className="text-sm font-black text-[#6B0C22] uppercase tracking-[0.3em] mb-4">
+                Hall of Fame
+              </h2>
+              <h3 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                Award-Winning <br />
+                <span className="text-[#6B0C22]">Masterpieces</span>
+              </h3>
+            </div>
+            <Link to="/books" className="no-underline">
+              <button className="bg-gray-900 hover:bg-[#6B0C22] text-white px-10 py-4 rounded-full font-bold transition-all shadow-xl hover:-translate-y-1">
+                VIEW FULL COLLECTION
               </button>
             </Link>
           </div>
 
           {/* Books Grid */}
           {books.length === 0 ? (
-            <div className="text-center py-12">
-              <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">
+            <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100">
+              <BookOpen className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+              <p className="text-gray-500 font-medium">
                 No award-winning books available yet.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-20">
-              {books.map((book) => (
-                <div
-                  key={book.id}
-                  onClick={() => handleBookClick(book)}
-                  className="cursor-pointer group"
-                >
-                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-                    <img
-                      src={book.cover_image_url}
-                      alt={book.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    {book.is_featured && (
-                      <div className="absolute top-2 left-2 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        Featured
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-16">
+                {currentBooks.map((book, idx) => (
+                  <div
+                    key={book.id}
+                    onClick={() => handleBookClick(book)}
+                    className={`cursor-pointer group animate-fade-in-up`}
+                    style={{ animationDelay: `${idx * 0.1}s` }}
+                  >
+                    <div className="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.1)] group-hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] transition-all duration-500">
+                      <img
+                        src={book.cover_image_url}
+                        alt={book.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                          <p className="font-bold text-lg leading-tight mb-2">
+                            {book.title}
+                          </p>
+                          <p className="text-sm text-white/70 italic uppercase tracking-wider">
+                            {book.author}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                        <p className="font-bold text-sm line-clamp-2">
-                          {book.title}
-                        </p>
-                        <p className="text-xs opacity-90">by {book.author}</p>
-                      </div>
+                      {book.is_featured && (
+                        <div className="absolute top-4 right-4 glass-panel px-3 py-1.5 rounded-full text-[10px] text-white font-black uppercase tracking-widest">
+                          FEATURED
+                        </div>
+                      )}
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mt-12">
+                  <button
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#6B0C22] hover:text-[#6B0C22] disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-500 transition-all font-bold"
+                  >
+                    ←
+                  </button>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i + 1}
+                      onClick={() => handlePageChange(i + 1)}
+                      className={`w-12 h-12 rounded-full font-bold transition-all ${
+                        currentPage === i + 1
+                          ? "bg-[#6B0C22] text-white shadow-lg"
+                          : "bg-white border border-gray-200 text-gray-600 hover:border-[#6B0C22] hover:text-[#6B0C22]"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#6B0C22] hover:text-[#6B0C22] disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-500 transition-all font-bold"
+                  >
+                    →
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
 
           {/* Latest Book Trailers Section */}
           {books.filter((book) => book.video_trailer_url).length > 0 && (
-            <div className="mt-20">
-              <div className="flex justify-between items-center mb-8 border-b-2 border-gray-200 pb-4">
-                <h2 className="text-3xl md:text-4xl font-bold text-teal-700">
-                  Celebrating the Latest <br /> Africa Laureate Award Winners
-                </h2>
-                <Link to="/meet-the-winners">
-                  <button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16]">
-                    VIEW ALL
+            <div className="mt-32">
+              <div className="flex flex-col md:flex-row md:items-end justify-between items-center mb-12 border-b border-gray-100 pb-8">
+                <div>
+                  <h2 className="text-sm font-black text-teal-600 uppercase tracking-[0.3em] mb-4">
+                    Visual Stories
+                  </h2>
+                  <h3 className="text-4xl lg:text-5xl font-bold text-gray-900">
+                    Latest <span className="text-teal-600">Book Trailers</span>
+                  </h3>
+                </div>
+                <Link to="/meet-the-winners" className="no-underline">
+                  <button className="text-teal-600 font-bold hover:text-teal-700 transition-all flex items-center gap-2 group">
+                    VIEW ALL TRAILERS
+                    <span className="w-8 h-8 rounded-full border border-teal-100 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all">
+                      →
+                    </span>
                   </button>
                 </Link>
               </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Facebook, Instagram, Twitter, Menu } from "lucide-react";
-import left from "../assets/IMG_0917.PNG";
+import left from "../assets/IMG_2706.JPG";
 import { Link } from "react-router-dom";
 export default function IndieBragFeatures() {
   const features = [
@@ -14,42 +14,57 @@ export default function IndieBragFeatures() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-
+    <div id="features" className="py-24 bg-gray-50 overflow-hidden">
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Left Side - Book Image */}
-          <div className="bg-[#0a2e3e] p-8 rounded-lg shadow-xl">
-            <div className="bg-white p-6 rounded-lg">
-              <Link to="/podcast">
+          <div className="relative group animate-fade-in-up stagger-1">
+            <div className="absolute -inset-4 bg-gradient-to-tr from-[#6B0C22]/20 to-teal-500/20 rounded-2xl blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000"></div>
+            <div className="relative bg-white p-4 rounded-2xl shadow-2xl transform transition duration-700 group-hover:scale-[1.02] group-hover:-rotate-1">
+              <Link to="/podcast" className="block overflow-hidden rounded-xl">
                 <img
                   src={left}
-                  alt="Eat Read Dream Cookbook"
-                  className="w-full rounded shadow-2xl"
+                  alt="Feature Highlight"
+                  className="w-full h-full object-cover transform transition duration-1000 group-hover:scale-110"
                 />
               </Link>
             </div>
           </div>
 
           {/* Right Side - Features */}
-          <div className="bg-gradient-to-br from-[#6B0C22] to-[#8B1538] p-8 lg:p-12 rounded-lg shadow-xl text-white">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-8">Features</h2>
+          <div className="animate-fade-in-up stagger-2">
+            <div className="mb-12">
+              <h2 className="text-sm font-black text-[#6B0C22] uppercase tracking-[0.3em] mb-4">
+                Our Ecosystem
+              </h2>
+              <h3 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                Empowering the <br />
+                <span className="text-[#6B0C22]">Indie Author Voice</span>
+              </h3>
+            </div>
 
-            <div className="space-y-4">
+            <div className="grid gap-4">
               {features.map((feature, index) => (
-                <div key={index}>
-                  <a
-                    href={feature.href}
-                    className="text-lg lg:text-xl hover:text-gray-200 transition block py-2"
-                  >
-                    {feature.label}
-                  </a>
-                  {index < features.length - 1 && (
-                    <div className="border-b border-white/30 mt-2"></div>
-                  )}
-                </div>
+                <Link
+                  key={index}
+                  to={feature.href}
+                  className="group relative flex items-center justify-between p-6 bg-white border border-gray-100 rounded-2xl transition-all duration-300 hover:border-[#6B0C22]/30 hover:shadow-[0_10px_30px_rgba(107,12,34,0.05)] hover:-translate-y-1 no-underline"
+                >
+                  <div className="flex items-center gap-5">
+                    <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-[#6B0C22] group-hover:bg-[#6B0C22] group-hover:text-white transition-colors duration-300">
+                      <span className="font-bold text-lg">{index + 1}</span>
+                    </div>
+                    <span className="text-lg font-bold text-gray-800 tracking-tight group-hover:text-[#6B0C22] transition-colors">
+                      {feature.label}
+                    </span>
+                  </div>
+                  <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 group-hover:text-[#6B0C22] group-hover:border-[#6B0C22]/30 transition-all">
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>

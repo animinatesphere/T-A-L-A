@@ -16,70 +16,65 @@ export default function Navbar() {
   return (
     <>
       {/* Header */}
-      <header className="sticky top-0 bg-[#6B0C22]/95 backdrop-blur-sm border-b border-white/10 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <header className="sticky top-0 bg-[#6B0C22]/80 backdrop-blur-xl border-b border-white/5 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <a
-            className="flex items-center gap-3 text-white no-underline"
+            className="flex items-center gap-4 text-white no-underline group"
             href="/"
           >
-            <img
-              src={logo}
-              alt="logo"
-              className="w-12 h-12 md:w-14 md:h-14 rounded-full shadow-2xl object-cover transform transition duration-500 hover:scale-105 bg-white/10 p-1"
-            />
+            <div className="relative">
+              <div className="absolute -inset-1 bg-white/20 rounded-full blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+              <img
+                src={logo}
+                alt="logo"
+                className="relative w-12 h-12 md:w-16 md:h-16 rounded-full shadow-2xl object-cover transform transition duration-500 group-hover:scale-110 bg-white p-0.5"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl md:text-2xl font-black tracking-tighter leading-none">T.A.L.A.</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Awards 2026</span>
+            </div>
           </a>
 
-          <div className="flex items-center gap-4">
-            {/* Hamburger Button */}
-            <button
-              className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
-              aria-label="Toggle menu"
-              onClick={() => setOpen(!open)}
-            >
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M3 7h18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M3 12h18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M3 17h18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-
+          <div className="flex items-center gap-8">
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-6">
-              <ul className="flex items-center gap-6 m-0 p-0 list-none">
+            <nav className="hidden md:flex items-center gap-8">
+              <ul className="flex items-center gap-8 m-0 p-0 list-none">
                 {links.map((l) => (
                   <li key={l.href}>
                     <a
                       href={l.href}
-                      className="group relative text-white text-[18px] hover:text-white transition no-underline whitespace-nowrap"
+                      className="group relative text-white/80 text-[15px] font-bold hover:text-white transition-all no-underline whitespace-nowrap uppercase tracking-widest active:scale-95 block"
                     >
                       <span className="relative z-10">{l.label}</span>
-                      <span className="absolute left-0 right-0 -bottom-1 h-0.5 bg-gradient-to-r from-yellow-400 to-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-1 bg-white rounded-full opacity-0 group-hover:w-full group-hover:opacity-100 transition-all duration-300" />
                     </a>
                   </li>
                 ))}
               </ul>
             </nav>
+
+            {/* Hamburger Button */}
+            <button
+              className="md:hidden p-3 text-white bg-white/10 hover:bg-white/20 rounded-2xl transition-all active:scale-90"
+              aria-label="Toggle menu"
+              onClick={() => setOpen(!open)}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 8h16M4 16h16"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </header>

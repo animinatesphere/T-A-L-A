@@ -1,8 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tailwindcss";
 
+:root {
+  --primary-wine: #6B0C22;
+  --secondary-wine: #8B1530;
+  --dark-wine: #4a0818;
+}
+
 body {
   font-family: "Inter", sans-serif;
+  @apply bg-gray-50 text-gray-900 antialiased;
 }
 
 .ws {
@@ -11,6 +18,60 @@ body {
 
 .hero {
   background-image: url("./assets/20260107_214402.png");
+  background-attachment: fixed;
+}
 
-  /* opacity: 20%; */
+/* Premium Design Utilities */
+.glass-panel {
+  @apply bg-white/10 backdrop-blur-md border border-white/20;
+}
+
+.glass-dark {
+  @apply bg-black/40 backdrop-blur-xl border border-white/10;
+}
+
+.premium-shadow {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+.wine-gradient {
+  background: linear-gradient(135deg, var(--primary-wine) 0%, var(--dark-wine) 100%);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-wine);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-wine);
 }

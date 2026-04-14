@@ -32,20 +32,23 @@ const BlogListing = () => {
             apikey: SUPABASE_ANON_KEY,
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
-        }
+        },
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+
       const data = await response.json();
       setBlogs(data);
-
       const featured = data.find((blog) => blog.is_featured);
       setFeaturedBlog(featured || data[0]);
     } catch (error) {
-      console.error("Error fetching blogs:", error);
+      console.error("Error fetching blogs:", error.message);
     } finally {
       setLoading(false);
     }
   };
-
   const categories = [
     "all",
     ...new Set(blogs.map((blog) => blog.category).filter(Boolean)),
@@ -120,7 +123,7 @@ const BlogListing = () => {
                       <span className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
                         {new Date(
-                          featuredBlog.published_date
+                          featuredBlog.published_date,
                         ).toLocaleDateString()}
                       </span>
                       <span className="flex items-center gap-1">

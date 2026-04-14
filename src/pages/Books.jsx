@@ -30,6 +30,8 @@ export default function Books() {
   const [genres, setGenres] = useState([]);
   const [years, setYears] = useState([]);
   const [selectedAuthor, setSelectedAuthor] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   // Generate slugs
   const generateSlug = (text) => {
@@ -172,6 +174,7 @@ export default function Books() {
     }
 
     setFilteredBooks(filtered);
+    setCurrentPage(1);
   };
 
   const resetFilters = () => {
@@ -799,52 +802,89 @@ export default function Books() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-            {filteredBooks.map((book) => (
-              <div
-                key={book.id}
-                onClick={() => {
-                  const bookSlug = generateSlug(book.title);
-                  navigate(`/books/${bookSlug}`);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="cursor-pointer group"
-              >
-                <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
-                  <img
-                    src={book.cover_image_url}
-                    alt={book.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => {
-                      e.target.src =
-                        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=";
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6 mb-12">
+              {filteredBooks
+                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .map((book) => (
+                  <div
+                    key={book.id}
+                    onClick={() => {
+                      const bookSlug = generateSlug(book.title);
+                      navigate(`/books/${bookSlug}`);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
-                  />
-                  {book.is_featured && (
-                    <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                      Featured
-                    </div>
-                  )}
-                  {book.year_won && (
-                    <div className="absolute top-2 right-2 bg-[#6B0C22] text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                      {book.year_won}
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                      <p className="font-bold text-sm line-clamp-2 mb-1">
-                        {book.title}
-                      </p>
-                      <p className="text-xs opacity-90">by {book.author}</p>
-                      {book.genre && (
-                        <p className="text-xs opacity-75 mt-1">{book.genre}</p>
+                    className="cursor-pointer group"
+                  >
+                    <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
+                      <img
+                        src={book.cover_image_url}
+                        alt={book.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        onError={(e) => {
+                          e.target.src =
+                            "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=";
+                        }}
+                      />
+                      {book.is_featured && (
+                        <div className="absolute top-3 left-3 bg-yellow-500 text-white px-2.5 py-1 rounded-full text-[10px] font-black shadow-lg">
+                          FEATURED
+                        </div>
                       )}
+                      {book.year_won && (
+                        <div className="absolute top-3 right-3 bg-[#6B0C22] text-white px-2.5 py-1 rounded-full text-[10px] font-black shadow-lg">
+                          {book.year_won}
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                          <p className="font-bold text-sm line-clamp-2 mb-1">
+                            {book.title}
+                          </p>
+                          <p className="text-[10px] opacity-70 uppercase tracking-wider">by {book.author}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {Math.ceil(filteredBooks.length / itemsPerPage) > 1 && (
+              <div className="flex flex-wrap justify-center items-center gap-2 mt-8">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-[#6B0C22] hover:text-[#6B0C22] disabled:opacity-20 transition-all"
+                >
+                  ←
+                </button>
+                {Array.from({ length: Math.ceil(filteredBooks.length / itemsPerPage) }).map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => {
+                      setCurrentPage(i + 1);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className={`w-10 h-10 rounded-full font-bold text-sm transition-all ${
+                      currentPage === i + 1
+                        ? "bg-[#6B0C22] text-white shadow-md"
+                        : "bg-white border border-gray-200 text-gray-600 hover:border-[#6B0C22] hover:text-[#6B0C22]"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(Math.min(Math.ceil(filteredBooks.length / itemsPerPage), currentPage + 1))}
+                  disabled={currentPage === Math.ceil(filteredBooks.length / itemsPerPage)}
+                  className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-[#6B0C22] hover:text-[#6B0C22] disabled:opacity-20 transition-all"
+                >
+                  →
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>
