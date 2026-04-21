@@ -125,13 +125,13 @@ export default function Books() {
   const fetchBooks = async () => {
     try {
       const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/award_winning_books?order=year_won.desc,title.asc`,
+        `${SUPABASE_URL}/rest/v1/award_winning_books?order=created_at.desc,title.asc`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
-        }
+        },
       );
       const data = await response.json();
       setBooks(data);
@@ -161,7 +161,7 @@ export default function Books() {
 
     if (selectedYear !== "all") {
       filtered = filtered.filter(
-        (book) => book.year_won === parseInt(selectedYear)
+        (book) => book.year_won === parseInt(selectedYear),
       );
     }
 
@@ -169,7 +169,7 @@ export default function Books() {
       filtered = filtered.filter(
         (book) =>
           book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          book.author.toLowerCase().includes(searchTerm.toLowerCase())
+          book.author.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
@@ -197,7 +197,7 @@ export default function Books() {
   // Book Detail Page View
   if (selectedBook) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         {/* Back Button Header */}
         {/* <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -212,13 +212,13 @@ export default function Books() {
         </div> */}
 
         {/* Hero Section with Cover */}
-        <div className="bg-gradient-to-br from-[#6B0C22] to-[#4a0818] text-white">
+        <div className="bg-linear-to-br from-[#6B0C22] to-[#4a0818] text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               {/* Book Cover */}
               <div className="flex justify-center md:justify-end">
                 <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
+                  <div className="absolute -inset-1 bg-linear-to-r from-yellow-400 to-yellow-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
                   <img
                     src={selectedBook.cover_image_url}
                     alt={selectedBook.title}
@@ -293,7 +293,7 @@ export default function Books() {
                       <img
                         src={selectedBook.author_image_url}
                         alt={selectedBook.author}
-                        className="w-24 h-24 rounded-full object-cover border-4 border-gray-100 shadow-lg flex-shrink-0"
+                        className="w-24 h-24 rounded-full object-cover border-4 border-gray-100 shadow-lg shrink-0"
                       />
                     )}
                     <div className="flex-1">
@@ -330,7 +330,7 @@ export default function Books() {
                                 href={selectedBook.instagram_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-2.5 rounded-lg transition-all hover:scale-105 shadow-md hover:shadow-lg"
+                                className="inline-flex items-center gap-2 bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-2.5 rounded-lg transition-all hover:scale-105 shadow-md hover:shadow-lg"
                               >
                                 <Instagram className="w-5 h-5" />
                                 <span className="font-semibold">Instagram</span>
@@ -468,7 +468,7 @@ export default function Books() {
   // Author Detail Page View
   if (selectedAuthor) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
         {/* Back Button Header */}
         <div className="bg-white border-b border-gray-200 shadow-sm z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -483,12 +483,12 @@ export default function Books() {
         </div>
 
         {/* Hero Section */}
-        <div className="bg-gradient-to-br from-[#6B0C22] to-[#4a0818] text-white py-20">
+        <div className="bg-linear-to-br from-[#6B0C22] to-[#4a0818] text-white py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row items-center gap-12">
               {/* Author Image */}
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
+                <div className="absolute -inset-1 bg-linear-to-r from-yellow-400 to-yellow-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
                 {selectedAuthor.image ? (
                   <img
                     src={selectedAuthor.image}
@@ -613,7 +613,7 @@ export default function Books() {
                       }}
                       className="cursor-pointer group"
                     >
-                      <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+                      <div className="relative aspect-2/3 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
                         <img
                           src={book.cover_image_url}
                           alt={book.title}
@@ -624,7 +624,7 @@ export default function Books() {
                             {book.year_won}
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
                             <p className="font-bold text-sm line-clamp-2">
                               {book.title}
@@ -676,7 +676,9 @@ export default function Books() {
                   <div className="flex flex-wrap gap-2">
                     {[
                       ...new Set(
-                        selectedAuthor.books.map((b) => b.genre).filter(Boolean)
+                        selectedAuthor.books
+                          .map((b) => b.genre)
+                          .filter(Boolean),
                       ),
                     ].map((genre, idx) => (
                       <span
@@ -700,7 +702,7 @@ export default function Books() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#6B0C22] to-[#4a0818] text-white py-16 md:py-24">
+      <div className="bg-linear-to-br from-[#6B0C22] to-[#4a0818] text-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
@@ -805,7 +807,10 @@ export default function Books() {
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6 mb-12">
               {filteredBooks
-                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                .slice(
+                  (currentPage - 1) * itemsPerPage,
+                  currentPage * itemsPerPage,
+                )
                 .map((book) => (
                   <div
                     key={book.id}
@@ -816,7 +821,7 @@ export default function Books() {
                     }}
                     className="cursor-pointer group"
                   >
-                    <div className="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
+                    <div className="relative aspect-2/3 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
                       <img
                         src={book.cover_image_url}
                         alt={book.title}
@@ -836,12 +841,14 @@ export default function Books() {
                           {book.year_won}
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute inset-0 bg-linear-to-t from-gray-900/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform">
                           <p className="font-bold text-sm line-clamp-2 mb-1">
                             {book.title}
                           </p>
-                          <p className="text-[10px] opacity-70 uppercase tracking-wider">by {book.author}</p>
+                          <p className="text-[10px] opacity-70 uppercase tracking-wider">
+                            by {book.author}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -859,7 +866,9 @@ export default function Books() {
                 >
                   ←
                 </button>
-                {Array.from({ length: Math.ceil(filteredBooks.length / itemsPerPage) }).map((_, i) => (
+                {Array.from({
+                  length: Math.ceil(filteredBooks.length / itemsPerPage),
+                }).map((_, i) => (
                   <button
                     key={i + 1}
                     onClick={() => {
@@ -876,8 +885,18 @@ export default function Books() {
                   </button>
                 ))}
                 <button
-                  onClick={() => setCurrentPage(Math.min(Math.ceil(filteredBooks.length / itemsPerPage), currentPage + 1))}
-                  disabled={currentPage === Math.ceil(filteredBooks.length / itemsPerPage)}
+                  onClick={() =>
+                    setCurrentPage(
+                      Math.min(
+                        Math.ceil(filteredBooks.length / itemsPerPage),
+                        currentPage + 1,
+                      ),
+                    )
+                  }
+                  disabled={
+                    currentPage ===
+                    Math.ceil(filteredBooks.length / itemsPerPage)
+                  }
                   className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-[#6B0C22] hover:text-[#6B0C22] disabled:opacity-20 transition-all"
                 >
                   →

@@ -2,8 +2,8 @@
 @import "tailwindcss";
 
 :root {
-  --primary-wine: #6B0C22;
-  --secondary-wine: #8B1530;
+  --primary-wine: #6b0c22;
+  --secondary-wine: #8b1530;
   --dark-wine: #4a0818;
 }
 
@@ -21,6 +21,24 @@ body {
   background-attachment: fixed;
 }
 
+/* iOS / Mobile fix: `background-attachment: fixed` is poorly supported on iOS Safari
+   which can cause the hero background to display incorrectly. Disable fixed
+   attachment on mobile and iOS to ensure the image displays consistently. */
+@media (max-width: 1024px) {
+  .hero {
+    background-attachment: scroll;
+    background-position: center bottom;
+    background-size: cover;
+    -webkit-background-size: cover;
+  }
+}
+
+@supports (-webkit-overflow-scrolling: touch) {
+  .hero {
+    background-attachment: scroll;
+  }
+}
+
 /* Premium Design Utilities */
 .glass-panel {
   @apply bg-white/10 backdrop-blur-md border border-white/20;
@@ -35,7 +53,11 @@ body {
 }
 
 .wine-gradient {
-  background: linear-gradient(135deg, var(--primary-wine) 0%, var(--dark-wine) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-wine) 0%,
+    var(--dark-wine) 100%
+  );
 }
 
 /* Animations */
@@ -54,9 +76,15 @@ body {
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
+.stagger-1 {
+  animation-delay: 0.1s;
+}
+.stagger-2 {
+  animation-delay: 0.2s;
+}
+.stagger-3 {
+  animation-delay: 0.3s;
+}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

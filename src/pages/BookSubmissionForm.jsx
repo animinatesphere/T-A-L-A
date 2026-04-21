@@ -257,7 +257,7 @@ export default function BookSubmissionForm() {
     const modal = window.FlutterwaveCheckout({
       public_key: FLUTTERWAVE_PUBLIC_KEY,
       tx_ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-      amount: 50,
+      amount: 1,
       currency: "USD",
       payment_options: "card,ussd,banktransfer",
       customer: {

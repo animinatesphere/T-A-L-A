@@ -28,13 +28,13 @@ export default function AwardWinningBooks() {
   const fetchBooks = async () => {
     try {
       const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/award_winning_books?order=display_order.asc,year_won.desc`,
+        `${SUPABASE_URL}/rest/v1/award_winning_books?order=created_at.desc`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
-        }
+        },
       );
       const data = await response.json();
       setBooks(data);
@@ -49,7 +49,7 @@ export default function AwardWinningBooks() {
   const totalPages = Math.ceil(books.length / itemsPerPage);
   const currentBooks = books.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const handlePageChange = (page) => {
@@ -64,7 +64,7 @@ export default function AwardWinningBooks() {
     if (!url) return null;
     const videoId = url.match(
       // eslint-disable-next-line no-useless-escape
-      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/,
     )?.[1];
     return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
   };
@@ -91,18 +91,21 @@ export default function AwardWinningBooks() {
       <div className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
           {/* Header */}
-          <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="max-w-2xl">
+          <div className="mb-16 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="max-w-2xl text-center md:text-left md:flex-1">
               <h2 className="text-sm font-black text-[#6B0C22] uppercase tracking-[0.3em] mb-4">
                 Hall of Fame
               </h2>
-              <h3 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Award-Winning <br />
-                <span className="text-[#6B0C22]">Masterpieces</span>
+              <h3 className="text-[16px] sm:text-[20px] md:text-[24px] lg:text-[28px]  font-bold text-gray-900 leading-tight">
+                Award Winning
+                <span className="text-[#6B0C22] ml-2">Books</span>
               </h3>
             </div>
-            <Link to="/books" className="no-underline">
-              <button className="bg-gray-900 hover:bg-[#6B0C22] text-white px-10 py-4 rounded-full font-bold transition-all shadow-xl hover:-translate-y-1">
+            <Link
+              to="/books"
+              className="no-underline mt-3 md:mt-0 md:ml-6 shrink-0"
+            >
+              <button className="bg-gray-900 hover:bg-[#6B0C22] text-white px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full font-bold transition-all shadow-xl hover:-translate-y-1 mx-auto md:mx-0">
                 VIEW FULL COLLECTION
               </button>
             </Link>
@@ -126,13 +129,13 @@ export default function AwardWinningBooks() {
                     className={`cursor-pointer group animate-fade-in-up`}
                     style={{ animationDelay: `${idx * 0.1}s` }}
                   >
-                    <div className="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.1)] group-hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] transition-all duration-500">
+                    <div className="relative aspect-2/3 rounded-2xl overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.1)] group-hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] transition-all duration-500">
                       <img
                         src={book.cover_image_url}
                         alt={book.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="absolute inset-0 bg-linear-to-t from-gray-900/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                         <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                           <p className="font-bold text-lg leading-tight mb-2">
                             {book.title}
@@ -156,7 +159,9 @@ export default function AwardWinningBooks() {
               {totalPages > 1 && (
                 <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mt-12">
                   <button
-                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    onClick={() =>
+                      handlePageChange(Math.max(1, currentPage - 1))
+                    }
                     disabled={currentPage === 1}
                     className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#6B0C22] hover:text-[#6B0C22] disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-500 transition-all font-bold"
                   >
@@ -176,7 +181,9 @@ export default function AwardWinningBooks() {
                     </button>
                   ))}
                   <button
-                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                    onClick={() =>
+                      handlePageChange(Math.min(totalPages, currentPage + 1))
+                    }
                     disabled={currentPage === totalPages}
                     className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#6B0C22] hover:text-[#6B0C22] disabled:opacity-30 disabled:hover:border-gray-200 disabled:hover:text-gray-500 transition-all font-bold"
                   >
@@ -193,15 +200,16 @@ export default function AwardWinningBooks() {
               <div className="flex flex-col md:flex-row md:items-end justify-between items-center mb-12 border-b border-gray-100 pb-8">
                 <div>
                   <h2 className="text-sm font-black text-teal-600 uppercase tracking-[0.3em] mb-4">
-                    Visual Stories
+                    Authors Interview
                   </h2>
                   <h3 className="text-4xl lg:text-5xl font-bold text-gray-900">
-                    Latest <span className="text-teal-600">Book Trailers</span>
+                    The{" "}
+                    <span className="text-teal-600">Laureate Conversation</span>
                   </h3>
                 </div>
-                <Link to="/meet-the-winners" className="no-underline">
+                <Link to="/podcast" className="no-underline">
                   <button className="text-teal-600 font-bold hover:text-teal-700 transition-all flex items-center gap-2 group">
-                    VIEW ALL TRAILERS
+                    Watch latest interviews
                     <span className="w-8 h-8 rounded-full border border-teal-100 flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all">
                       →
                     </span>

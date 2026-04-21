@@ -16,7 +16,7 @@ export default function Navbar() {
   return (
     <>
       {/* Header */}
-      <header className="sticky top-0 bg-[#6B0C22]/80 backdrop-blur-xl border-b border-white/5 z-50">
+      <header className="sticky top-0 bg-[#6B0C22] backdrop-blur-xl border-b border-white/5 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <a
             className="flex items-center gap-4 text-white no-underline group"
@@ -30,10 +30,7 @@ export default function Navbar() {
                 className="relative w-12 h-12 md:w-16 md:h-16 rounded-full shadow-2xl object-cover transform transition duration-500 group-hover:scale-110 bg-white p-0.5"
               />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-black tracking-tighter leading-none">T.A.L.A.</span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Awards 2026</span>
-            </div>
+            
           </a>
 
           <div className="flex items-center gap-8">
