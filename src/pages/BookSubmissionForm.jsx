@@ -257,7 +257,7 @@ export default function BookSubmissionForm() {
     const modal = window.FlutterwaveCheckout({
       public_key: FLUTTERWAVE_PUBLIC_KEY,
       tx_ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-      amount: 1,
+      amount: 50,
       currency: "USD",
       payment_options: "card,ussd,banktransfer",
       customer: {
@@ -282,7 +282,6 @@ export default function BookSubmissionForm() {
     });
   };
 
-
   const handlePaystackPayment = () => {
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
@@ -300,25 +299,25 @@ export default function BookSubmissionForm() {
     handler.openIframe();
   };
 
-const handlePayment = () => {
-  if (currency === "USD") {
-    handleFlutterwavePayment();
-  } else {
-    handlePaystackPayment();
-  }
-};
-
   // const handlePayment = () => {
-  //   // Comment out payment functions for testing
   //   if (currency === "USD") {
   //     handleFlutterwavePayment();
   //   } else {
   //     handlePaystackPayment();
   //   }
-
-  //   // Directly call saveSubmission with a test reference for testing
-  //   // saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
   // };
+
+  const handlePayment = () => {
+    // Comment out payment functions for testing
+    // if (currency === "USD") {
+    //   handleFlutterwavePayment();
+    // } else {
+    //   handlePaystackPayment();
+    // }
+
+    // Directly call saveSubmission with a test reference for testing
+    saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+  };
 
   // const generateAuthorSlug = (name) => {
   //   return name
@@ -546,7 +545,7 @@ View submission in admin dashboard.
             </p>
           </div>
 
-          <div className="mt-8 bg-gradient-to-r from-[#6B0C22] to-[#4a0818] text-white rounded-xl p-6">
+          <div className="mt-8 bg-linear-to-r from-[#6B0C22] to-[#4a0818] text-white rounded-xl p-6">
             <h3 className="text-xl font-bold mb-3">
               Ready to Submit Your Book?
             </h3>
@@ -1070,7 +1069,7 @@ View submission in admin dashboard.
               </div>
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
                 <div className="text-sm text-blue-900">
                   <p className="font-semibold mb-1">Secure Payment</p>
                   <p>
@@ -1080,7 +1079,7 @@ View submission in admin dashboard.
                 </div>
               </div>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
                 <div className="text-sm text-blue-900">
                   <p className="font-semibold mb-1">Payment Currency Notice</p>
                   <p>
@@ -1095,13 +1094,23 @@ View submission in admin dashboard.
                 </div>
               </div>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
                 <div className="text-sm text-blue-900">
                   <p className="font-semibold mb-1">Note</p>
                   <p>
                     when you submit your book details and payment please make
                     sure you wait until the submission is complete before
                     navigating away from the page.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
+                <div className="text-sm text-blue-900">
+                  <p className="font-semibold mb-1">Note</p>
+                  <p>
+                    if you are paying from U.S , your bank may require you to
+                    approve this international transaction
                   </p>
                 </div>
               </div>
@@ -1154,17 +1163,17 @@ View submission in admin dashboard.
                 </h3>
                 <ul className="text-left text-gray-700 space-y-2">
                   <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                     <span>You'll receive a confirmation email shortly</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                     <span>
                       Our team will review your submission within 2-3 weeks
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                     <span>Your book is now in our awards consideration</span>
                   </li>
                 </ul>
@@ -1208,7 +1217,6 @@ View submission in admin dashboard.
           )}
         </div>
       </div>
-
     </div>
   );
 }
