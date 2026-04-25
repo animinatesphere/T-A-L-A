@@ -23,6 +23,7 @@ import OurJudges from "./pages/OurJudges";
 import Bookme from "./pages/Bookme";
 import AwardWinningBooks from "./pages/AwardWinningBooks";
 import ScrollToTop from "./component/ScrollToTop";
+import DonationPage from "./pages/DonationPage";
 
 const Routee = () => {
   return (
@@ -50,6 +51,7 @@ const Routee = () => {
         <Route path="/blog/:slug" element={<BlogDetail />} />
         <Route path="/book-desk" element={<BlogListing />} />
         <Route path="/book" element={<AwardWinningBooks />} />
+        <Route path="/donate" element={<DonationPage />} />
         <Route path="/book/:author" element={<AwardWinningBooks />} />
 
         <Route path="/books/:slug" element={<Books />} />
