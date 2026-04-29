@@ -9,9 +9,8 @@ import {
 } from "lucide-react";
 
 // Replace with your Supabase URL and anon key
-const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
+const API_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000";
 
 export default function TALAPodcastPage() {
   const [podcasts, setPodcasts] = useState([]);
@@ -27,22 +26,20 @@ export default function TALAPodcastPage() {
 
   const fetchPodcasts = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/podcasts?order=episode_number.desc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setPodcasts(data);
+      const response = await fetch(`${API_URL}/podcasts`);
+      const result = await response.json();
+      setPodcasts(result.data);
     } catch (error) {
       console.error("Error fetching podcasts:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${BASE_URL}${url}`;
   };
 
   const formatDate = (dateString) => {
@@ -91,7 +88,7 @@ export default function TALAPodcastPage() {
                 <div className="aspect-square md:aspect-auto relative">
                   {podcasts[0].cover_image_url ? (
                     <img
-                      src={podcasts[0].cover_image_url}
+                      src={getImageUrl(podcasts[0].cover_image_url)}
                       alt={podcasts[0].title}
                       className="w-full h-full object-cover"
                     />
@@ -199,7 +196,7 @@ export default function TALAPodcastPage() {
                   <div className="aspect-video relative overflow-hidden bg-gray-200">
                     {podcast.cover_image_url ? (
                       <img
-                        src={podcast.cover_image_url}
+                        src={getImageUrl(podcast.cover_image_url)}
                         alt={podcast.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />

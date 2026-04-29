@@ -9,9 +9,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom"; // Make sure to install react-router-dom
 
-const SUPABASE_URL = "https://pnfebkenxtqfzfbewyiy.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuZmVia2VueHRxZnpmYmV3eWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDczMjUsImV4cCI6MjA4MTk4MzMyNX0.xGaevgclohcy1Y8w9J83oZ0cQB2rN5WWEJwrDIDwk70";
+const API_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000";
 const BlogListing = () => {
   const [blogs, setBlogs] = useState([]);
   const [featuredBlog, setFeaturedBlog] = useState(null);
@@ -25,21 +24,14 @@ const BlogListing = () => {
 
   const fetchBlogs = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/blog_posts?is_published=eq.true&order=published_date.desc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        },
-      );
+      const response = await fetch(`${API_URL}/blogs`);
 
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const result = await response.json();
+      const data = result.data;
       setBlogs(data);
       const featured = data.find((blog) => blog.is_featured);
       setFeaturedBlog(featured || data[0]);
@@ -48,6 +40,12 @@ const BlogListing = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${BASE_URL}${url}`;
   };
   const categories = [
     "all",
@@ -102,7 +100,7 @@ const BlogListing = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="aspect-video md:aspect-auto bg-gray-200 overflow-hidden">
                     <img
-                      src={featuredBlog.featured_image_url}
+                      src={getImageUrl(featuredBlog.featured_image_url || featuredBlog.featured_image)}
                       alt={featuredBlog.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -187,7 +185,7 @@ const BlogListing = () => {
               >
                 <div className="aspect-video bg-gray-200 overflow-hidden">
                   <img
-                    src={blog.featured_image_url}
+                    src={getImageUrl(blog.featured_image_url || blog.featured_image)}
                     alt={blog.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />

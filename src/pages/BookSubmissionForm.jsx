@@ -10,9 +10,7 @@ import {
   File,
 } from "lucide-react";
 
-const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
+const API_URL = "http://localhost:5000/api";
 
 const PAYSTACK_PUBLIC_KEY = "pk_live_6560af0a81f50cfdd244e08bf2e54169a3e434e9";
 // Add Flutterwave public key at the top with other constants
@@ -299,25 +297,25 @@ export default function BookSubmissionForm() {
     handler.openIframe();
   };
 
-  const handlePayment = () => {
-    if (currency === "USD") {
-      handleFlutterwavePayment();
-    } else {
-      handlePaystackPayment();
-    }
-  };
-
   // const handlePayment = () => {
-  //   // Comment out payment functions for testing
-  //   // if (currency === "USD") {
-  //   //   handleFlutterwavePayment();
-  //   // } else {
-  //   //   handlePaystackPayment();
-  //   // }
-
-  //   // Directly call saveSubmission with a test reference for testing
-  //   // saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+  //   if (currency === "USD") {
+  //     handleFlutterwavePayment();
+  //   } else {
+  //     handlePaystackPayment();
+  //   }
   // };
+
+  const handlePayment = () => {
+    // Comment out payment functions for testing
+    // if (currency === "USD") {
+    //   handleFlutterwavePayment();
+    // } else {
+    //   handlePaystackPayment();
+    // }
+
+    // Directly call saveSubmission with a test reference for testing
+    saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+  };
 
   // const generateAuthorSlug = (name) => {
   //   return name
@@ -401,85 +399,42 @@ View submission in admin dashboard.
       console.error("Error sending email notification:", error);
     }
   };
+
   const saveSubmission = async (paymentReference) => {
     setLoading(true);
 
     try {
-      const timestamp = Date.now();
-      let fileUrls = {
-        cover_image_url: null,
-        author_image_url: null,
-        about_book_pdf_url: null,
-        ebook_url: null,
-      };
+      const submissionData = new FormData();
 
-      if (files.book_cover) {
-        fileUrls.cover_image_url = await uploadFile(
-          files.book_cover,
-          `${timestamp}_cover_${files.book_cover.name}`,
-          "book-covers",
-        );
-        console.log("Book cover uploaded:", fileUrls.cover_image_url);
-      }
+      // Add all form fields
+      Object.keys(formData).forEach((key) => {
+        submissionData.append(key, formData[key]);
+      });
 
-      if (files.author_image) {
-        fileUrls.author_image_url = await uploadFile(
-          files.author_image,
-          `${timestamp}_author_${files.author_image.name}`,
-          "author-images",
-        );
-        console.log("Author image uploaded:", fileUrls.author_image_url);
-      }
+      // Add files
+      if (files.book_cover) submissionData.append("book_cover", files.book_cover);
+      if (files.author_image)
+        submissionData.append("author_image", files.author_image);
+      if (files.about_book_pdf)
+        submissionData.append("about_book_pdf", files.about_book_pdf);
+      if (files.ebook) submissionData.append("ebook", files.ebook);
 
-      if (files.about_book_pdf) {
-        fileUrls.about_book_pdf_url = await uploadFile(
-          files.about_book_pdf,
-          `${timestamp}_about_${files.about_book_pdf.name}`,
-          "book-documents",
-        );
-        console.log("About book PDF uploaded:", fileUrls.about_book_pdf_url);
-      }
+      // Add payment info
+      submissionData.append("payment_status", "completed");
+      submissionData.append("payment_amount", amount);
+      submissionData.append("payment_currency", currency);
+      submissionData.append("payment_reference", paymentReference);
+      submissionData.append("submission_status", "pending");
 
-      if (files.ebook) {
-        fileUrls.ebook_url = await uploadFile(
-          files.ebook,
-          `${timestamp}_ebook_${files.ebook.name}`,
-          "book-documents",
-        );
-        console.log("eBook uploaded:", fileUrls.ebook_url);
-      }
-
-      console.log("All file URLs:", fileUrls);
-
-      // Save to book_submissions table only
-      // Admin will approve and add to award_winning_books from dashboard
-      const submissionData = {
-        ...formData,
-        ...fileUrls,
-        payment_status: "completed",
-        payment_amount: amount,
-        payment_currency: currency,
-        payment_reference: paymentReference,
-        submission_status: "pending",
-      };
-
-      const submissionResponse = await fetch(
-        `${SUPABASE_URL}/rest/v1/book_submissions`,
-        {
-          method: "POST",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            Prefer: "return=minimal",
-          },
-          body: JSON.stringify(submissionData),
-        },
-      );
+      const submissionResponse = await fetch(`${API_URL}/submissions`, {
+        method: "POST",
+        body: submissionData,
+      });
 
       if (submissionResponse.ok) {
+        const result = await submissionResponse.json();
         // Send email notification
-        await sendEmailNotification(submissionData, fileUrls);
+        await sendEmailNotification(result.data, {});
 
         setSubmitStatus("success");
         setStep(4);

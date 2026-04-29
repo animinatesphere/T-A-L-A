@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Award } from "lucide-react";
 
-const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
+const API_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000";
 
 export default function OurJudges() {
   const [judges, setJudges] = useState([]);
@@ -16,22 +15,20 @@ export default function OurJudges() {
 
   const fetchJudges = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/judges?is_active=eq.true&order=display_order.asc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setJudges(data);
+      const response = await fetch(`${API_URL}/judges`);
+      const result = await response.json();
+      setJudges(result.data);
     } catch (error) {
       console.error("Error fetching judges:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${BASE_URL}${url}`;
   };
 
   return (
@@ -89,7 +86,7 @@ export default function OurJudges() {
                     <div className="aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden shadow-lg">
                       {judge.image_url ? (
                         <img
-                          src={judge.image_url}
+                          src={getImageUrl(judge.image_url)}
                           alt={judge.name}
                           className="w-full h-full object-cover"
                         />

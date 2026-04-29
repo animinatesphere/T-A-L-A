@@ -11,9 +11,8 @@ import {
   Linkedin,
 } from "lucide-react";
 
-const SUPABASE_URL = "https://pnfebkenxtqfzfbewyiy.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuZmVia2VueHRxZnpmYmV3eWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDczMjUsImV4cCI6MjA4MTk4MzMyNX0.xGaevgclohcy1Y8w9J83oZ0cQB2rN5WWEJwrDIDwk70";
+const API_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000";
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -30,36 +29,14 @@ const BlogDetail = () => {
   const fetchBlog = async () => {
     try {
       // Fetch main blog post
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/blog_posts?slug=eq.${slug}&is_published=eq.true`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const data = await response.json();
+      const response = await fetch(`${API_URL}/blogs/${slug}`);
+      const result = await response.json();
 
-      if (data && data.length > 0) {
-        setBlog(data[0]);
-
-        // Update view count
-        await fetch(`${SUPABASE_URL}/rest/v1/blog_posts?id=eq.${data[0].id}`, {
-          method: "PATCH",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            Prefer: "return=minimal",
-          },
-          body: JSON.stringify({
-            views_count: (data[0].views_count || 0) + 1,
-          }),
-        });
+      if (result.success && result.data) {
+        setBlog(result.data);
 
         // Fetch related posts
-        fetchRelatedPosts(data[0].category, data[0].id);
+        fetchRelatedPosts(result.data.category, result.data._id);
       }
     } catch (error) {
       console.error("Error fetching blog:", error);
@@ -68,19 +45,22 @@ const BlogDetail = () => {
     }
   };
 
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${BASE_URL}${url}`;
+  };
+
   const fetchRelatedPosts = async (category, currentId) => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/blog_posts?is_published=eq.true&category=eq.${category}&id=neq.${currentId}&limit=3&order=published_date.desc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setRelatedPosts(data);
+      const response = await fetch(`${API_URL}/blogs`);
+      const result = await response.json();
+      if (result.success) {
+        const filtered = result.data
+          .filter((p) => p.category === category && p._id !== currentId)
+          .slice(0, 3);
+        setRelatedPosts(filtered);
+      }
     } catch (error) {
       console.error("Error fetching related posts:", error);
     }
@@ -195,10 +175,9 @@ const BlogDetail = () => {
         </div>
       </div>
 
-      {/* Featured Image */}
       <div className="aspect-[21/9] max-h-[500px] bg-gray-200 overflow-hidden">
         <img
-          src={blog.featured_image_url}
+          src={getImageUrl(blog.featured_image_url || blog.featured_image)}
           alt={blog.title}
           className="w-full h-full object-cover"
         />
@@ -227,7 +206,7 @@ const BlogDetail = () => {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">
-                  {blog.author_name}
+                  {blog.author_name || blog.author}
                 </p>
                 <p className="text-sm">Author</p>
               </div>
@@ -322,7 +301,7 @@ const BlogDetail = () => {
                   >
                     <div className="aspect-video bg-gray-200 overflow-hidden">
                       <img
-                        src={post.featured_image_url}
+                        src={getImageUrl(post.featured_image_url || post.featured_image)}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

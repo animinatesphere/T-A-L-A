@@ -11,9 +11,8 @@ import {
   Twitter,
 } from "lucide-react";
 
-const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
+const API_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000";
 
 export default function Books() {
   const navigate = useNavigate();
@@ -124,16 +123,9 @@ export default function Books() {
 
   const fetchBooks = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/award_winning_books?order=created_at.desc,title.asc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        },
-      );
-      const data = await response.json();
+      const response = await fetch(`${API_URL}/award-books`);
+      const result = await response.json();
+      const data = result.data;
       setBooks(data);
 
       const uniqueGenres = [
@@ -150,6 +142,12 @@ export default function Books() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${BASE_URL}${url}`;
   };
 
   const filterBooks = () => {
@@ -220,7 +218,7 @@ export default function Books() {
                 <div className="relative group">
                   <div className="absolute -inset-1 bg-linear-to-r from-yellow-400 to-yellow-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
                   <img
-                    src={selectedBook.cover_image_url}
+                    src={getImageUrl(selectedBook.cover_image_url)}
                     alt={selectedBook.title}
                     className="relative w-full max-w-sm rounded-xl shadow-2xl transform group-hover:scale-105 transition duration-500"
                   />
@@ -291,7 +289,7 @@ export default function Books() {
                   <div className="flex items-start gap-6">
                     {selectedBook.author_image_url && (
                       <img
-                        src={selectedBook.author_image_url}
+                        src={getImageUrl(selectedBook.author_image_url)}
                         alt={selectedBook.author}
                         className="w-24 h-24 rounded-full object-cover border-4 border-gray-100 shadow-lg shrink-0"
                       />
@@ -491,7 +489,7 @@ export default function Books() {
                 <div className="absolute -inset-1 bg-linear-to-r from-yellow-400 to-yellow-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
                 {selectedAuthor.image ? (
                   <img
-                    src={selectedAuthor.image}
+                    src={getImageUrl(selectedAuthor.image)}
                     alt={selectedAuthor.name}
                     className="relative w-64 h-64 rounded-full object-cover border-8 border-white/20 shadow-2xl"
                   />
@@ -615,7 +613,7 @@ export default function Books() {
                     >
                       <div className="relative aspect-2/3 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
                         <img
-                          src={book.cover_image_url}
+                          src={getImageUrl(book.cover_image_url)}
                           alt={book.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />

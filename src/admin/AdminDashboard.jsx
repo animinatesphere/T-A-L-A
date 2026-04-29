@@ -18,12 +18,8 @@ import {
   File, // ADD THIS LINE
 } from "lucide-react";
 
-const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
-const SUPABASE_URL2 = "https://pnfebkenxtqfzfbewyiy.supabase.co";
-const SUPABASE_ANON_KEY2 =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuZmVia2VueHRxZnpmYmV3eWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0MDczMjUsImV4cCI6MjA4MTk4MzMyNX0.xGaevgclohcy1Y8w9J83oZ0cQB2rN5WWEJwrDIDwk70";
+const API_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
@@ -34,6 +30,9 @@ export default function AdminDashboard() {
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const [loginError, setLoginError] = useState("");
 
   // Podcast modal states
   const [isPodcastModalOpen, setIsPodcastModalOpen] = useState(false);
@@ -129,53 +128,80 @@ export default function AdminDashboard() {
 
   const fetchJudges = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/judges?order=display_order.asc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setJudges(data);
+      const response = await fetch(`${API_URL}/judges`);
+      const result = await response.json();
+      setJudges(result.data);
     } catch (error) {
       console.error("Error fetching judges:", error);
     }
   };
   const fetchBlogs = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL2}/rest/v1/blog_posts?order=created_at.desc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY2,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setBlogs(data);
+      const response = await fetch(`${API_URL}/blogs`);
+      const result = await response.json();
+      setBlogs(result.data);
     } catch (error) {
       console.error("Error fetching blogs:", error);
     }
   };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${API_URL}/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginData),
+      });
+      const result = await response.json();
+      if (result.success) {
+        localStorage.setItem("tala_admin_token", result.token);
+        setIsAuthenticated(true);
+      } else {
+        setLoginError(result.error);
+      }
+    } catch (error) {
+      setLoginError("Login failed. Please try again.");
+    }
+  };
+
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("tala_admin_token");
+    return {
+      Authorization: `Bearer ${token}`,
+    };
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${BASE_URL}${url}`;
+  };
   // Add to existing useEffect
   useEffect(() => {
+    const token = localStorage.getItem("tala_admin_token");
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
     fetchSubmissions();
     fetchPodcasts();
-    fetchAwardBooks(); // Add this line
-    fetchJudges(); // ADD THIS LINE
+    fetchAwardBooks();
+    fetchJudges();
     fetchBlogs();
+
     const interval = setInterval(() => {
       fetchSubmissions();
-      fetchAwardBooks(); // Add this line
-      fetchJudges(); // ADD THIS LINE
+      fetchAwardBooks();
+      fetchJudges();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isAuthenticated]);
 
   // Add this function after updateSubmissionStatus
   const approveAndAddToAwards = async (submission) => {
@@ -189,22 +215,16 @@ export default function AdminDashboard() {
 
     try {
       // 1. Update submission status to approved
-      const updateResponse = await fetch(
-        `${SUPABASE_URL}/rest/v1/book_submissions?id=eq.${submission.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            Prefer: "return=minimal",
-          },
-          body: JSON.stringify({
-            submission_status: "approved",
-            updated_at: new Date().toISOString(),
-          }),
-        }
-      );
+      const updateResponse = await fetch(`${API_URL}/submissions/${submission._id}`, {
+        method: "PATCH",
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          submission_status: "approved",
+        }),
+      });
 
       if (!updateResponse.ok) {
         throw new Error("Failed to update submission status");
@@ -258,19 +278,14 @@ export default function AdminDashboard() {
         display_order: 999,
       };
 
-      const awardResponse = await fetch(
-        `${SUPABASE_URL}/rest/v1/award_winning_books`,
-        {
-          method: "POST",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            Prefer: "return=minimal",
-          },
-          body: JSON.stringify(awardBookData),
-        }
-      );
+      const awardResponse = await fetch(`${API_URL}/award-books`, {
+        method: "POST",
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(awardBookData),
+      });
 
       if (awardResponse.ok) {
         alert("✅ Submission approved and added to Award-Winning Books!");
@@ -405,56 +420,38 @@ export default function AdminDashboard() {
   const handleBlogSubmit = async () => {
     setBlogLoading(true);
 
-    let featuredImageUrl = blogFormData.featured_image_url;
+    const formData = new FormData();
+    Object.keys(blogFormData).forEach((key) => {
+      formData.append(key, blogFormData[key]);
+    });
 
     if (blogImageFile) {
-      featuredImageUrl = await uploadBlogImage(blogImageFile);
+      formData.append("image", blogImageFile);
     }
 
-    // Auto-generate slug if empty
-    const slug = blogFormData.slug || generateSlug(blogFormData.title);
-
-    const blogData = {
-      ...blogFormData,
-      slug,
-      featured_image_url: featuredImageUrl,
-      read_time_minutes: parseInt(blogFormData.read_time_minutes),
-      published_date: blogFormData.is_published
-        ? new Date(blogFormData.published_date).toISOString()
-        : null,
-      updated_at: new Date().toISOString(),
-    };
-
     try {
+      let response;
       if (editingBlog) {
-        await fetch(
-          `${SUPABASE_URL2}/rest/v1/blog_posts?id=eq.${editingBlog.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              apikey: SUPABASE_ANON_KEY2,
-              Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
-              "Content-Type": "application/json",
-              Prefer: "return=minimal",
-            },
-            body: JSON.stringify(blogData),
-          }
-        );
-      } else {
-        await fetch(`${SUPABASE_URL2}/rest/v1/blog_posts`, {
-          method: "POST",
+        response = await fetch(`${API_URL}/blogs/${editingBlog._id}`, {
+          method: "PATCH",
           headers: {
-            apikey: SUPABASE_ANON_KEY2,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
+            ...getAuthHeaders(),
             "Content-Type": "application/json",
-            Prefer: "return=minimal",
           },
-          body: JSON.stringify(blogData),
+          body: JSON.stringify(blogFormData),
+        });
+      } else {
+        response = await fetch(`${API_URL}/blogs`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: formData,
         });
       }
 
-      fetchBlogs();
-      closeBlogModal();
+      if (response.ok) {
+        fetchBlogs();
+        closeBlogModal();
+      }
     } catch (error) {
       console.error("Error saving blog:", error);
       alert("Error saving blog post. Please try again.");
@@ -466,12 +463,9 @@ export default function AdminDashboard() {
   const deleteBlog = async (id) => {
     if (window.confirm("Are you sure you want to delete this blog post?")) {
       try {
-        await fetch(`${SUPABASE_URL2}/rest/v1/blog_posts?id=eq.${id}`, {
+        await fetch(`${API_URL}/blogs/${id}`, {
           method: "DELETE",
-          headers: {
-            apikey: SUPABASE_ANON_KEY2,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
-          },
+          headers: getAuthHeaders(),
         });
         fetchBlogs();
       } catch (error) {
@@ -482,17 +476,9 @@ export default function AdminDashboard() {
   // Add this new fetch function
   const fetchAwardBooks = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/award_winning_books?order=display_order.asc,year_won.desc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setAwardBooks(data);
+      const response = await fetch(`${API_URL}/award-books`);
+      const result = await response.json();
+      setAwardBooks(result.data);
     } catch (error) {
       console.error("Error fetching award books:", error);
     }
@@ -511,17 +497,11 @@ export default function AdminDashboard() {
 
   const fetchSubmissions = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/book_submissions?order=created_at.desc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setSubmissions(data);
+      const response = await fetch(`${API_URL}/submissions`, {
+        headers: getAuthHeaders(),
+      });
+      const result = await response.json();
+      setSubmissions(result.data);
     } catch (error) {
       console.error("Error fetching submissions:", error);
     } finally {
@@ -531,17 +511,9 @@ export default function AdminDashboard() {
 
   const fetchPodcasts = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/podcasts?order=episode_number.desc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setPodcasts(data);
+      const response = await fetch(`${API_URL}/podcasts`);
+      const result = await response.json();
+      setPodcasts(result.data);
     } catch (error) {
       console.error("Error fetching podcasts:", error);
     }
@@ -549,18 +521,15 @@ export default function AdminDashboard() {
 
   const updateSubmissionStatus = async (id, status, notes = "") => {
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/book_submissions?id=eq.${id}`, {
+      await fetch(`${API_URL}/submissions/${id}`, {
         method: "PATCH",
         headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          ...getAuthHeaders(),
           "Content-Type": "application/json",
-          Prefer: "return=minimal",
         },
         body: JSON.stringify({
           submission_status: status,
           admin_notes: notes,
-          updated_at: new Date().toISOString(),
         }),
       });
       fetchSubmissions();
@@ -637,50 +606,41 @@ export default function AdminDashboard() {
     }
     return null;
   };
-
   const handleJudgeSubmit = async () => {
     setJudgeLoading(true);
 
-    let imageUrl = judgeFormData.image_url;
+    const formData = new FormData();
+    Object.keys(judgeFormData).forEach((key) => {
+      formData.append(key, judgeFormData[key]);
+    });
 
     if (judgeImageFile) {
-      imageUrl = await uploadJudgeImage(judgeImageFile);
+      formData.append("image", judgeImageFile);
     }
 
-    const judgeData = {
-      ...judgeFormData,
-      image_url: imageUrl,
-      display_order: parseInt(judgeFormData.display_order),
-      updated_at: new Date().toISOString(),
-    };
-
     try {
+      let response;
       if (editingJudge) {
-        await fetch(`${SUPABASE_URL}/rest/v1/judges?id=eq.${editingJudge.id}`, {
+        response = await fetch(`${API_URL}/judges/${editingJudge._id}`, {
           method: "PATCH",
           headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            ...getAuthHeaders(),
             "Content-Type": "application/json",
-            Prefer: "return=minimal",
           },
-          body: JSON.stringify(judgeData),
+          body: JSON.stringify(judgeFormData),
         });
       } else {
-        await fetch(`${SUPABASE_URL}/rest/v1/judges`, {
+        response = await fetch(`${API_URL}/judges`, {
           method: "POST",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            Prefer: "return=minimal",
-          },
-          body: JSON.stringify(judgeData),
+          headers: getAuthHeaders(),
+          body: formData,
         });
       }
 
-      fetchJudges();
-      closeJudgeModal();
+      if (response.ok) {
+        fetchJudges();
+        closeJudgeModal();
+      }
     } catch (error) {
       console.error("Error saving judge:", error);
       alert("Error saving judge. Please try again.");
@@ -692,12 +652,9 @@ export default function AdminDashboard() {
   const deleteJudge = async (id) => {
     if (window.confirm("Are you sure you want to delete this judge?")) {
       try {
-        await fetch(`${SUPABASE_URL}/rest/v1/judges?id=eq.${id}`, {
+        await fetch(`${API_URL}/judges/${id}`, {
           method: "DELETE",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
+          headers: getAuthHeaders(),
         });
         fetchJudges();
       } catch (error) {
@@ -705,15 +662,13 @@ export default function AdminDashboard() {
       }
     }
   };
+
   const deleteSubmission = async (id) => {
     if (window.confirm("Are you sure you want to delete this submission?")) {
       try {
-        await fetch(`${SUPABASE_URL}/rest/v1/book_submissions?id=eq.${id}`, {
+        await fetch(`${API_URL}/submissions/${id}`, {
           method: "DELETE",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
+          headers: getAuthHeaders(),
         });
         fetchSubmissions();
       } catch (error) {
@@ -721,6 +676,7 @@ export default function AdminDashboard() {
       }
     }
   };
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -808,54 +764,60 @@ export default function AdminDashboard() {
   const handlePodcastSubmit = async () => {
     setPodcastLoading(true);
 
-    let coverImageUrl = podcastFormData.cover_image_url;
+    const formData = new FormData();
+    Object.keys(podcastFormData).forEach((key) => {
+      formData.append(key, podcastFormData[key]);
+    });
 
     if (podcastImageFile) {
-      coverImageUrl = await uploadPodcastImage(podcastImageFile);
+      formData.append("cover_image", podcastImageFile);
     }
 
-    const podcastData = {
-      ...podcastFormData,
-      cover_image_url: coverImageUrl,
-      episode_number: parseInt(podcastFormData.episode_number),
-    };
-
     try {
+      let response;
       if (editingPodcast) {
-        await fetch(
-          `${SUPABASE_URL}/rest/v1/podcasts?id=eq.${editingPodcast.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              apikey: SUPABASE_ANON_KEY,
-              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-              "Content-Type": "application/json",
-              Prefer: "return=minimal",
-            },
-            body: JSON.stringify(podcastData),
-          }
-        );
-      } else {
-        await fetch(`${SUPABASE_URL}/rest/v1/podcasts`, {
-          method: "POST",
+        response = await fetch(`${API_URL}/podcasts/${editingPodcast._id}`, {
+          method: "PATCH",
           headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            ...getAuthHeaders(),
             "Content-Type": "application/json",
-            Prefer: "return=minimal",
           },
-          body: JSON.stringify(podcastData),
+          body: JSON.stringify(podcastFormData),
+        });
+      } else {
+        response = await fetch(`${API_URL}/podcasts`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: formData,
         });
       }
 
-      fetchPodcasts();
-      closePodcastModal();
+      if (response.ok) {
+        fetchPodcasts();
+        closePodcastModal();
+      }
     } catch (error) {
       console.error("Error saving podcast:", error);
+      alert("Error saving podcast. Please try again.");
     } finally {
       setPodcastLoading(false);
     }
   };
+
+  const deletePodcast = async (id) => {
+    if (window.confirm("Are you sure you want to delete this podcast episode?")) {
+      try {
+        await fetch(`${API_URL}/podcasts/${id}`, {
+          method: "DELETE",
+          headers: getAuthHeaders(),
+        });
+        fetchPodcasts();
+      } catch (error) {
+        console.error("Error deleting podcast:", error);
+      }
+    }
+  };
+
   const openBookModal = (book = null) => {
     if (book) {
       setEditingBook(book);
@@ -931,50 +893,38 @@ export default function AdminDashboard() {
   const handleBookSubmit = async () => {
     setBookLoading(true);
 
-    let coverImageUrl = bookFormData.cover_image_url;
+    const formData = new FormData();
+    Object.keys(bookFormData).forEach((key) => {
+      formData.append(key, bookFormData[key]);
+    });
 
     if (bookImageFile) {
-      coverImageUrl = await uploadBookImage(bookImageFile);
+      formData.append("cover_image", bookImageFile);
     }
 
-    const bookData = {
-      ...bookFormData,
-      cover_image_url: coverImageUrl,
-      year_won: parseInt(bookFormData.year_won),
-      display_order: parseInt(bookFormData.display_order),
-      updated_at: new Date().toISOString(),
-    };
-
     try {
+      let response;
       if (editingBook) {
-        await fetch(
-          `${SUPABASE_URL}/rest/v1/award_winning_books?id=eq.${editingBook.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              apikey: SUPABASE_ANON_KEY,
-              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-              "Content-Type": "application/json",
-              Prefer: "return=minimal",
-            },
-            body: JSON.stringify(bookData),
-          }
-        );
-      } else {
-        await fetch(`${SUPABASE_URL}/rest/v1/award_winning_books`, {
-          method: "POST",
+        response = await fetch(`${API_URL}/award-books/${editingBook._id}`, {
+          method: "PATCH",
           headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            ...getAuthHeaders(),
             "Content-Type": "application/json",
-            Prefer: "return=minimal",
           },
-          body: JSON.stringify(bookData),
+          body: JSON.stringify(bookFormData),
+        });
+      } else {
+        response = await fetch(`${API_URL}/award-books`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: formData,
         });
       }
 
-      fetchAwardBooks();
-      closeBookModal();
+      if (response.ok) {
+        fetchAwardBooks();
+        closeBookModal();
+      }
     } catch (error) {
       console.error("Error saving book:", error);
       alert("Error saving book. Please try again.");
@@ -986,12 +936,9 @@ export default function AdminDashboard() {
   const deleteBook = async (id) => {
     if (window.confirm("Are you sure you want to delete this book?")) {
       try {
-        await fetch(`${SUPABASE_URL}/rest/v1/award_winning_books?id=eq.${id}`, {
+        await fetch(`${API_URL}/award-books/${id}`, {
           method: "DELETE",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
+          headers: getAuthHeaders(),
         });
         fetchAwardBooks();
       } catch (error) {
@@ -1000,22 +947,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const deletePodcast = async (id) => {
-    if (window.confirm("Are you sure you want to delete this podcast?")) {
-      try {
-        await fetch(`${SUPABASE_URL}/rest/v1/podcasts?id=eq.${id}`, {
-          method: "DELETE",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        });
-        fetchPodcasts();
-      } catch (error) {
-        console.error("Error deleting podcast:", error);
-      }
-    }
-  };
+
 
   const filteredSubmissions = submissions.filter((sub) => {
     if (filter === "all") return true;
@@ -1025,6 +957,54 @@ export default function AdminDashboard() {
   const pendingCount = submissions.filter(
     (s) => s.submission_status === "pending"
   ).length;
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-[#6B0C22] rounded-full flex items-center justify-center mx-auto mb-4">
+              <Award className="w-12 h-12 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
+            <p className="text-gray-600">Enter your credentials to access the dashboard</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <input
+                type="text"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                value={loginData.username}
+                onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                type="password"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
+                value={loginData.password}
+                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+              />
+            </div>
+
+            {loginError && <p className="text-red-600 text-sm">{loginError}</p>}
+
+            <button
+              type="submit"
+              className="w-full bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] transition-colors"
+            >
+              Log In
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
@@ -1338,7 +1318,7 @@ export default function AdminDashboard() {
                               <Eye className="w-5 h-5" />
                             </button>
                             <button
-                              onClick={() => deleteSubmission(submission.id)}
+                              onClick={() => deleteSubmission(submission._id)}
                               className="p-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-110"
                               title="Delete"
                             >
@@ -1348,14 +1328,13 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Quick Actions */}
-                        {/* Quick Actions */}
                         <div className="flex gap-2 flex-wrap">
                           {submission.submission_status === "pending" && (
                             <>
                               <button
                                 onClick={() =>
                                   updateSubmissionStatus(
-                                    submission.id,
+                                    submission._id,
                                     "under_review"
                                   )
                                 }
@@ -1374,7 +1353,7 @@ export default function AdminDashboard() {
                               <button
                                 onClick={() =>
                                   updateSubmissionStatus(
-                                    submission.id,
+                                    submission._id,
                                     "rejected"
                                   )
                                 }
@@ -1423,7 +1402,7 @@ export default function AdminDashboard() {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {podcasts.map((podcast) => (
                       <div
-                        key={podcast.id}
+                        key={podcast._id}
                         className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
                       >
                         <div className="aspect-video bg-gray-200 relative">
@@ -1461,7 +1440,7 @@ export default function AdminDashboard() {
                               Edit
                             </button>
                             <button
-                              onClick={() => deletePodcast(podcast.id)}
+                              onClick={() => deletePodcast(podcast._id)}
                               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -1474,7 +1453,6 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
-            {/* // In the "books" tab section, update the book card display: */}
             {activeTab === "books" && (
               <div>
                 <div className="flex justify-between items-center mb-6">
@@ -1502,7 +1480,7 @@ export default function AdminDashboard() {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {awardBooks.map((book) => (
                       <div
-                        key={book.id}
+                        key={book._id}
                         className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
                       >
                         <div className="aspect-[3/4] bg-gray-200 relative">
@@ -1537,7 +1515,7 @@ export default function AdminDashboard() {
                             {book.description}
                           </p>
 
-                          {/* ADD THIS: Download buttons for files */}
+                          {/* Download buttons for files */}
                           {(book.about_book_pdf_url || book.ebook_url) && (
                             <div className="mb-3 space-y-2">
                               {book.about_book_pdf_url && (
@@ -1576,7 +1554,7 @@ export default function AdminDashboard() {
                               Edit
                             </button>
                             <button
-                              onClick={() => deleteBook(book.id)}
+                              onClick={() => deleteBook(book._id)}
                               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -1615,7 +1593,7 @@ export default function AdminDashboard() {
                   <div className="space-y-4">
                     {blogs.map((blog) => (
                       <div
-                        key={blog.id}
+                        key={blog._id}
                         className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
                       >
                         <div className="flex gap-4 p-4">
@@ -1689,7 +1667,7 @@ export default function AdminDashboard() {
                                   <Edit className="w-5 h-5" />
                                 </button>
                                 <button
-                                  onClick={() => deleteBlog(blog.id)}
+                                  onClick={() => deleteBlog(blog._id)}
                                   className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                                   title="Delete"
                                 >
@@ -1731,7 +1709,7 @@ export default function AdminDashboard() {
                   <div className="space-y-4">
                     {judges.map((judge) => (
                       <div
-                        key={judge.id}
+                        key={judge._id}
                         className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
                       >
                         <div className="flex gap-6 p-6">
@@ -1785,7 +1763,7 @@ export default function AdminDashboard() {
                                   <Edit className="w-5 h-5" />
                                 </button>
                                 <button
-                                  onClick={() => deleteJudge(judge.id)}
+                                  onClick={() => deleteJudge(judge._id)}
                                   className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                                   title="Delete"
                                 >

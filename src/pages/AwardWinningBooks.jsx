@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { BookOpen, Play } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-const SUPABASE_URL = "https://sunipfnesvzlkcitbhns.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1bmlwZm5lc3Z6bGtjaXRiaG5zIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTE2MDA0MCwiZXhwIjoyMDgwNzM2MDQwfQ.h_UMD88A5kTsZfM3JrkU89tMgDfUUrZY1cCEwIuuKtY";
+const API_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000";
 
 // Helper function to create URL-friendly slug
 // const createSlug = (text) => {
@@ -27,22 +26,20 @@ export default function AwardWinningBooks() {
 
   const fetchBooks = async () => {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/award_winning_books?order=created_at.desc`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        },
-      );
-      const data = await response.json();
-      setBooks(data);
+      const response = await fetch(`${API_URL}/award-books`);
+      const result = await response.json();
+      setBooks(result.data);
     } catch (error) {
       console.error("Error fetching books:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${BASE_URL}${url}`;
   };
 
   // Pagination Logic
@@ -131,7 +128,7 @@ export default function AwardWinningBooks() {
                   >
                     <div className="relative aspect-2/3 rounded-2xl overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.1)] group-hover:shadow-[0_25px_50px_rgba(0,0,0,0.15)] transition-all duration-500">
                       <img
-                        src={book.cover_image_url}
+                        src={getImageUrl(book.cover_image_url)}
                         alt={book.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
