@@ -1,6 +1,6 @@
 import React from "react";
 import { Facebook, Instagram, Twitter, Menu } from "lucide-react";
-import left from "../assets/IMG_2706.JPG";
+import left from "../assets/IMG_1712.JPG.jpeg";
 import { Link } from "react-router-dom";
 export default function IndieBragFeatures() {
   const features = [
