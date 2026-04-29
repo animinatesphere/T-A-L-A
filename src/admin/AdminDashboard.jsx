@@ -18,8 +18,8 @@ import {
   File, // ADD THIS LINE
 } from "lucide-react";
 
-const API_URL = "http://localhost:5000/api";
-const BASE_URL = "http://localhost:5000";
+const API_URL = "/api";
+const BASE_URL = "";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 

@@ -11,8 +11,8 @@ import {
   Twitter,
 } from "lucide-react";
 
-const API_URL = "http://localhost:5000/api";
-const BASE_URL = "http://localhost:5000";
+const API_URL = "/api";
+const BASE_URL = "";
 
 export default function Books() {
   const navigate = useNavigate();

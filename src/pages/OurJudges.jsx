@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Award } from "lucide-react";
 
-const API_URL = "http://localhost:5000/api";
-const BASE_URL = "http://localhost:5000";
+const API_URL = "/api";
+const BASE_URL = "";
 
 export default function OurJudges() {
   const [judges, setJudges] = useState([]);

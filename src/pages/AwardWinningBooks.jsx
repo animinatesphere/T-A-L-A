@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { BookOpen, Play } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:5000/api";
-const BASE_URL = "http://localhost:5000";
+const API_URL = "/api";
+const BASE_URL = "";
 
 // Helper function to create URL-friendly slug
 // const createSlug = (text) => {

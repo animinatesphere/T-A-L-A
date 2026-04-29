@@ -9,8 +9,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom"; // Make sure to install react-router-dom
 
-const API_URL = "http://localhost:5000/api";
-const BASE_URL = "http://localhost:5000";
+const API_URL = "/api";
+const BASE_URL = "";
 const BlogListing = () => {
   const [blogs, setBlogs] = useState([]);
   const [featuredBlog, setFeaturedBlog] = useState(null);
