@@ -70,13 +70,20 @@ export default function AwardWinningBooks() {
     return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
   };
 
-  // Navigate to book detail page
+  // Generate a URL-friendly slug from text
+  const generateSlug = (text) => {
+    if (!text) return "";
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
+  // Navigate to book detail page (same detail view as Books page)
   const handleBookClick = (book) => {
-    if (book.author_slug) {
-      navigate(`/book/${book.author_slug}`);
-    } else {
-      navigate(`/books`);
-    }
+    const slug = book.author_slug || generateSlug(book.author);
+    navigate(`/author/${slug}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (loading) {
