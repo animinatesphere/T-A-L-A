@@ -28,7 +28,11 @@ export default function AwardWinningBooks() {
     try {
       const response = await fetch(`${API_URL}/award-books`);
       const result = await response.json();
-      setBooks(result.data);
+      // Sort newest books first by year_won
+      const sorted = (result.data || []).sort(
+        (a, b) => (b.year_won || 0) - (a.year_won || 0)
+      );
+      setBooks(sorted);
     } catch (error) {
       console.error("Error fetching books:", error);
     } finally {
@@ -67,8 +71,12 @@ export default function AwardWinningBooks() {
   };
 
   // Navigate to book detail page
-  const handleBookClick = () => {
-    navigate(`/books`);
+  const handleBookClick = (book) => {
+    if (book.author_slug) {
+      navigate(`/book/${book.author_slug}`);
+    } else {
+      navigate(`/books`);
+    }
   };
 
   if (loading) {
@@ -121,7 +129,7 @@ export default function AwardWinningBooks() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-16">
                 {currentBooks.map((book, idx) => (
                   <div
-                    key={book.id}
+                    key={book._id || book.id}
                     onClick={() => handleBookClick(book)}
                     className={`cursor-pointer group animate-fade-in-up`}
                     style={{ animationDelay: `${idx * 0.1}s` }}
@@ -220,7 +228,7 @@ export default function AwardWinningBooks() {
                   .slice(0, 2)
                   .map((book) => (
                     <div
-                      key={book.id}
+                      key={book._id || book.id}
                       className="bg-white rounded-lg shadow-lg overflow-hidden"
                     >
                       <div className="grid md:grid-cols-2 gap-4">
