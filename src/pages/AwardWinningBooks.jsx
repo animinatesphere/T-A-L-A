@@ -26,7 +26,8 @@ export default function AwardWinningBooks() {
 
   const fetchBooks = async () => {
     try {
-      const response = await fetch(`${API_URL}/award-books`);
+      // Add timestamp to prevent browser caching
+      const response = await fetch(`${API_URL}/award-books?t=${Date.now()}`);
       const result = await response.json();
       // Sort newest books first by year_won
       const sorted = (result.data || []).sort(

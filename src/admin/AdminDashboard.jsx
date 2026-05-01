@@ -482,7 +482,7 @@ export default function AdminDashboard() {
   // Add this new fetch function
   const fetchAwardBooks = async () => {
     try {
-      const response = await fetch(`${API_URL}/award-books`);
+      const response = await fetch(`${API_URL}/award-books?t=${Date.now()}`);
       const result = await response.json();
       setAwardBooks(result.data);
     } catch (error) {
