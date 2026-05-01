@@ -1806,7 +1806,7 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6 overflow-y-auto custom-scrollbar">
               <div>
                 <h3 className="font-bold text-lg mb-3">Uploaded Images</h3>
                 <div className="grid grid-cols-2 gap-4">
@@ -1947,25 +1947,25 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               )}
-              {/* Action Buttons in Modal */}
-              <div className="flex gap-3 pt-6 border-t">
-                <button
-                  onClick={() => approveAndAddToAwards(selectedSubmission)}
-                  className="flex-1 bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  Approve & Add to Awards
-                </button>
-                <button
-                  onClick={() =>
-                    updateSubmissionStatus(selectedSubmission.id, "rejected")
-                  }
-                  className="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
-                >
-                  <XCircle className="w-5 h-5" />
-                  Reject
-                </button>
-              </div>
+            </div>
+            {/* Sticky Footer for Action Buttons */}
+            <div className="sticky bottom-0 bg-gray-50 p-4 sm:p-6 border-t rounded-b-2xl flex flex-col sm:flex-row gap-3 z-10">
+              <button
+                onClick={() => approveAndAddToAwards(selectedSubmission)}
+                className="flex-1 bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2 shadow-sm"
+              >
+                <CheckCircle className="w-5 h-5" />
+                Approve & Add to Awards
+              </button>
+              <button
+                onClick={() =>
+                  updateSubmissionStatus(selectedSubmission._id, "rejected")
+                }
+                className="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold hover:bg-red-600 transition-colors flex items-center justify-center gap-2 shadow-sm"
+              >
+                <XCircle className="w-5 h-5" />
+                Reject
+              </button>
             </div>
           </div>
         </div>
