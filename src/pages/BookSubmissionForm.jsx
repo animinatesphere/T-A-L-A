@@ -297,25 +297,25 @@ export default function BookSubmissionForm() {
     handler.openIframe();
   };
 
-  const handlePayment = () => {
-    if (currency === "USD") {
-      handleFlutterwavePayment();
-    } else {
-      handlePaystackPayment();
-    }
-  };
-
   // const handlePayment = () => {
-  //   // Comment out payment functions for testing
-  //   // if (currency === "USD") {
-  //   //   handleFlutterwavePayment();
-  //   // } else {
-  //   //   handlePaystackPayment();
-  //   // }
-
-  //   // Directly call saveSubmission with a test reference for testing
-  //   saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+  //   if (currency === "USD") {
+  //     handleFlutterwavePayment();
+  //   } else {
+  //     handlePaystackPayment();
+  //   }
   // };
+
+  const handlePayment = () => {
+    // Comment out payment functions for testing
+    // if (currency === "USD") {
+    //   handleFlutterwavePayment();
+    // } else {
+    //   handlePaystackPayment();
+    // }
+
+    // Directly call saveSubmission with a test reference for testing
+    saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+  };
 
   // const generateAuthorSlug = (name) => {
   //   return name
@@ -328,7 +328,7 @@ export default function BookSubmissionForm() {
     try {
       const formData = new FormData();
 
-      // Web3Forms API key - replace with your actual key
+      // Web3Forms API key
       formData.append("access_key", "7ad34e05-087f-49d6-b593-0a57134ddf96");
 
       // Email details
@@ -338,50 +338,80 @@ export default function BookSubmissionForm() {
       );
       formData.append("from_name", "T.A.L.A. Submission System");
 
-      // Prepare email body with all submission details
-      const emailBody = `
-New Book Submission Received
+      // Rich HTML email body
+      const htmlBody = `
+<div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; color: #333;">
+  <div style="background: #6B0C22; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
+    <h1 style="color: white; margin: 0; font-size: 22px;">📚 New Book Submission Received</h1>
+  </div>
+  <div style="background: #fff; padding: 24px; border: 1px solid #ddd; border-radius: 0 0 8px 8px;">
 
-SUBMITTER INFORMATION:
-- Name: ${submissionData.first_name} ${submissionData.last_name}
-- Email: ${submissionData.email}
-- Relationship to Author: ${submissionData.relationship_to_author}
+    <h2 style="color: #6B0C22; border-bottom: 2px solid #6B0C22; padding-bottom: 8px;">Submitter Information</h2>
+    <p><strong>Name:</strong> ${submissionData.first_name} ${submissionData.last_name}</p>
+    <p><strong>Email:</strong> ${submissionData.email}</p>
+    <p><strong>Relationship to Author:</strong> ${submissionData.relationship_to_author}</p>
 
-AUTHOR INFORMATION:
-- Author Name: ${submissionData.author_name}
-- Pen Name: ${submissionData.pen_name || "N/A"}
-- About Author: ${submissionData.about_aurthor}
+    <h2 style="color: #6B0C22; border-bottom: 2px solid #6B0C22; padding-bottom: 8px;">Author Information</h2>
+    <p><strong>Author Name:</strong> ${submissionData.author_name}</p>
+    <p><strong>Pen Name:</strong> ${submissionData.pen_name || "N/A"}</p>
+    <p><strong>About Author:</strong> ${submissionData.about_aurthor}</p>
 
-BOOK DETAILS:
-- Title: ${submissionData.book_title}
-- Subtitle: ${submissionData.subtitle || "N/A"}
-- Genre: ${submissionData.genre}
-- Book Series: ${submissionData.book_series || "N/A"}
-- Description: ${submissionData.book_description || "N/A"}
-- Date of Publication: ${submissionData.date_of_publication || "N/A"}
+    <h2 style="color: #6B0C22; border-bottom: 2px solid #6B0C22; padding-bottom: 8px;">Book Details</h2>
+    <p><strong>Title:</strong> ${submissionData.book_title}</p>
+    <p><strong>Subtitle:</strong> ${submissionData.subtitle || "N/A"}</p>
+    <p><strong>Genre:</strong> ${submissionData.genre}</p>
+    <p><strong>Book Series:</strong> ${submissionData.book_series || "N/A"}</p>
+    <p><strong>Description:</strong> ${submissionData.book_description || "N/A"}</p>
+    <p><strong>Date of Publication:</strong> ${submissionData.date_of_publication || "N/A"}</p>
 
-LINKS:
-- Barnes & Noble: ${submissionData.barnes_noble_url || "N/A"}
-- Facebook: ${submissionData.facebook_url || "N/A"}
-- Instagram: ${submissionData.instagram_url || "N/A"}
-- Twitter: ${submissionData.twitter_url || "N/A"}
-- Threads: ${submissionData.threads_url || "N/A"}
+    <h2 style="color: #6B0C22; border-bottom: 2px solid #6B0C22; padding-bottom: 8px;">Uploaded Files</h2>
 
-UPLOADED FILES:
-- Book Cover: ${fileUrls.cover_image_url || "Not uploaded"}
-- Author Image: ${fileUrls.author_image_url || "Not uploaded"}
-- About Book PDF: ${fileUrls.about_book_pdf_url || "Not uploaded"}
-- eBook: ${fileUrls.ebook_url || "Not uploaded"}
+    ${fileUrls.cover_image_url ? `
+    <div style="margin-bottom: 16px;">
+      <p><strong>📷 Book Cover:</strong></p>
+      <a href="${fileUrls.cover_image_url}" target="_blank">
+        <img src="${fileUrls.cover_image_url}" alt="Book Cover" style="max-width: 200px; border-radius: 8px; border: 1px solid #ddd;" />
+      </a>
+      <br/><a href="${fileUrls.cover_image_url}" style="color: #6B0C22;">View Full Image</a>
+    </div>` : "<p><strong>📷 Book Cover:</strong> Not uploaded</p>"}
 
-PAYMENT INFORMATION:
-- Amount: ${submissionData.payment_currency} ${submissionData.payment_amount}
-- Reference: ${submissionData.payment_reference}
-- Status: ${submissionData.payment_status}
+    ${fileUrls.author_image_url ? `
+    <div style="margin-bottom: 16px;">
+      <p><strong>👤 Author Image:</strong></p>
+      <a href="${fileUrls.author_image_url}" target="_blank">
+        <img src="${fileUrls.author_image_url}" alt="Author Image" style="max-width: 200px; border-radius: 8px; border: 1px solid #ddd;" />
+      </a>
+      <br/><a href="${fileUrls.author_image_url}" style="color: #6B0C22;">View Full Image</a>
+    </div>` : "<p><strong>👤 Author Image:</strong> Not uploaded</p>"}
 
-View submission in admin dashboard.
-    `;
+    ${fileUrls.about_book_pdf_url ? `
+    <div style="margin-bottom: 16px;">
+      <p><strong>📄 About Book PDF:</strong></p>
+      <a href="${fileUrls.about_book_pdf_url}" style="background: #6B0C22; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; display: inline-block;">
+        📥 Download PDF
+      </a>
+    </div>` : "<p><strong>📄 About Book PDF:</strong> Not uploaded</p>"}
 
-      formData.append("message", emailBody);
+    ${fileUrls.ebook_url ? `
+    <div style="margin-bottom: 16px;">
+      <p><strong>📖 eBook File:</strong></p>
+      <a href="${fileUrls.ebook_url}" style="background: #6B0C22; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; display: inline-block;">
+        📥 Download eBook
+      </a>
+    </div>` : "<p><strong>📖 eBook:</strong> Not uploaded</p>"}
+
+    <h2 style="color: #6B0C22; border-bottom: 2px solid #6B0C22; padding-bottom: 8px;">Payment Information</h2>
+    <p><strong>Amount:</strong> ${submissionData.payment_currency} ${submissionData.payment_amount}</p>
+    <p><strong>Reference:</strong> ${submissionData.payment_reference}</p>
+    <p><strong>Status:</strong> ${submissionData.payment_status}</p>
+
+    <div style="background: #f9f9f9; padding: 16px; border-radius: 8px; margin-top: 24px; text-align: center;">
+      <p style="margin: 0; color: #666;">Log into the admin dashboard to review this submission.</p>
+    </div>
+  </div>
+</div>`;
+
+      formData.append("message", htmlBody);
 
       const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
@@ -393,6 +423,7 @@ View submission in admin dashboard.
       if (result.success) {
         console.log("Email notification sent successfully");
       } else {
+
         console.error("Failed to send email notification");
       }
     } catch (error) {
@@ -433,8 +464,18 @@ View submission in admin dashboard.
 
       if (submissionResponse.ok) {
         const result = await submissionResponse.json();
+        
+        // Construct full URLs for the email since backend returns relative paths
+        const baseUrl = window.location.origin;
+        const fileUrls = {
+          cover_image_url: result.data.cover_image_url ? `${baseUrl}${result.data.cover_image_url}` : null,
+          author_image_url: result.data.author_image_url ? `${baseUrl}${result.data.author_image_url}` : null,
+          about_book_pdf_url: result.data.about_book_pdf_url ? `${baseUrl}${result.data.about_book_pdf_url}` : null,
+          ebook_url: result.data.ebook_url ? `${baseUrl}${result.data.ebook_url}` : null,
+        };
+
         // Send email notification
-        await sendEmailNotification(result.data, {});
+        await sendEmailNotification(result.data, fileUrls);
 
         setSubmitStatus("success");
         setStep(4);

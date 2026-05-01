@@ -19,6 +19,14 @@ import {
 } from "lucide-react";
 
 const API_URL = "/api";
+const BASE_URL = ""; // Relative to root
+
+const getImageUrl = (path) => {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  // If it starts with /uploads, it's a server path
+  return path;
+};
 const BASE_URL = "";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
@@ -486,6 +494,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchSubmissions();
     fetchPodcasts();
+    fetchAwardBooks();
+    fetchBlogs();
+    fetchJudges();
 
     // Poll for new submissions every 30 seconds
     const interval = setInterval(() => {
@@ -1798,24 +1809,29 @@ export default function AdminDashboard() {
             </div>
 
             <div className="p-6 space-y-6">
-              {/* Book Images */}
               <div>
-                <h3 className="font-bold text-lg mb-3">Book Cover Images</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    selectedSubmission.cover_image_1,
-                    selectedSubmission.cover_image_2,
-                    selectedSubmission.cover_image_3,
-                  ]
-                    .filter(Boolean)
-                    .map((img, idx) => (
+                <h3 className="font-bold text-lg mb-3">Uploaded Images</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {selectedSubmission.cover_image_url && (
+                    <div className="text-center">
+                      <p className="text-xs text-gray-500 mb-1">Book Cover</p>
                       <img
-                        key={idx}
-                        src={img}
-                        alt={`Cover ${idx + 1}`}
-                        className="w-full h-48 object-cover rounded-lg"
+                        src={getImageUrl(selectedSubmission.cover_image_url)}
+                        alt="Book Cover"
+                        className="w-full h-48 object-contain rounded-lg border bg-gray-50"
                       />
-                    ))}
+                    </div>
+                  )}
+                  {selectedSubmission.author_image_url && (
+                    <div className="text-center">
+                      <p className="text-xs text-gray-500 mb-1">Author Image</p>
+                      <img
+                        src={getImageUrl(selectedSubmission.author_image_url)}
+                        alt="Author Image"
+                        className="w-full h-48 object-contain rounded-lg border bg-gray-50"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1900,34 +1916,34 @@ export default function AdminDashboard() {
                 </div>
               </div>
               {/* // In the selectedSubmission modal, add this section before the Action Buttons: */}
-              {/* Files Section - ADD THIS */}
+              {/* Files Section */}
               {(selectedSubmission.about_book_pdf_url ||
                 selectedSubmission.ebook_url) && (
                 <div className="border-t pt-6">
-                  <h3 className="font-bold text-lg mb-3">Submitted Files</h3>
-                  <div className="space-y-2">
+                  <h3 className="font-bold text-lg mb-3">Submitted Documents</h3>
+                  <div className="flex flex-wrap gap-3">
                     {selectedSubmission.about_book_pdf_url && (
                       <a
-                        href={selectedSubmission.about_book_pdf_url}
+                        href={getImageUrl(selectedSubmission.about_book_pdf_url)}
                         download
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+                        className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors border border-blue-200 font-medium"
                       >
                         <File className="w-5 h-5" />
-                        Download About Book PDF
+                        Download PDF
                       </a>
                     )}
                     {selectedSubmission.ebook_url && (
                       <a
-                        href={selectedSubmission.ebook_url}
+                        href={getImageUrl(selectedSubmission.ebook_url)}
                         download
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+                        className="flex items-center gap-2 bg-purple-50 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-100 transition-colors border border-purple-200 font-medium"
                       >
                         <File className="w-5 h-5" />
-                        Download eBook File
+                        Download eBook
                       </a>
                     )}
                   </div>
