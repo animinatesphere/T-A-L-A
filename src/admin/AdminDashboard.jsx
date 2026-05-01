@@ -27,8 +27,6 @@ const getImageUrl = (path) => {
   // If it starts with /uploads, it's a server path
   return path;
 };
-const BASE_URL = "";
-
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export default function AdminDashboard() {
