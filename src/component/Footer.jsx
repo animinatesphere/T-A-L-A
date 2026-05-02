@@ -153,7 +153,7 @@ export default function Footer() {
               </div>
               <div className="flex items-start gap-2 text-gray-300">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>Lagos, Nigeria</span>
+                <span>Abese Area Elebu Oluyole Extension, Ibadan Oyo</span>
               </div>
             </div>
           </div>
