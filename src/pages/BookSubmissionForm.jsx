@@ -281,10 +281,21 @@ export default function BookSubmissionForm() {
   };
 
   const handlePaystackPayment = () => {
+    if (!window.PaystackPop) {
+      alert("Payment system is still loading. Please wait a moment and try again.");
+      return;
+    }
+
+    if (!PAYSTACK_PUBLIC_KEY) {
+      alert("Payment system configuration error. Please contact support.");
+      return;
+    }
+
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: formData.email,
-      amount: 1000,
+      // amount: 2000000, // 20,000 Naira in kobo
+      amount: 10000, // 20,000 Naira in kobo
       currency: "NGN",
       ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
       callback: function (response) {
