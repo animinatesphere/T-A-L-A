@@ -14,7 +14,10 @@ router.post('/', protect, uploadFields.fields([
   { name: 'cover_image', maxCount: 1 },
   { name: 'author_image', maxCount: 1 }
 ]), createAwardBook);
-router.patch('/:id', protect, updateAwardBook);
+router.patch('/:id', protect, uploadFields.fields([
+  { name: 'cover_image', maxCount: 1 },
+  { name: 'author_image', maxCount: 1 }
+]), updateAwardBook);
 router.delete('/:id', protect, deleteAwardBook);
 
 module.exports = router;
