@@ -49,7 +49,19 @@ const createAwardBook = async (req, res) => {
 // @access  Private/Admin
 const updateAwardBook = async (req, res) => {
   try {
-    const book = await AwardBook.findByIdAndUpdate(req.params.id, req.body, {
+    const updateData = { ...req.body };
+    
+    // Check for new files in the update request
+    if (req.files) {
+      if (req.files.cover_image) {
+        updateData.cover_image_url = `/uploads/images/${req.files.cover_image[0].filename}`;
+      }
+      if (req.files.author_image) {
+        updateData.author_image_url = `/uploads/images/${req.files.author_image[0].filename}`;
+      }
+    }
+
+    const book = await AwardBook.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true
     });
