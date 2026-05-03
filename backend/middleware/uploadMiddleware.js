@@ -44,7 +44,7 @@ const fileFilter = (req, file, cb) => {
   const docFields = ['about_book_pdf', 'ebook'];
 
   if (imageFields.includes(file.fieldname)) {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|webp|jfif|heic|heif)$/i)) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|webp|jfif|heic|heif|tiff|bmp|gif|svg)$/i)) {
       console.error(`Rejected image: ${file.originalname}`);
       return cb(new Error('Please upload an image (jpg, jpeg, png, or webp)'), false);
     }
