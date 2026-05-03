@@ -23,9 +23,12 @@ const BASE_URL = ""; // Relative to root
 
 const getImageUrl = (path) => {
   if (!path) return "";
-  if (path.startsWith("http")) return path;
-  // If it starts with /uploads, it's a server path
-  return path;
+  if (path.startsWith("http") || path.startsWith("blob:") || path.startsWith("data:")) {
+    return path;
+  }
+  // If it's a server path, make sure it starts with a slash
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return cleanPath;
 };
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
@@ -133,6 +136,20 @@ export default function AdminDashboard() {
     display_order: 0,
     is_active: true,
   });
+
+  // Notification state
+  const [notification, setNotification] = useState({
+    message: "",
+    type: null,
+    show: false,
+  });
+
+  const showNotify = (message, type = "success") => {
+    setNotification({ message, type, show: true });
+    setTimeout(() => {
+      setNotification((prev) => ({ ...prev, show: false }));
+    }, 4000);
+  };
 
   const fetchJudges = async () => {
     try {
@@ -543,6 +560,7 @@ export default function AdminDashboard() {
           admin_notes: notes,
         }),
       });
+      showNotify(`Submission ${status} successfully!`);
       fetchSubmissions();
       setSelectedSubmission(null);
     } catch (error) {
@@ -649,6 +667,11 @@ export default function AdminDashboard() {
       }
 
       if (response.ok) {
+        showNotify(
+          editingJudge
+            ? "Judge updated successfully!"
+            : "Judge added successfully!"
+        );
         fetchJudges();
         closeJudgeModal();
       }
@@ -804,6 +827,11 @@ export default function AdminDashboard() {
       }
 
       if (response.ok) {
+        showNotify(
+          editingPodcast
+            ? "Podcast updated successfully!"
+            : "Podcast added successfully!"
+        );
         fetchPodcasts();
         closePodcastModal();
       }
@@ -951,6 +979,9 @@ export default function AdminDashboard() {
       }
 
       if (response.ok) {
+        showNotify(
+          editingBook ? "Book updated successfully!" : "Book added successfully!"
+        );
         fetchAwardBooks();
         closeBookModal();
       }
@@ -3312,6 +3343,21 @@ export default function AdminDashboard() {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Floating Notification */}
+      {notification.show && (
+        <div className={`fixed bottom-8 right-8 z-[100] animate-in slide-in-from-right-10 duration-300`}>
+          <div className={`${
+            notification.type === "error" ? "bg-red-600" : "bg-green-600"
+          } text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/20 backdrop-blur-sm`}>
+            {notification.type === "error" ? (
+              <XCircle className="w-6 h-6" />
+            ) : (
+              <CheckCircle className="w-6 h-6" />
+            )}
+            <p className="font-bold tracking-wide">{notification.message}</p>
           </div>
         </div>
       )}
