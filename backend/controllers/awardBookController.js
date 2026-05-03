@@ -5,7 +5,7 @@ const AwardBook = require('../models/AwardBook');
 // @access  Public
 const getAwardBooks = async (req, res) => {
   try {
-    const books = await AwardBook.find().sort({ display_order: 1, year_won: -1 });
+    const books = await AwardBook.find().sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       count: books.length,

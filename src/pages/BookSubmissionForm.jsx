@@ -299,7 +299,7 @@ export default function BookSubmissionForm() {
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: formData.email.trim(),
-      amount: 1000, // 20,000 Naira in kobo
+      amount: 10000, // 20,000 Naira in kobo
       currency: "NGN",
       ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
       callback: function (response) {
