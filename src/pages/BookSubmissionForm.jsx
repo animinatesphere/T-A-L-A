@@ -291,11 +291,15 @@ export default function BookSubmissionForm() {
       return;
     }
 
+    if (!formData.email || !formData.email.includes("@")) {
+      alert("Please provide a valid email address before proceeding to payment.");
+      return;
+    }
+
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
-      email: formData.email,
-      // amount: 2000000, // 20,000 Naira in kobo
-      amount: 10000, // 20,000 Naira in kobo
+      email: formData.email.trim(),
+      amount: 2000000, // 20,000 Naira in kobo
       currency: "NGN",
       ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
       callback: function (response) {
