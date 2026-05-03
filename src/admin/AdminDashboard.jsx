@@ -52,6 +52,8 @@ export default function AdminDashboard() {
   const [editingBook, setEditingBook] = useState(null);
   const [bookImageFile, setBookImageFile] = useState(null);
   const [bookImagePreview, setBookImagePreview] = useState("");
+  const [authorImageFile, setAuthorImageFile] = useState(null);
+  const [authorImagePreview, setAuthorImagePreview] = useState("");
   const [bookLoading, setBookLoading] = useState(false);
   const [podcastFormData, setPodcastFormData] = useState({
     title: "",
@@ -832,12 +834,14 @@ export default function AdminDashboard() {
       setEditingBook(book);
       setBookFormData(book);
       setBookImagePreview(book.cover_image_url);
+      setAuthorImagePreview(book.author_image_url);
     } else {
       setEditingBook(null);
       setBookFormData({
         title: "",
         author: "",
         cover_image_url: "",
+        author_image_url: "",
         description: "",
         synopsis: "",
         genre: "",
@@ -851,8 +855,10 @@ export default function AdminDashboard() {
         display_order: 0,
       });
       setBookImagePreview("");
+      setAuthorImagePreview("");
     }
     setBookImageFile(null);
+    setAuthorImageFile(null);
     setIsBookModalOpen(true);
   };
 
@@ -861,6 +867,8 @@ export default function AdminDashboard() {
     setEditingBook(null);
     setBookImageFile(null);
     setBookImagePreview("");
+    setAuthorImageFile(null);
+    setAuthorImagePreview("");
   };
 
   const handleBookImageChange = (e) => {
@@ -872,6 +880,18 @@ export default function AdminDashboard() {
       }
       setBookImageFile(file);
       setBookImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAuthorImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        alert("Image size should be less than 100MB");
+        return;
+      }
+      setAuthorImageFile(file);
+      setAuthorImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -910,17 +930,17 @@ export default function AdminDashboard() {
     if (bookImageFile) {
       formData.append("cover_image", bookImageFile);
     }
+    if (authorImageFile) {
+      formData.append("author_image", authorImageFile);
+    }
 
     try {
       let response;
       if (editingBook) {
         response = await fetch(`${API_URL}/award-books/${editingBook._id}`, {
           method: "PATCH",
-          headers: {
-            ...getAuthHeaders(),
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(bookFormData),
+          headers: getAuthHeaders(), // Remove Content-Type, let browser set it for FormData
+          body: formData,
         });
       } else {
         response = await fetch(`${API_URL}/award-books`, {
@@ -2207,6 +2227,7 @@ export default function AdminDashboard() {
 
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
               {/* Cover Image */}
+              {/* Book Cover Image */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Book Cover Image *
@@ -2215,7 +2236,7 @@ export default function AdminDashboard() {
                   {bookImagePreview ? (
                     <div className="relative">
                       <img
-                        src={bookImagePreview}
+                        src={getImageUrl(bookImagePreview)}
                         alt="Preview"
                         className="w-full h-64 object-contain rounded-lg"
                       />
@@ -2245,7 +2266,6 @@ export default function AdminDashboard() {
                   )}
                 </div>
               </div>
-              {/* After the Book Cover Image upload, add this: */}
 
               {/* Author Image */}
               <div>
@@ -2253,20 +2273,18 @@ export default function AdminDashboard() {
                   Author Photo
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-[#6B0C22] transition-colors">
-                  {bookFormData.author_image_url ? (
+                  {authorImagePreview ? (
                     <div className="relative">
                       <img
-                        src={bookFormData.author_image_url}
+                        src={getImageUrl(authorImagePreview)}
                         alt="Author"
                         className="w-32 h-32 object-cover rounded-full mx-auto"
                       />
                       <button
-                        onClick={() =>
-                          setBookFormData({
-                            ...bookFormData,
-                            author_image_url: "",
-                          })
-                        }
+                        onClick={() => {
+                          setAuthorImagePreview("");
+                          setAuthorImageFile(null);
+                        }}
                         className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                       >
                         <X className="w-4 h-4" />
@@ -2281,16 +2299,7 @@ export default function AdminDashboard() {
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            const url = await uploadBookImage(file);
-                            setBookFormData({
-                              ...bookFormData,
-                              author_image_url: url,
-                            });
-                          }
-                        }}
+                        onChange={handleAuthorImageChange}
                         className="hidden"
                       />
                     </label>
