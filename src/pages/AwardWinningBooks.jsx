@@ -73,7 +73,7 @@ export default function AwardWinningBooks() {
 
   // Generate a URL-friendly slug from text
   const generateSlug = (text) => {
-    if (!text) return "";
+    if (!text || text === "null") return "";
     return text
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -159,7 +159,9 @@ export default function AwardWinningBooks() {
                               const authorSlug = (book.author_slug && book.author_slug !== "null") 
                                 ? book.author_slug 
                                 : generateSlug(book.author);
-                              navigate(`/author/${authorSlug}`);
+                              if (authorSlug) {
+                                navigate(`/author/${authorSlug}`);
+                              }
                             }}
                             className="text-sm text-white/70 hover:text-white italic uppercase tracking-wider cursor-pointer underline-offset-4 hover:underline"
                           >

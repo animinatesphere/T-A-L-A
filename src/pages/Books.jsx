@@ -34,6 +34,7 @@ export default function Books() {
 
   // Generate slugs
   const generateSlug = (text) => {
+    if (!text || text === "null") return "";
     return text
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -45,6 +46,11 @@ export default function Books() {
     const authorSlug = (book.author_slug && book.author_slug !== "null")
       ? book.author_slug
       : generateSlug(book.author);
+
+    if (!authorSlug) {
+      console.warn("No valid slug for author:", book.author);
+      return;
+    }
 
     setSelectedAuthor({
       name: book.author,
