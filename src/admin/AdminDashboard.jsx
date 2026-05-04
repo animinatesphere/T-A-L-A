@@ -650,23 +650,16 @@ export default function AdminDashboard() {
     }
 
     try {
-      let response;
-      if (editingJudge) {
-        response = await fetch(`${API_URL}/judges/${editingJudge._id}`, {
-          method: "PATCH",
-          headers: {
-            ...getAuthHeaders(),
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(judgeFormData),
-        });
-      } else {
-        response = await fetch(`${API_URL}/judges`, {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: formData,
-        });
-      }
+      const url = editingJudge
+        ? `${API_URL}/judges/${editingJudge._id}`
+        : `${API_URL}/judges`;
+      const method = editingJudge ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: getAuthHeaders(),
+        body: formData,
+      });
 
       if (response.ok) {
         showNotify(
@@ -2049,7 +2042,7 @@ export default function AdminDashboard() {
                   {podcastImagePreview ? (
                     <div className="relative">
                       <img
-                        src={podcastImagePreview}
+                        src={getImageUrl(podcastImagePreview)}
                         alt="Preview"
                         className="w-full h-48 object-cover rounded-lg"
                       />
@@ -2862,7 +2855,7 @@ export default function AdminDashboard() {
                   {blogImagePreview ? (
                     <div className="relative">
                       <img
-                        src={blogImagePreview}
+                        src={getImageUrl(blogImagePreview)}
                         alt="Preview"
                         className="w-full h-64 object-cover rounded-lg"
                       />
@@ -3191,7 +3184,7 @@ export default function AdminDashboard() {
                   {judgeImagePreview ? (
                     <div className="relative">
                       <img
-                        src={judgeImagePreview}
+                        src={getImageUrl(judgeImagePreview)}
                         alt="Preview"
                         className="w-full h-48 sm:h-64 object-cover rounded-lg"
                       />
