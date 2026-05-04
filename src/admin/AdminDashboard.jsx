@@ -442,43 +442,45 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleBlogSubmit = async () => {
+  const handleBlogSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     setBlogLoading(true);
 
     const formData = new FormData();
     Object.keys(blogFormData).forEach((key) => {
-      formData.append(key, blogFormData[key]);
+      if (key === "tags") {
+        formData.append(key, JSON.stringify(blogFormData[key]));
+      } else {
+        formData.append(key, blogFormData[key]);
+      }
     });
 
     if (blogImageFile) {
-      formData.append("image", blogImageFile);
+      formData.append("featured_image", blogImageFile);
     }
 
     try {
-      let response;
-      if (editingBlog) {
-        response = await fetch(`${API_URL}/blogs/${editingBlog._id}`, {
-          method: "PATCH",
-          headers: {
-            ...getAuthHeaders(),
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(blogFormData),
-        });
-      } else {
-        response = await fetch(`${API_URL}/blogs`, {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: formData,
-        });
-      }
+      const url = editingBlog
+        ? `${API_URL}/blogs/${editingBlog._id}`
+        : `${API_URL}/blogs`;
+      const method = editingBlog ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: getAuthHeaders(),
+        body: formData,
+      });
 
       if (response.ok) {
+        showNotify(`Blog post ${editingBlog ? "updated" : "created"} successfully!`);
         fetchBlogs();
         closeBlogModal();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
       }
     } catch (error) {
-      console.error("Error saving blog:", error);
+      console.error("Error saving blog post:", error);
       alert("Error saving blog post. Please try again.");
     } finally {
       setBlogLoading(false);

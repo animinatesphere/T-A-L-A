@@ -15,7 +15,9 @@ router.get('/:slug', getBlogBySlug);
 router.post('/', protect, uploadFields.fields([
   { name: 'featured_image', maxCount: 1 }
 ]), createBlog);
-router.patch('/:id', protect, updateBlog);
+router.patch('/:id', protect, uploadFields.fields([
+  { name: 'featured_image', maxCount: 1 }
+]), updateBlog);
 router.delete('/:id', protect, deleteBlog);
 
 module.exports = router;

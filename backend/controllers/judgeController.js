@@ -48,7 +48,13 @@ const createJudge = async (req, res) => {
 // @access  Private/Admin
 const updateJudge = async (req, res) => {
   try {
-    const judge = await Judge.findByIdAndUpdate(req.params.id, req.body, {
+    const judgeData = req.body;
+
+    if (req.files && req.files.image) {
+      judgeData.image_url = `/uploads/images/${req.files.image[0].filename}`;
+    }
+
+    const judge = await Judge.findByIdAndUpdate(req.params.id, judgeData, {
       new: true,
       runValidators: true
     });

@@ -82,8 +82,8 @@ export default function AwardWinningBooks() {
 
   // Navigate to book detail page (same detail view as Books page)
   const handleBookClick = (book) => {
-    const slug = book.author_slug || generateSlug(book.author);
-    navigate(`/author/${slug}`);
+    const bookSlug = generateSlug(book.title);
+    navigate(`/books/${bookSlug}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -153,7 +153,16 @@ export default function AwardWinningBooks() {
                           <p className="font-bold text-lg leading-tight mb-2">
                             {book.title}
                           </p>
-                          <p className="text-sm text-white/70 italic uppercase tracking-wider">
+                          <p 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const authorSlug = (book.author_slug && book.author_slug !== "null") 
+                                ? book.author_slug 
+                                : generateSlug(book.author);
+                              navigate(`/author/${authorSlug}`);
+                            }}
+                            className="text-sm text-white/70 hover:text-white italic uppercase tracking-wider cursor-pointer underline-offset-4 hover:underline"
+                          >
                             {book.author}
                           </p>
                         </div>

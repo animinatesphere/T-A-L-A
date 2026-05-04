@@ -65,7 +65,13 @@ const createBlog = async (req, res) => {
 // @access  Private/Admin
 const updateBlog = async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, {
+    const blogData = req.body;
+
+    if (req.files && req.files.featured_image) {
+      blogData.featured_image_url = `/uploads/images/${req.files.featured_image[0].filename}`;
+    }
+
+    const blog = await Blog.findByIdAndUpdate(req.params.id, blogData, {
       new: true,
       runValidators: true
     });
