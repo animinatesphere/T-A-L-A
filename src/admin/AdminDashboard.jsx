@@ -23,11 +23,23 @@ const BASE_URL = ""; // Relative to root
 
 const getImageUrl = (path) => {
   if (!path) return "";
-  if (path.startsWith("http") || path.startsWith("blob:") || path.startsWith("data:")) {
+  if (
+    path.startsWith("http") ||
+    path.startsWith("blob:") ||
+    path.startsWith("data:")
+  ) {
     return path;
   }
-  // If it's a server path, make sure it starts with a slash
+
+  // If we are on localhost, we might want to point to the backend directly 
+  // or rely on the Vite proxy. Since proxy is set to localhost:5000, 
+  // keeping it relative is usually best, but making sure it has a leading slash.
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  
+  // If you are on localhost and the image is only on the VPS, 
+  // you can temporarily uncomment the line below to see them:
+  // return `https://www.theafricalaureateawards.org${cleanPath}`;
+
   return cleanPath;
 };
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
@@ -197,11 +209,6 @@ export default function AdminDashboard() {
     };
   };
 
-  const getImageUrl = (url) => {
-    if (!url) return "";
-    if (url.startsWith("http")) return url;
-    return `${BASE_URL}${url}`;
-  };
   // Add to existing useEffect
   useEffect(() => {
     const token = localStorage.getItem("tala_admin_token");
