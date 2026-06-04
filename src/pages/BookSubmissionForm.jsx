@@ -282,7 +282,9 @@ export default function BookSubmissionForm() {
 
   const handlePaystackPayment = () => {
     if (!window.PaystackPop) {
-      alert("Payment system is still loading. Please wait a moment and try again.");
+      alert(
+        "Payment system is still loading. Please wait a moment and try again.",
+      );
       return;
     }
 
@@ -292,7 +294,9 @@ export default function BookSubmissionForm() {
     }
 
     if (!formData.email || !formData.email.includes("@")) {
-      alert("Please provide a valid email address before proceeding to payment.");
+      alert(
+        "Please provide a valid email address before proceeding to payment.",
+      );
       return;
     }
 
@@ -312,25 +316,25 @@ export default function BookSubmissionForm() {
     handler.openIframe();
   };
 
-  const handlePayment = () => {
-    if (currency === "USD") {
-      handleFlutterwavePayment();
-    } else {
-      handlePaystackPayment();
-    }
-  };
-
   // const handlePayment = () => {
-  //   // Comment out payment functions for testing
-  //   // if (currency === "USD") {
-  //   //   handleFlutterwavePayment();
-  //   // } else {
-  //   //   handlePaystackPayment();
-  //   // }
-
-  //   // Directly call saveSubmission with a test reference for testing
-  //   saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+  //   if (currency === "USD") {
+  //     handleFlutterwavePayment();
+  //   } else {
+  //     handlePaystackPayment();
+  //   }
   // };
+
+  const handlePayment = () => {
+    // Comment out payment functions for testing
+    // if (currency === "USD") {
+    //   handleFlutterwavePayment();
+    // } else {
+    //   handlePaystackPayment();
+    // }
+
+    // Directly call saveSubmission with a test reference for testing
+    saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+  };
 
   // const generateAuthorSlug = (name) => {
   //   return name
@@ -432,7 +436,8 @@ https://www.theafricalaureateawards.org/Tala-admin
       });
 
       // Add files
-      if (files.book_cover) submissionData.append("book_cover", files.book_cover);
+      if (files.book_cover)
+        submissionData.append("book_cover", files.book_cover);
       if (files.author_image)
         submissionData.append("author_image", files.author_image);
       if (files.about_book_pdf)
@@ -453,14 +458,22 @@ https://www.theafricalaureateawards.org/Tala-admin
 
       if (submissionResponse.ok) {
         const result = await submissionResponse.json();
-        
+
         // Construct full URLs for the email since backend returns relative paths
         const baseUrl = window.location.origin;
         const fileUrls = {
-          cover_image_url: result.data.cover_image_url ? `${baseUrl}${result.data.cover_image_url}` : null,
-          author_image_url: result.data.author_image_url ? `${baseUrl}${result.data.author_image_url}` : null,
-          about_book_pdf_url: result.data.about_book_pdf_url ? `${baseUrl}${result.data.about_book_pdf_url}` : null,
-          ebook_url: result.data.ebook_url ? `${baseUrl}${result.data.ebook_url}` : null,
+          cover_image_url: result.data.cover_image_url
+            ? `${baseUrl}${result.data.cover_image_url}`
+            : null,
+          author_image_url: result.data.author_image_url
+            ? `${baseUrl}${result.data.author_image_url}`
+            : null,
+          about_book_pdf_url: result.data.about_book_pdf_url
+            ? `${baseUrl}${result.data.about_book_pdf_url}`
+            : null,
+          ebook_url: result.data.ebook_url
+            ? `${baseUrl}${result.data.ebook_url}`
+            : null,
         };
 
         // Send email notification
