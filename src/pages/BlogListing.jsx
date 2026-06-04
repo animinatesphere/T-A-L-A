@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom"; // Make sure to install react-router-dom
 
-const API_URL = "/api";
+const API_URL = "https://www.theafricalaureateawards.org/api";
 const BASE_URL = "";
 const BlogListing = () => {
   const [blogs, setBlogs] = useState([]);
@@ -100,7 +100,10 @@ const BlogListing = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="aspect-video md:aspect-auto bg-gray-200 overflow-hidden">
                     <img
-                      src={getImageUrl(featuredBlog.featured_image_url || featuredBlog.featured_image)}
+                      src={getImageUrl(
+                        featuredBlog.featured_image_url ||
+                          featuredBlog.featured_image,
+                      )}
                       alt={featuredBlog.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -185,7 +188,9 @@ const BlogListing = () => {
               >
                 <div className="aspect-video bg-gray-200 overflow-hidden">
                   <img
-                    src={getImageUrl(blog.featured_image_url || blog.featured_image)}
+                    src={getImageUrl(
+                      blog.featured_image_url || blog.featured_image,
+                    )}
                     alt={blog.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />

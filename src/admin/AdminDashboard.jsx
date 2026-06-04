@@ -18,7 +18,7 @@ import {
   File, // ADD THIS LINE
 } from "lucide-react";
 
-const API_URL = "/api";
+const API_URL = "https://www.theafricalaureateawards.org/api";
 const BASE_URL = ""; // Relative to root
 
 const getImageUrl = (path) => {
@@ -31,12 +31,12 @@ const getImageUrl = (path) => {
     return path;
   }
 
-  // If we are on localhost, we might want to point to the backend directly 
-  // or rely on the Vite proxy. Since proxy is set to localhost:5000, 
+  // If we are on localhost, we might want to point to the backend directly
+  // or rely on the Vite proxy. Since proxy is set to localhost:5000,
   // keeping it relative is usually best, but making sure it has a leading slash.
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
-  
-  // If you are on localhost and the image is only on the VPS, 
+
+  // If you are on localhost and the image is only on the VPS,
   // you can temporarily uncomment the line below to see them:
   // return `https://www.theafricalaureateawards.org${cleanPath}`;
 
@@ -239,7 +239,7 @@ export default function AdminDashboard() {
   const approveAndAddToAwards = async (submission) => {
     if (
       !window.confirm(
-        `Approve "${submission.book_title}" and add to Award-Winning Books?`
+        `Approve "${submission.book_title}" and add to Award-Winning Books?`,
       )
     ) {
       return;
@@ -247,16 +247,19 @@ export default function AdminDashboard() {
 
     try {
       // 1. Update submission status to approved
-      const updateResponse = await fetch(`${API_URL}/submissions/${submission._id}`, {
-        method: "PATCH",
-        headers: {
-          ...getAuthHeaders(),
-          "Content-Type": "application/json",
+      const updateResponse = await fetch(
+        `${API_URL}/submissions/${submission._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            ...getAuthHeaders(),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            submission_status: "approved",
+          }),
         },
-        body: JSON.stringify({
-          submission_status: "approved",
-        }),
-      });
+      );
 
       if (!updateResponse.ok) {
         throw new Error("Failed to update submission status");
@@ -328,7 +331,7 @@ export default function AdminDashboard() {
         const errorText = await awardResponse.text();
         console.error("Failed to add to award books:", errorText);
         alert(
-          "Submission approved but failed to add to awards. Check console for details."
+          "Submission approved but failed to add to awards. Check console for details.",
         );
       }
     } catch (error) {
@@ -430,7 +433,7 @@ export default function AdminDashboard() {
             Authorization: `Bearer ${SUPABASE_ANON_KEY2}`,
           },
           body: formData,
-        }
+        },
       );
 
       const result = await response.text();
@@ -479,7 +482,9 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        showNotify(`Blog post ${editingBlog ? "updated" : "created"} successfully!`);
+        showNotify(
+          `Blog post ${editingBlog ? "updated" : "created"} successfully!`,
+        );
         fetchBlogs();
         closeBlogModal();
       } else {
@@ -633,7 +638,7 @@ export default function AdminDashboard() {
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
           body: file,
-        }
+        },
       );
 
       if (response.ok) {
@@ -672,7 +677,7 @@ export default function AdminDashboard() {
         showNotify(
           editingJudge
             ? "Judge updated successfully!"
-            : "Judge added successfully!"
+            : "Judge added successfully!",
         );
         fetchJudges();
         closeJudgeModal();
@@ -712,7 +717,6 @@ export default function AdminDashboard() {
       }
     }
   };
-
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -785,7 +789,7 @@ export default function AdminDashboard() {
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
           body: file,
-        }
+        },
       );
 
       if (response.ok) {
@@ -832,7 +836,7 @@ export default function AdminDashboard() {
         showNotify(
           editingPodcast
             ? "Podcast updated successfully!"
-            : "Podcast added successfully!"
+            : "Podcast added successfully!",
         );
         fetchPodcasts();
         closePodcastModal();
@@ -846,7 +850,9 @@ export default function AdminDashboard() {
   };
 
   const deletePodcast = async (id) => {
-    if (window.confirm("Are you sure you want to delete this podcast episode?")) {
+    if (
+      window.confirm("Are you sure you want to delete this podcast episode?")
+    ) {
       try {
         await fetch(`${API_URL}/podcasts/${id}`, {
           method: "DELETE",
@@ -937,7 +943,7 @@ export default function AdminDashboard() {
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
           body: file,
-        }
+        },
       );
 
       if (response.ok) {
@@ -982,7 +988,9 @@ export default function AdminDashboard() {
 
       if (response.ok) {
         showNotify(
-          editingBook ? "Book updated successfully!" : "Book added successfully!"
+          editingBook
+            ? "Book updated successfully!"
+            : "Book added successfully!",
         );
         fetchAwardBooks();
         closeBookModal();
@@ -1009,15 +1017,13 @@ export default function AdminDashboard() {
     }
   };
 
-
-
   const filteredSubmissions = submissions.filter((sub) => {
     if (filter === "all") return true;
     return sub.submission_status === filter;
   });
 
   const pendingCount = submissions.filter(
-    (s) => s.submission_status === "pending"
+    (s) => s.submission_status === "pending",
   ).length;
 
   if (!isAuthenticated) {
@@ -1029,28 +1035,38 @@ export default function AdminDashboard() {
               <Award className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
-            <p className="text-gray-600">Enter your credentials to access the dashboard</p>
+            <p className="text-gray-600">
+              Enter your credentials to access the dashboard
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Username
+              </label>
               <input
                 type="text"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
                 value={loginData.username}
-                onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+                onChange={(e) =>
+                  setLoginData({ ...loginData, username: e.target.value })
+                }
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
               <input
                 type="password"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B0C22] outline-none"
                 value={loginData.password}
-                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                onChange={(e) =>
+                  setLoginData({ ...loginData, password: e.target.value })
+                }
               />
             </div>
 
@@ -1075,7 +1091,10 @@ export default function AdminDashboard() {
         {/* Animated background pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div
+            className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse"
+            style={{ animationDelay: "1s" }}
+          ></div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -1108,7 +1127,9 @@ export default function AdminDashboard() {
           <div className="group bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-gray-100">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Total Submissions</p>
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Total Submissions
+                </p>
                 <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#6B0C22] to-[#8B1530] bg-clip-text text-transparent">
                   {submissions.length}
                 </p>
@@ -1123,7 +1144,9 @@ export default function AdminDashboard() {
           <div className="group bg-gradient-to-br from-white to-yellow-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-yellow-100">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Pending Review</p>
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Pending Review
+                </p>
                 <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
                   {pendingCount}
                 </p>
@@ -1138,11 +1161,13 @@ export default function AdminDashboard() {
           <div className="group bg-gradient-to-br from-white to-green-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-green-100">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Approved</p>
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Approved
+                </p>
                 <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                   {
                     submissions.filter(
-                      (s) => s.submission_status === "approved"
+                      (s) => s.submission_status === "approved",
                     ).length
                   }
                 </p>
@@ -1157,7 +1182,9 @@ export default function AdminDashboard() {
           <div className="group bg-gradient-to-br from-white to-purple-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-purple-100">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Total Podcasts</p>
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Total Podcasts
+                </p>
                 <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   {podcasts.length}
                 </p>
@@ -1172,7 +1199,9 @@ export default function AdminDashboard() {
           <div className="group bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-blue-100">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Award Books</p>
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Award Books
+                </p>
                 <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                   {awardBooks.length}
                 </p>
@@ -1187,7 +1216,9 @@ export default function AdminDashboard() {
           <div className="group bg-gradient-to-br from-white to-indigo-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-indigo-100">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Blog Posts</p>
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Blog Posts
+                </p>
                 <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   {blogs.length}
                 </p>
@@ -1202,7 +1233,9 @@ export default function AdminDashboard() {
           <div className="group bg-gradient-to-br from-white to-orange-50 rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-orange-100">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Judges</p>
+                <p className="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  Judges
+                </p>
                 <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                   {judges.length}
                 </p>
@@ -1341,7 +1374,7 @@ export default function AdminDashboard() {
                               </h3>
                               <span
                                 className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${getStatusColor(
-                                  submission.submission_status
+                                  submission.submission_status,
                                 )}`}
                               >
                                 {submission.submission_status
@@ -1354,11 +1387,15 @@ export default function AdminDashboard() {
                             </p>
                             <div className="space-y-1 text-sm text-gray-600">
                               <p>
-                                <span className="font-semibold">Submitted by:</span> {submission.first_name}{" "}
-                                {submission.last_name} ({submission.email})
+                                <span className="font-semibold">
+                                  Submitted by:
+                                </span>{" "}
+                                {submission.first_name} {submission.last_name} (
+                                {submission.email})
                               </p>
                               <p>
-                                <span className="font-semibold">Genre:</span> {submission.genre} | 
+                                <span className="font-semibold">Genre:</span>{" "}
+                                {submission.genre} |
                                 <span className="font-semibold"> Payment:</span>{" "}
                                 {submission.payment_currency}{" "}
                                 {submission.payment_amount}
@@ -1366,7 +1403,7 @@ export default function AdminDashboard() {
                               <p className="text-xs text-gray-500">
                                 Submitted:{" "}
                                 {new Date(
-                                  submission.created_at
+                                  submission.created_at,
                                 ).toLocaleDateString()}
                               </p>
                             </div>
@@ -1397,7 +1434,7 @@ export default function AdminDashboard() {
                                 onClick={() =>
                                   updateSubmissionStatus(
                                     submission._id,
-                                    "under_review"
+                                    "under_review",
                                   )
                                 }
                                 className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-colors"
@@ -1416,7 +1453,7 @@ export default function AdminDashboard() {
                                 onClick={() =>
                                   updateSubmissionStatus(
                                     submission._id,
-                                    "rejected"
+                                    "rejected",
                                   )
                                 }
                                 className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors"
@@ -1712,7 +1749,7 @@ export default function AdminDashboard() {
                                     <span>
                                       •{" "}
                                       {new Date(
-                                        blog.published_date
+                                        blog.published_date,
                                       ).toLocaleDateString()}
                                     </span>
                                   )}
@@ -1971,11 +2008,15 @@ export default function AdminDashboard() {
               {(selectedSubmission.about_book_pdf_url ||
                 selectedSubmission.ebook_url) && (
                 <div className="border-t pt-6">
-                  <h3 className="font-bold text-lg mb-3">Submitted Documents</h3>
+                  <h3 className="font-bold text-lg mb-3">
+                    Submitted Documents
+                  </h3>
                   <div className="flex flex-wrap gap-3">
                     {selectedSubmission.about_book_pdf_url && (
                       <a
-                        href={getImageUrl(selectedSubmission.about_book_pdf_url)}
+                        href={getImageUrl(
+                          selectedSubmission.about_book_pdf_url,
+                        )}
                         download
                         target="_blank"
                         rel="noopener noreferrer"
@@ -3350,10 +3391,14 @@ export default function AdminDashboard() {
       )}
       {/* Floating Notification */}
       {notification.show && (
-        <div className={`fixed bottom-8 right-8 z-[100] animate-in slide-in-from-right-10 duration-300`}>
-          <div className={`${
-            notification.type === "error" ? "bg-red-600" : "bg-green-600"
-          } text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/20 backdrop-blur-sm`}>
+        <div
+          className={`fixed bottom-8 right-8 z-[100] animate-in slide-in-from-right-10 duration-300`}
+        >
+          <div
+            className={`${
+              notification.type === "error" ? "bg-red-600" : "bg-green-600"
+            } text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/20 backdrop-blur-sm`}
+          >
             {notification.type === "error" ? (
               <XCircle className="w-6 h-6" />
             ) : (

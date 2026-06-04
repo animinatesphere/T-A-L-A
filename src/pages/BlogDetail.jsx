@@ -11,7 +11,7 @@ import {
   Linkedin,
 } from "lucide-react";
 
-const API_URL = "/api";
+const API_URL = "https://www.theafricalaureateawards.org/api";
 const BASE_URL = "";
 
 const BlogDetail = () => {
@@ -78,20 +78,20 @@ const BlogDetail = () => {
       // Links
       .replace(
         /\[(.+?)\]\((.+?)\)/g,
-        '<a href="$2" class="text-[#6B0C22] hover:underline" target="_blank" rel="noopener">$1</a>'
+        '<a href="$2" class="text-[#6B0C22] hover:underline" target="_blank" rel="noopener">$1</a>',
       )
       // Headings
       .replace(
         /^### (.+)$/gm,
-        '<h3 class="text-2xl font-bold text-gray-900 mt-8 mb-4">$1</h3>'
+        '<h3 class="text-2xl font-bold text-gray-900 mt-8 mb-4">$1</h3>',
       )
       .replace(
         /^## (.+)$/gm,
-        '<h2 class="text-3xl font-bold text-gray-900 mt-10 mb-4">$1</h2>'
+        '<h2 class="text-3xl font-bold text-gray-900 mt-10 mb-4">$1</h2>',
       )
       .replace(
         /^# (.+)$/gm,
-        '<h1 class="text-4xl font-bold text-gray-900 mt-12 mb-6">$1</h1>'
+        '<h1 class="text-4xl font-bold text-gray-900 mt-12 mb-6">$1</h1>',
       )
       // Bullet points
       .replace(/^- (.+)$/gm, '<li class="ml-6 mb-2">$1</li>')
@@ -114,13 +114,13 @@ const BlogDetail = () => {
   const shareOnSocial = (platform) => {
     const urls = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        shareUrl
+        shareUrl,
       )}`,
       twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-        shareUrl
+        shareUrl,
       )}&text=${encodeURIComponent(shareTitle)}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-        shareUrl
+        shareUrl,
       )}`,
     };
 
@@ -301,7 +301,9 @@ const BlogDetail = () => {
                   >
                     <div className="aspect-video bg-gray-200 overflow-hidden">
                       <img
-                        src={getImageUrl(post.featured_image_url || post.featured_image)}
+                        src={getImageUrl(
+                          post.featured_image_url || post.featured_image,
+                        )}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 // Replace with your Supabase URL and anon key
-const API_URL = "/api";
+const API_URL = "https://www.theafricalaureateawards.org/api";
 const BASE_URL = "";
 
 export default function TALAPodcastPage() {

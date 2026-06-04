@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BookOpen, Play } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-const API_URL = "/api";
+const API_URL = "https://www.theafricalaureateawards.org/api";
 const BASE_URL = "";
 
 // Helper function to create URL-friendly slug
@@ -31,7 +31,7 @@ export default function AwardWinningBooks() {
       const result = await response.json();
       // Sort newest books first by year_won
       const sorted = (result.data || []).sort(
-        (a, b) => (b.year_won || 0) - (a.year_won || 0)
+        (a, b) => (b.year_won || 0) - (a.year_won || 0),
       );
       setBooks(sorted);
     } catch (error) {
@@ -153,12 +153,13 @@ export default function AwardWinningBooks() {
                           <p className="font-bold text-lg leading-tight mb-2">
                             {book.title}
                           </p>
-                          <p 
+                          <p
                             onClick={(e) => {
                               e.stopPropagation();
-                              const authorSlug = (book.author_slug && book.author_slug !== "null") 
-                                ? book.author_slug 
-                                : generateSlug(book.author);
+                              const authorSlug =
+                                book.author_slug && book.author_slug !== "null"
+                                  ? book.author_slug
+                                  : generateSlug(book.author);
                               if (authorSlug) {
                                 navigate(`/author/${authorSlug}`);
                               }

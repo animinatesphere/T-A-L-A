@@ -11,7 +11,7 @@ import {
   Twitter,
 } from "lucide-react";
 
-const API_URL = "/api";
+const API_URL = "https://www.theafricalaureateawards.org/api";
 const BASE_URL = "";
 
 export default function Books() {
@@ -43,9 +43,10 @@ export default function Books() {
 
   // View author function
   const viewAuthor = (book) => {
-    const authorSlug = (book.author_slug && book.author_slug !== "null")
-      ? book.author_slug
-      : generateSlug(book.author);
+    const authorSlug =
+      book.author_slug && book.author_slug !== "null"
+        ? book.author_slug
+        : generateSlug(book.author);
 
     if (!authorSlug) {
       console.warn("No valid slug for author:", book.author);
@@ -90,16 +91,18 @@ export default function Books() {
       const authorSlug = path.split("/author/")[1].split("?")[0];
 
       const authorBook = books.find((book) => {
-        const bookAuthorSlug = (book.author_slug && book.author_slug !== "null")
-          ? book.author_slug
-          : generateSlug(book.author);
+        const bookAuthorSlug =
+          book.author_slug && book.author_slug !== "null"
+            ? book.author_slug
+            : generateSlug(book.author);
         return bookAuthorSlug === authorSlug;
       });
 
       if (authorBook) {
-        const finalAuthorSlug = (authorBook.author_slug && authorBook.author_slug !== "null")
-          ? authorBook.author_slug
-          : generateSlug(authorBook.author);
+        const finalAuthorSlug =
+          authorBook.author_slug && authorBook.author_slug !== "null"
+            ? authorBook.author_slug
+            : generateSlug(authorBook.author);
 
         setSelectedAuthor({
           name: authorBook.author,

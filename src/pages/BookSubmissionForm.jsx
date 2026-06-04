@@ -10,7 +10,7 @@ import {
   File,
 } from "lucide-react";
 
-const API_URL = "/api";
+const API_URL = "https://www.theafricalaureateawards.org/api";
 
 const PAYSTACK_PUBLIC_KEY = "pk_live_6560af0a81f50cfdd244e08bf2e54169a3e434e9";
 // Add Flutterwave public key at the top with other constants
