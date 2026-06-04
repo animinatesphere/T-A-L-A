@@ -316,25 +316,25 @@ export default function BookSubmissionForm() {
     handler.openIframe();
   };
 
-  // const handlePayment = () => {
-  //   if (currency === "USD") {
-  //     handleFlutterwavePayment();
-  //   } else {
-  //     handlePaystackPayment();
-  //   }
-  // };
-
   const handlePayment = () => {
-    // Comment out payment functions for testing
-    // if (currency === "USD") {
-    //   handleFlutterwavePayment();
-    // } else {
-    //   handlePaystackPayment();
-    // }ddddd
-
-    // Directly call saveSubmission with a test reference for testing
-    saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+    if (currency === "USD") {
+      handleFlutterwavePayment();
+    } else {
+      handlePaystackPayment();
+    }
   };
+
+  // const handlePayment = () => {
+  //   // Comment out payment functions for testing
+  //   // if (currency === "USD") {
+  //   //   handleFlutterwavePayment();
+  //   // } else {
+  //   //   handlePaystackPayment();
+  //   // }ddddd
+
+  //   // Directly call saveSubmission with a test reference for testing
+  //   saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
+  // };
 
   // const generateAuthorSlug = (name) => {
   //   return name
