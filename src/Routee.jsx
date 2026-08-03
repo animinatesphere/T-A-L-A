@@ -9,7 +9,7 @@ import Footer from "./component/Footer";
 import TALAFAQPage from "./component/TALAFAQPage";
 import TALAContactPage from "./pages/TALAContactPage";
 import TALAPodcastPage from "./pages/TALAPodcastPage";
-import AdminDashboard from "./admin/AdminDashboard";
+import AdminApp from "./admin/AdminApp";
 import BookSubmissionForm from "./pages/BookSubmissionForm";
 import TALATermsPage from "./pages/TALATermsPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -23,46 +23,54 @@ import OurJudges from "./pages/OurJudges";
 import Bookme from "./pages/Bookme";
 import AwardWinningBooks from "./pages/AwardWinningBooks";
 import ScrollToTop from "./component/ScrollToTop";
-import DonationPage from "./pages/DonationPage";
+
+const PublicLayout = ({ children }) => (
+  <>
+    <Loading minMs={700} />
+    <Navbar />
+    <ScrollToTop />
+    {children}
+    <Footer />
+  </>
+);
 
 const Routee = () => {
   return (
-    <>
-      <Loading minMs={700} />
-      <Navbar />
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/faq" element={<TALAFAQPage />} />
-        <Route path="/contact" element={<TALAContactPage />} />
-        <Route path="/podcast" element={<TALAPodcastPage />} />
-        <Route path="/Tala-admin" element={<AdminDashboard />} />
-        <Route path="/submit-your-book" element={<BookSubmissionForm />} />
-        <Route path="/terms" element={<TALATermsPage />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/categories" element={<TALACategoriesPage />} />
-        <Route path="/refund" element={<TALARefundPage />} />
-        <Route path="/books" element={<Books />} />
-        <Route path="/books/:slug" element={<Books />} />
-        <Route path="/nominate" element={<Books />} />
-        <Route path="/meet-the-winners" element={<Books />} />
-        <Route path="/blog" element={<BlogListing />} />
-        <Route path="/blog/:slug" element={<BlogDetail />} />
-        <Route path="/book-desk" element={<BlogListing />} />
-        <Route path="/book" element={<AwardWinningBooks />} />
-        <Route path="/donate" element={<DonationPage />} />
-        <Route path="/book/:author" element={<AwardWinningBooks />} />
-
-        <Route path="/books/:slug" element={<Books />} />
-        <Route path="/author/:slug" element={<Books />} />
-        <Route path="/judges" element={<OurJudges />} />
-        <Route path="/become-a-reader" element={<BecomeAReader />} />
-
-        <Route path="*" element={<TALA404Page />} />
-      </Routes>
-      <Footer />
-    </>
+    <Routes>
+      <Route path="/Tala-admin/*" element={<AdminApp />} />
+      <Route
+        path="*"
+        element={
+          <PublicLayout>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/faq" element={<TALAFAQPage />} />
+              <Route path="/contact" element={<TALAContactPage />} />
+              <Route path="/podcast" element={<TALAPodcastPage />} />
+              <Route path="/submit-your-book" element={<BookSubmissionForm />} />
+              <Route path="/terms" element={<TALATermsPage />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/categories" element={<TALACategoriesPage />} />
+              <Route path="/refund" element={<TALARefundPage />} />
+              <Route path="/books" element={<Books />} />
+              <Route path="/books/:slug" element={<Books />} />
+              <Route path="/nominate" element={<Books />} />
+              <Route path="/meet-the-winners" element={<Books />} />
+              <Route path="/blog" element={<BlogListing />} />
+              <Route path="/blog/:slug" element={<BlogDetail />} />
+              <Route path="/book-desk" element={<BlogListing />} />
+              <Route path="/book" element={<AwardWinningBooks />} />
+              <Route path="/book/:author" element={<AwardWinningBooks />} />
+              <Route path="/author/:slug" element={<Books />} />
+              <Route path="/judges" element={<OurJudges />} />
+              <Route path="/become-a-reader" element={<BecomeAReader />} />
+              <Route path="*" element={<TALA404Page />} />
+            </Routes>
+          </PublicLayout>
+        }
+      />
+    </Routes>
   );
 };
 

@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Env files (never commit real secrets)
+.env
+!.env.example
+!backend/.env.example
+
+# Claude Code local session config
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
