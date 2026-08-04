@@ -6,9 +6,9 @@ export default function Table({ columns, children }) {
       <table className="min-w-full divide-y divide-gray-100 text-sm">
         <thead className="bg-gray-50">
           <tr>
-            {columns.map((col) => (
+            {columns.map((col, i) => (
               <th
-                key={col}
+                key={i}
                 className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap"
               >
                 {col}

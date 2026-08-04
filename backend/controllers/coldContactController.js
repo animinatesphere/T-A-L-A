@@ -10,17 +10,18 @@ const listContacts = async (req, res) => {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.max(1, parseInt(req.query.limit) || PAGE_SIZE);
     const search = (req.query.search || "").trim();
+    const status = (req.query.status || "").trim();
 
-    const filter = search
-      ? {
-          $or: [
-            { email: { $regex: search, $options: "i" } },
-            { firstName: { $regex: search, $options: "i" } },
-            { lastName: { $regex: search, $options: "i" } },
-            { company: { $regex: search, $options: "i" } },
-          ],
-        }
-      : {};
+    const filter = {};
+    if (status === "active" || status === "suppressed") filter.status = status;
+    if (search) {
+      filter.$or = [
+        { email: { $regex: search, $options: "i" } },
+        { firstName: { $regex: search, $options: "i" } },
+        { lastName: { $regex: search, $options: "i" } },
+        { company: { $regex: search, $options: "i" } },
+      ];
+    }
 
     const [contacts, total, activeCount, suppressedCount] = await Promise.all([
       ColdContact.find(filter)
@@ -49,7 +50,9 @@ const listContacts = async (req, res) => {
 const allContactIds = async (req, res) => {
   try {
     const search = (req.query.search || "").trim();
-    const filter = { status: "active" };
+    const status = (req.query.status || "").trim();
+    const filter = {};
+    if (status === "active" || status === "suppressed") filter.status = status;
     if (search) {
       filter.$or = [
         { email: { $regex: search, $options: "i" } },
