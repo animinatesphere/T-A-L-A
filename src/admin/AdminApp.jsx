@@ -4,6 +4,7 @@ import { Award } from "lucide-react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AdminLayout from "./components/AdminLayout";
 import DashboardHome from "./DashboardHome";
+import RevenuePage from "./RevenuePage";
 import LegacyLayout from "./legacy/LegacyLayout";
 import SubmissionsSection from "./legacy/SubmissionsSection";
 import PodcastsSection from "./legacy/PodcastsSection";
@@ -81,6 +82,7 @@ function AdminRoutes() {
     <Routes>
       <Route element={<AdminLayout />}>
         <Route index element={<DashboardHome />} />
+        <Route path="revenue" element={<RevenuePage />} />
         <Route element={<LegacyLayout />}>
           <Route path="submissions" element={<SubmissionsSection />} />
           <Route path="books" element={<BooksSection />} />

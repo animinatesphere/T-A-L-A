@@ -13,12 +13,16 @@ import {
   LogOut,
   Menu,
   X,
+  DollarSign,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const NAV_SECTIONS = [
   {
-    items: [{ to: "/Tala-admin", label: "Dashboard", icon: LayoutDashboard, end: true }],
+    items: [
+      { to: "/Tala-admin", label: "Dashboard", icon: LayoutDashboard, end: true },
+      { to: "/Tala-admin/revenue", label: "Revenue", icon: DollarSign },
+    ],
   },
   {
     title: "Content",
