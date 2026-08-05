@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Users, UserCheck, UserX, Upload, Plus, Trash2, Search, X, CheckCircle2, AlertCircle } from "lucide-react";
-import { apiGet, apiPost, apiDelete, apiUpload } from "../../services/api";
+import { Users, UserCheck, UserX, Upload, Plus, Pencil, Trash2, Search, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from "../../services/api";
 import Card, { StatCard } from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
@@ -50,6 +50,9 @@ export default function ContactsPage() {
   const [expandingSelection, setExpandingSelection] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [addForm, setAddForm] = useState({ email: "", firstName: "", lastName: "", bookName: "", company: "" });
+  const [editingId, setEditingId] = useState(null);
+  const [savingContact, setSavingContact] = useState(false);
+  const [formError, setFormError] = useState("");
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -146,12 +149,43 @@ export default function ContactsPage() {
     load();
   };
 
-  const handleAddContact = async (e) => {
-    e.preventDefault();
-    await apiPost("/cold-email/contacts", addForm);
+  const openAddModal = () => {
+    setEditingId(null);
+    setFormError("");
     setAddForm({ email: "", firstName: "", lastName: "", bookName: "", company: "" });
-    setAddOpen(false);
-    load();
+    setAddOpen(true);
+  };
+
+  const openEditModal = (contact) => {
+    setEditingId(contact._id);
+    setFormError("");
+    setAddForm({
+      email: contact.email || "",
+      firstName: contact.firstName || "",
+      lastName: contact.lastName || "",
+      bookName: contact.bookName || "",
+      company: contact.company || "",
+    });
+    setAddOpen(true);
+  };
+
+  const handleSubmitContact = async (e) => {
+    e.preventDefault();
+    setFormError("");
+    setSavingContact(true);
+    try {
+      if (editingId) {
+        await apiPatch(`/cold-email/contacts/${editingId}`, addForm);
+      } else {
+        await apiPost("/cold-email/contacts", addForm);
+      }
+      setAddOpen(false);
+      load();
+    } catch (err) {
+      setFormError(err.message);
+    } finally {
+      setSavingContact(false);
+    }
   };
 
   const handleFileChange = async (e) => {
@@ -186,7 +220,7 @@ export default function ContactsPage() {
             <Upload size={16} />
             {importing ? "Importing..." : "Import CSV"}
           </Button>
-          <Button onClick={() => setAddOpen(true)}>
+          <Button onClick={openAddModal}>
             <Plus size={16} />
             Add Contact
           </Button>
@@ -326,19 +360,19 @@ export default function ContactsPage() {
                     />
                   </Td>
                   <Td>
-                    <div className="flex items-center gap-3">
+                    <button onClick={() => openEditModal(contact)} className="flex items-center gap-3 text-left group">
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${avatarTone(contact._id)}`}
                       >
                         {initials(contact)}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
+                        <p className="font-medium text-gray-900 truncate group-hover:underline">
                           {[contact.firstName, contact.lastName].filter(Boolean).join(" ") || "—"}
                         </p>
                         <p className="text-xs text-gray-500 truncate">{contact.email}</p>
                       </div>
-                    </div>
+                    </button>
                   </Td>
                   <Td>
                     <p className="text-gray-700 truncate max-w-[220px]">{contact.bookName || "—"}</p>
@@ -348,9 +382,14 @@ export default function ContactsPage() {
                     <Badge status={contact.status} />
                   </Td>
                   <Td className="text-right">
-                    <button onClick={() => deleteOne(contact._id)} className="text-gray-400 hover:text-red-600">
-                      <Trash2 size={15} />
-                    </button>
+                    <div className="flex items-center justify-end gap-3">
+                      <button onClick={() => openEditModal(contact)} className="text-gray-400 hover:text-[#6B0C22]" title="Edit contact">
+                        <Pencil size={15} />
+                      </button>
+                      <button onClick={() => deleteOne(contact._id)} className="text-gray-400 hover:text-red-600" title="Delete contact">
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </Td>
                 </tr>
               ))}
@@ -363,17 +402,20 @@ export default function ContactsPage() {
       <Modal
         open={addOpen}
         onClose={() => setAddOpen(false)}
-        title="Add Contact"
+        title={editingId ? "Edit Contact" : "Add Contact"}
         footer={
           <>
             <Button variant="secondary" onClick={() => setAddOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAddContact}>Add Contact</Button>
+            <Button onClick={handleSubmitContact} disabled={savingContact}>
+              {savingContact ? "Saving..." : editingId ? "Save Changes" : "Add Contact"}
+            </Button>
           </>
         }
       >
-        <form className="space-y-4" onSubmit={handleAddContact}>
+        <form className="space-y-4" onSubmit={handleSubmitContact}>
+          {formError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{formError}</p>}
           <div>
             <Label>Author email *</Label>
             <Input

@@ -36,7 +36,7 @@ const createCampaign = async (req, res) => {
 // GET /api/cold-email/campaigns/:id
 const getCampaign = async (req, res) => {
   try {
-    const campaign = await ColdCampaign.findById(req.params.id);
+    const campaign = await ColdCampaign.findById(req.params.id).populate("mailboxIds", "email status");
     if (!campaign) return res.status(404).json({ success: false, error: "Campaign not found" });
 
     const breakdown = await ColdSend.aggregate([

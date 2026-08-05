@@ -16,6 +16,7 @@ const {
   allContactIds,
   importContacts,
   addContact,
+  updateContact,
   deleteContact,
   bulkDeleteContacts,
 } = require("../controllers/coldContactController");
@@ -61,6 +62,7 @@ router.get("/contacts/all-ids", protect, allContactIds);
 router.post("/contacts/import", protect, csvUpload.single("file"), importContacts);
 router.get("/contacts", protect, listContacts);
 router.post("/contacts", protect, addContact);
+router.patch("/contacts/:id", protect, updateContact);
 router.delete("/contacts/:id", protect, deleteContact);
 router.delete("/contacts", protect, bulkDeleteContacts);
 

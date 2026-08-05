@@ -181,6 +181,30 @@ const addContact = async (req, res) => {
   }
 };
 
+// PATCH /api/cold-email/contacts/:id
+const updateContact = async (req, res) => {
+  try {
+    const { email, firstName, lastName, company, bookName, status } = req.body;
+    const update = {};
+    if (email !== undefined) update.email = email.toLowerCase().trim();
+    if (firstName !== undefined) update.firstName = firstName;
+    if (lastName !== undefined) update.lastName = lastName;
+    if (company !== undefined) update.company = company;
+    if (bookName !== undefined) update.bookName = bookName;
+    if (status === "active" || status === "suppressed") update.status = status;
+
+    const contact = await ColdContact.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+      runValidators: true,
+    });
+    if (!contact) return res.status(404).json({ success: false, error: "Contact not found" });
+    res.json({ success: true, contact });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).json({ success: false, error: "Another contact already uses that email" });
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 // DELETE /api/cold-email/contacts/:id
 const deleteContact = async (req, res) => {
   try {
@@ -210,6 +234,7 @@ module.exports = {
   allContactIds,
   importContacts,
   addContact,
+  updateContact,
   deleteContact,
   bulkDeleteContacts,
 };
