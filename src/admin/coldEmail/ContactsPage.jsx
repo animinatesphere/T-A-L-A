@@ -49,7 +49,7 @@ export default function ContactsPage() {
   const [allMatchingSelected, setAllMatchingSelected] = useState(false);
   const [expandingSelection, setExpandingSelection] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [addForm, setAddForm] = useState({ email: "", firstName: "", lastName: "", company: "" });
+  const [addForm, setAddForm] = useState({ email: "", firstName: "", lastName: "", bookName: "", company: "" });
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -149,7 +149,7 @@ export default function ContactsPage() {
   const handleAddContact = async (e) => {
     e.preventDefault();
     await apiPost("/cold-email/contacts", addForm);
-    setAddForm({ email: "", firstName: "", lastName: "", company: "" });
+    setAddForm({ email: "", firstName: "", lastName: "", bookName: "", company: "" });
     setAddOpen(false);
     load();
   };
@@ -192,6 +192,10 @@ export default function ContactsPage() {
           </Button>
         </div>
       </div>
+      <p className="text-xs text-gray-400 -mt-4">
+        CSV columns recognized: <strong className="text-gray-500 font-semibold">Author Name</strong> (or First/Last Name),{" "}
+        <strong className="text-gray-500 font-semibold">Book Name</strong>, <strong className="text-gray-500 font-semibold">Author Email</strong> — any others are kept but unused in campaigns.
+      </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Active" value={counts.active} icon={UserCheck} />
@@ -307,7 +311,7 @@ export default function ContactsPage() {
                   aria-label="Select all on page"
                 />,
                 "Contact",
-                "Company",
+                "Book",
                 "Status",
                 "",
               ]}
@@ -336,7 +340,10 @@ export default function ContactsPage() {
                       </div>
                     </div>
                   </Td>
-                  <Td className="text-gray-600">{contact.company || "—"}</Td>
+                  <Td>
+                    <p className="text-gray-700 truncate max-w-[220px]">{contact.bookName || "—"}</p>
+                    {contact.company && <p className="text-xs text-gray-400 truncate max-w-[220px]">{contact.company}</p>}
+                  </Td>
                   <Td>
                     <Badge status={contact.status} />
                   </Td>
@@ -368,7 +375,7 @@ export default function ContactsPage() {
       >
         <form className="space-y-4" onSubmit={handleAddContact}>
           <div>
-            <Label>Email *</Label>
+            <Label>Author email *</Label>
             <Input
               type="email"
               required
@@ -378,16 +385,24 @@ export default function ContactsPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>First name</Label>
+              <Label>Author first name</Label>
               <Input value={addForm.firstName} onChange={(e) => setAddForm({ ...addForm, firstName: e.target.value })} />
             </div>
             <div>
-              <Label>Last name</Label>
+              <Label>Author last name</Label>
               <Input value={addForm.lastName} onChange={(e) => setAddForm({ ...addForm, lastName: e.target.value })} />
             </div>
           </div>
           <div>
-            <Label>Company</Label>
+            <Label>Book name</Label>
+            <Input
+              value={addForm.bookName}
+              onChange={(e) => setAddForm({ ...addForm, bookName: e.target.value })}
+              placeholder="Used for the {{book_name}} merge tag"
+            />
+          </div>
+          <div>
+            <Label>Company / Publisher (optional)</Label>
             <Input value={addForm.company} onChange={(e) => setAddForm({ ...addForm, company: e.target.value })} />
           </div>
         </form>

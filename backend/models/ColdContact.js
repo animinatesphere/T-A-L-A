@@ -5,6 +5,7 @@ const coldContactSchema = new mongoose.Schema({
   firstName: { type: String, default: "" },
   lastName: { type: String, default: "" },
   company: { type: String, default: "" },
+  bookName: { type: String, default: "" },
   extraFields: { type: Map, of: String, default: {} },
   status: { type: String, enum: ["active", "suppressed"], default: "active" },
   importBatch: { type: String },

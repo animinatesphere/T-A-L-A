@@ -20,6 +20,7 @@ const listContacts = async (req, res) => {
         { firstName: { $regex: search, $options: "i" } },
         { lastName: { $regex: search, $options: "i" } },
         { company: { $regex: search, $options: "i" } },
+        { bookName: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -59,6 +60,7 @@ const allContactIds = async (req, res) => {
         { firstName: { $regex: search, $options: "i" } },
         { lastName: { $regex: search, $options: "i" } },
         { company: { $regex: search, $options: "i" } },
+        { bookName: { $regex: search, $options: "i" } },
       ];
     }
     const ids = await ColdContact.find(filter).select("_id").lean();
@@ -83,10 +85,21 @@ function mapRow(row) {
       mapped.firstName = value;
     } else if (key === "lastname") {
       mapped.lastName = value;
-    } else if (!mapped._fullName && (key === "fullname" || key === "prospectfullname")) {
+    } else if (
+      !mapped._fullName &&
+      (key === "fullname" || key === "prospectfullname" || key === "authorname" || key === "author")
+    ) {
       mapped._fullName = value;
     } else if (key === "company" || key === "companyname" || key === "prospectcompanyname") {
       mapped.company = value;
+    } else if (
+      key === "bookname" ||
+      key === "booktitle" ||
+      key === "book" ||
+      key === "prospectbookname" ||
+      key === "prospectbooktitle"
+    ) {
+      mapped.bookName = value;
     } else {
       mapped.extraFields[rawKey] = value;
     }
@@ -124,6 +137,7 @@ const importContacts = async (req, res) => {
         firstName: mapped.firstName || "",
         lastName: mapped.lastName || "",
         company: mapped.company || "",
+        bookName: mapped.bookName || "",
         extraFields: mapped.extraFields,
         importBatch,
       });
@@ -149,7 +163,7 @@ const importContacts = async (req, res) => {
 // POST /api/cold-email/contacts
 const addContact = async (req, res) => {
   try {
-    const { email, firstName, lastName, company } = req.body;
+    const { email, firstName, lastName, company, bookName } = req.body;
     if (!email) return res.status(400).json({ success: false, error: "Email is required" });
 
     const contact = await ColdContact.create({
@@ -157,6 +171,7 @@ const addContact = async (req, res) => {
       firstName: firstName || "",
       lastName: lastName || "",
       company: company || "",
+      bookName: bookName || "",
       importBatch: "manual",
     });
     res.status(201).json({ success: true, contact });

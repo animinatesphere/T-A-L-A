@@ -91,6 +91,8 @@ function personalizeTemplate(template, contact) {
     .replace(/\{\{first_name\}\}/gi, contact.firstName || "")
     .replace(/\{\{last_name\}\}/gi, contact.lastName || "")
     .replace(/\{\{full_name\}\}/gi, fullName)
+    .replace(/\{\{author_name\}\}/gi, fullName)
+    .replace(/\{\{book_name\}\}/gi, contact.bookName || "")
     .replace(/\{\{company\}\}/gi, contact.company || "")
     .replace(/\{\{email\}\}/gi, contact.email || "");
 }

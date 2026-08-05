@@ -140,7 +140,7 @@ function CampaignEditor({ open, onClose, onSaved }) {
                 )}
                 <div>
                   <Label>Subject</Label>
-                  <Input value={step.subject} onChange={(e) => updateStep(i, "subject", e.target.value)} placeholder="{{first_name}}, quick question" />
+                  <Input value={step.subject} onChange={(e) => updateStep(i, "subject", e.target.value)} placeholder="{{author_name}}, quick question about {{book_name}}" />
                 </div>
                 <div>
                   <Label>Body</Label>
@@ -148,10 +148,10 @@ function CampaignEditor({ open, onClose, onSaved }) {
                     rows={5}
                     value={step.body}
                     onChange={(e) => updateStep(i, "body", e.target.value)}
-                    placeholder="Hi {{first_name}}, ..."
+                    placeholder="Hi {{author_name}}, I came across {{book_name}}..."
                   />
                   <p className="text-[11px] text-gray-400 mt-1">
-                    Merge tags: {"{{first_name}}"} {"{{last_name}}"} {"{{full_name}}"} {"{{company}}"} {"{{email}}"}
+                    Merge tags: {"{{author_name}}"} {"{{book_name}}"} {"{{first_name}}"} {"{{last_name}}"} {"{{full_name}}"} {"{{company}}"} {"{{email}}"}
                   </p>
                 </div>
               </div>
