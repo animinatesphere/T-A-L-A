@@ -9,7 +9,8 @@ const ColdSend = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
 
 // -- Token encryption (AES-256-GCM) ------------------------------------------
-const RAW_KEY = process.env.COLD_EMAIL_ENCRYPTION_KEY || "dev_cold_email_key_32chars_pad00";
+const RAW_KEY =
+  process.env.COLD_EMAIL_ENCRYPTION_KEY || "dev_cold_email_key_32chars_pad00";
 const ENC_KEY = crypto.createHash("sha256").update(RAW_KEY).digest();
 
 function encrypt(text) {
@@ -39,7 +40,7 @@ function buildOAuth2Client() {
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    REDIRECT_URI
+    REDIRECT_URI,
   );
 }
 
@@ -48,7 +49,9 @@ async function getGmailClient(mailbox) {
   oauth2.setCredentials({
     access_token: decrypt(mailbox.accessToken),
     refresh_token: decrypt(mailbox.refreshToken),
-    expiry_date: mailbox.tokenExpiry ? mailbox.tokenExpiry.getTime() : undefined,
+    expiry_date: mailbox.tokenExpiry
+      ? mailbox.tokenExpiry.getTime()
+      : undefined,
   });
   oauth2.on("tokens", async (tokens) => {
     const update = {};
@@ -79,14 +82,18 @@ async function sendViaGmail(mailbox, { to, subject, html, fromName }) {
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/, "");
-  const result = await gmail.users.messages.send({ userId: "me", requestBody: { raw } });
+  const result = await gmail.users.messages.send({
+    userId: "me",
+    requestBody: { raw },
+  });
   return result.data;
 }
 
 // -- Template personalization --------------------------------------------------
 // Supported merge tags: {{first_name}} {{last_name}} {{full_name}} {{company}} {{email}}
 function personalizeTemplate(template, contact) {
-  const fullName = `${contact.firstName || ""} ${contact.lastName || ""}`.trim();
+  const fullName =
+    `${contact.firstName || ""} ${contact.lastName || ""}`.trim();
   return template
     .replace(/\{\{first_name\}\}/gi, contact.firstName || "")
     .replace(/\{\{last_name\}\}/gi, contact.lastName || "")
@@ -111,15 +118,17 @@ function buildEmailHtml(rawBody, unsubUrl, replySubject) {
         .map((line) =>
           line.trim()
             ? `<tr><td style="padding:0 0 6px;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;line-height:1.7;">${line}</td></tr>`
-            : `<tr><td style="height:10px;font-size:10px;line-height:10px;">&nbsp;</td></tr>`
+            : `<tr><td style="height:10px;font-size:10px;line-height:10px;">&nbsp;</td></tr>`,
         )
         .join("\n");
 
-  const replySubEnc = encodeURIComponent("Re: " + (replySubject || "Your message"));
-  const replyBodyEnc = encodeURIComponent(
-    "Hi,\n\nI'm interested in learning more. Please get in touch.\n\nKind regards,"
+  const replySubEnc = encodeURIComponent(
+    "Re: " + (replySubject || "Your message"),
   );
-  const replyHref = `mailto:info@theafricalaureateawards.org?subject=${replySubEnc}&body=${replyBodyEnc}`;
+  const replyBodyEnc = encodeURIComponent(
+    "Hi,\n\nI'm interested in learning more. Please get in touch.\n\nKind regards,",
+  );
+  const replyHref = `mailto:theafricalaureateawards@gmail.com?subject=${replySubEnc}&body=${replyBodyEnc}`;
 
   return `<!DOCTYPE html>
 <html lang="en"><head>
@@ -177,13 +186,16 @@ async function resetDailyCounters() {
   today.setHours(0, 0, 0, 0);
   await ColdMailbox.updateMany(
     { lastResetDate: { $lt: today } },
-    { $set: { sentToday: 0, lastResetDate: new Date() } }
+    { $set: { sentToday: 0, lastResetDate: new Date() } },
   );
 }
 
 // -- Pick an available mailbox (one with remaining daily capacity) ---------------
 async function pickMailbox(mailboxIds) {
-  const boxes = await ColdMailbox.find({ _id: { $in: mailboxIds }, status: "active" });
+  const boxes = await ColdMailbox.find({
+    _id: { $in: mailboxIds },
+    status: "active",
+  });
   for (const box of boxes) {
     if (box.sentToday < box.dailyLimit) return box;
   }
@@ -197,7 +209,12 @@ async function scheduleNextStep(send, campaign) {
   const nextStep = campaign.steps[nextIdx];
   const base = new Date();
   base.setDate(base.getDate() + (nextStep.waitDays || 1));
-  base.setHours(9 + Math.floor(Math.random() * 7), Math.floor(Math.random() * 60), 0, 0);
+  base.setHours(
+    9 + Math.floor(Math.random() * 7),
+    Math.floor(Math.random() * 60),
+    0,
+    0,
+  );
   const exists = await ColdSend.findOne({
     campaignId: send.campaignId,
     contactId: send.contactId,
@@ -218,41 +235,72 @@ async function scheduleNextStep(send, campaign) {
 async function processSingleSend(send) {
   const campaign = await ColdCampaign.findById(send.campaignId);
   if (!campaign || campaign.status !== "active")
-    return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Campaign not active" });
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: "Campaign not active",
+    });
 
-  const suppressed = await ColdSuppressionList.findOne({ email: send.contactEmail });
-  if (suppressed) return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Suppressed" });
+  const suppressed = await ColdSuppressionList.findOne({
+    email: send.contactEmail,
+  });
+  if (suppressed)
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: "Suppressed",
+    });
 
   const contact = await ColdContact.findById(send.contactId);
   if (!contact || contact.status !== "active")
-    return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Contact inactive" });
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: "Contact inactive",
+    });
 
   const mailbox = await pickMailbox(campaign.mailboxIds);
   if (!mailbox) {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(9 + Math.floor(Math.random() * 6), Math.floor(Math.random() * 60), 0, 0);
+    tomorrow.setHours(
+      9 + Math.floor(Math.random() * 6),
+      Math.floor(Math.random() * 60),
+      0,
+      0,
+    );
     return ColdSend.findByIdAndUpdate(send._id, { scheduledAt: tomorrow });
   }
 
   const step = campaign.steps[send.stepIndex];
-  if (!step) return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Step missing" });
+  if (!step)
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: "Step missing",
+    });
 
   const subject = personalizeTemplate(step.subject, contact);
   const body = personalizeTemplate(step.body, contact);
   const unsubToken = jwt.sign(
     { email: contact.email, campaignId: send.campaignId.toString() },
     process.env.JWT_SECRET || "secret",
-    { expiresIn: "90d" }
+    { expiresIn: "90d" },
   );
   const unsubUrl = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/unsubscribe/${unsubToken}`;
   const fullHtml = buildEmailHtml(body, unsubUrl, subject);
 
   if (process.env.COLD_EMAIL_DRY_RUN === "true") {
-    console.log(`[DRY RUN] -> ${contact.email} | Step ${send.stepIndex + 1} | "${subject}"`);
-    await ColdSend.findByIdAndUpdate(send._id, { status: "sent", sentAt: new Date(), mailboxId: mailbox._id });
-    await ColdMailbox.findByIdAndUpdate(mailbox._id, { $inc: { sentToday: 1 } });
-    await ColdCampaign.findByIdAndUpdate(send.campaignId, { $inc: { "stats.sent": 1 } });
+    console.log(
+      `[DRY RUN] -> ${contact.email} | Step ${send.stepIndex + 1} | "${subject}"`,
+    );
+    await ColdSend.findByIdAndUpdate(send._id, {
+      status: "sent",
+      sentAt: new Date(),
+      mailboxId: mailbox._id,
+    });
+    await ColdMailbox.findByIdAndUpdate(mailbox._id, {
+      $inc: { sentToday: 1 },
+    });
+    await ColdCampaign.findByIdAndUpdate(send.campaignId, {
+      $inc: { "stats.sent": 1 },
+    });
     await scheduleNextStep(send, campaign);
     return;
   }
@@ -272,7 +320,9 @@ async function processSingleSend(send) {
     gmailThreadId: result.threadId,
   });
   await ColdMailbox.findByIdAndUpdate(mailbox._id, { $inc: { sentToday: 1 } });
-  await ColdCampaign.findByIdAndUpdate(send.campaignId, { $inc: { "stats.sent": 1 } });
+  await ColdCampaign.findByIdAndUpdate(send.campaignId, {
+    $inc: { "stats.sent": 1 },
+  });
   await scheduleNextStep(send, campaign);
 }
 
@@ -284,7 +334,10 @@ async function processColdEmailSends() {
   try {
     await resetDailyCounters();
     const now = new Date();
-    const pending = await ColdSend.find({ status: "pending", scheduledAt: { $lte: now } })
+    const pending = await ColdSend.find({
+      status: "pending",
+      scheduledAt: { $lte: now },
+    })
       .sort({ scheduledAt: 1 })
       .limit(150)
       .lean();
@@ -298,13 +351,22 @@ async function processColdEmailSends() {
             await processSingleSend(send);
           } catch (err) {
             console.error(`Send error (${send.contactEmail}):`, err.message);
-            await ColdSend.findByIdAndUpdate(send._id, { status: "failed", error: err.message });
-            if (err.message?.includes("invalid_grant") || err.message?.includes("Invalid Credentials")) {
+            await ColdSend.findByIdAndUpdate(send._id, {
+              status: "failed",
+              error: err.message,
+            });
+            if (
+              err.message?.includes("invalid_grant") ||
+              err.message?.includes("Invalid Credentials")
+            ) {
               if (send.mailboxId)
-                await ColdMailbox.findByIdAndUpdate(send.mailboxId, { status: "error", errorMessage: err.message });
+                await ColdMailbox.findByIdAndUpdate(send.mailboxId, {
+                  status: "error",
+                  errorMessage: err.message,
+                });
             }
           }
-        })
+        }),
       );
     }
   } finally {
@@ -316,7 +378,10 @@ async function processColdEmailSends() {
 function b64Decode(data) {
   if (!data) return "";
   try {
-    return Buffer.from(data.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+    return Buffer.from(
+      data.replace(/-/g, "+").replace(/_/g, "/"),
+      "base64",
+    ).toString("utf8");
   } catch {
     return "";
   }
@@ -349,7 +414,10 @@ async function detectRepliesForMailbox(mailbox) {
 
   for (const send of sentSends) {
     try {
-      const thread = await gmail.users.threads.get({ userId: "me", id: send.gmailThreadId });
+      const thread = await gmail.users.threads.get({
+        userId: "me",
+        id: send.gmailThreadId,
+      });
       const messages = thread.data.messages || [];
       if (messages.length < 2) continue;
 
@@ -370,7 +438,9 @@ async function detectRepliesForMailbox(mailbox) {
         replySubject,
         replyBody: replyBody.slice(0, 2000),
       });
-      await ColdCampaign.findByIdAndUpdate(send.campaignId, { $inc: { "stats.replied": 1 } });
+      await ColdCampaign.findByIdAndUpdate(send.campaignId, {
+        $inc: { "stats.replied": 1 },
+      });
     } catch {
       /* skip individual thread errors */
     }
