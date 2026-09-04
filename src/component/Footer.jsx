@@ -145,10 +145,10 @@ export default function Footer() {
               <div className="flex items-start gap-2 text-gray-300">
                 <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <a
-                  href="mailto:theafricalaureateawards@gmail.com"
+                  href="mailto:submissions@theafricalaureateawards.org"
                   className="hover:text-white transition-colors"
                 >
-                  theafricalaureateawards@gmail.com
+                 submissions@theafricalaureateawards.org
                 </a>
               </div>
               <div className="flex items-start gap-2 text-gray-300">
