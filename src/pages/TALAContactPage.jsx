@@ -106,10 +106,10 @@ export default function TALAContactPage() {
               </div>
               <h3 className="font-bold text-gray-900 mb-2">Email Us</h3>
               <a
-                href="mailto:info@tala.com"
+                href="mailto:submissions@theafricalaureateawards.org"
                 className="text-[#6B0C22] hover:underline"
               >
-                theafricalaureateawards@gmail.com
+                submissions@theafricalaureateawards.org
               </a>
             </div>
 
