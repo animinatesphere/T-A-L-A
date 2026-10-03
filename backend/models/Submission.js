@@ -26,7 +26,7 @@ const submissionSchema = new mongoose.Schema({
   payment_status: { type: String, default: 'pending' },
   payment_amount: { type: Number },
   payment_currency: { type: String },
-  payment_reference: { type: String },
+  payment_reference: { type: String, required: true, unique: true, sparse: true },
   submission_status: { 
     type: String, 
     enum: ['pending', 'approved', 'rejected', 'under_review'], 
