@@ -1052,17 +1052,19 @@ https://www.theafricalaureateawards.org/Tala-admin
                     <DollarSign className="w-6 h-6 mx-auto mb-2" />
                     USD $50.00
                   </button>
-                  <button
-                    onClick={() => setCurrency("NGN")}
-                    className={`p-4 border-2 rounded-lg font-semibold ${
-                      currency === "NGN"
-                        ? "border-[#6B0C22] bg-[#6B0C22]/5"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <span className="text-2xl">₦</span>
-                    <div className="mt-2">NGN ₦20,000</div>
-                  </button>
+               <div>
+  <button
+    disabled
+    onClick={() => setCurrency("NGN")}
+    className="w-full p-4 border-2 border-gray-300 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <span className="text-2xl">₦</span>
+    <div className="mt-2">NGN ₦20,000</div>
+  </button>
+  <p className="mt-2 text-xs text-red-600 text-center">
+    Naira payment is temporarily unavailable.
+  </p>
+</div>
                 </div>
               </div>
 
