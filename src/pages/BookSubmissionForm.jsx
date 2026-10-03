@@ -21,6 +21,8 @@ export default function BookSubmissionForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [gatewayReady, setGatewayReady] = useState({ NGN: false, USD: false });
+  const [gatewayError, setGatewayError] = useState({ NGN: "", USD: "" });
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -147,22 +149,59 @@ export default function BookSubmissionForm() {
   //     document.body.removeChild(korapayScript);
   //   };
   // }, []);
-  // Update the useEffect to load Flutterwave script
   useEffect(() => {
-    const paystackScript = document.createElement("script");
-    paystackScript.src = "https://js.paystack.co/v1/inline.js";
-    paystackScript.async = true;
-    document.body.appendChild(paystackScript);
+    const cleanupScripts = [];
+    const paymentScripts = [
+      {
+        currency: "NGN",
+        src: "https://js.paystack.co/v1/inline.js",
+        isReady: () => Boolean(window.PaystackPop),
+      },
+      {
+        currency: "USD",
+        src: "https://checkout.flutterwave.com/v3.js",
+        isReady: () => Boolean(window.FlutterwaveCheckout),
+      },
+    ];
 
-    const flutterwaveScript = document.createElement("script");
-    flutterwaveScript.src = "https://checkout.flutterwave.com/v3.js";
-    flutterwaveScript.async = true;
-    document.body.appendChild(flutterwaveScript);
+    paymentScripts.forEach(({ currency: paymentCurrency, src, isReady }) => {
+      if (isReady()) {
+        setGatewayReady((current) => ({ ...current, [paymentCurrency]: true }));
+        return;
+      }
 
-    return () => {
-      document.body.removeChild(paystackScript);
-      document.body.removeChild(flutterwaveScript);
-    };
+      const script = document.createElement("script");
+      const handleLoad = () => {
+        if (isReady()) {
+          setGatewayReady((current) => ({ ...current, [paymentCurrency]: true }));
+        } else {
+          setGatewayError((current) => ({
+            ...current,
+            [paymentCurrency]: "The payment service did not initialize. Refresh the page and try again.",
+          }));
+        }
+      };
+      const handleError = () => {
+        setGatewayError((current) => ({
+          ...current,
+          [paymentCurrency]: "The payment service could not load. Check your connection and refresh the page.",
+        }));
+      };
+
+      script.src = src;
+      script.async = true;
+      script.addEventListener("load", handleLoad);
+      script.addEventListener("error", handleError);
+      document.body.appendChild(script);
+
+      cleanupScripts.push(() => {
+        script.removeEventListener("load", handleLoad);
+        script.removeEventListener("error", handleError);
+        script.remove();
+      });
+    });
+
+    return () => cleanupScripts.forEach((cleanup) => cleanup());
   }, []);
   const handleFileChange = (fileType, file) => {
     if (file) {
@@ -252,32 +291,66 @@ export default function BookSubmissionForm() {
   };
   // Replace handleKorapayPayment with this Flutterwave function
   const handleFlutterwavePayment = () => {
-    const modal = window.FlutterwaveCheckout({
-      public_key: FLUTTERWAVE_PUBLIC_KEY,
-      tx_ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-      amount: 50,
-      currency: "USD",
-      payment_options: "card,ussd,banktransfer",
-      customer: {
-        email: formData.email,
-        name: `${formData.first_name} ${formData.last_name}`,
-      },
-      customizations: {
-        title: "T.A.L.A. Book Submission",
-        description: "Book submission processing fee",
-        logo: "https://your-logo-url.com/logo.png", // Optional: Add your logo URL
-      },
-      callback: function (data) {
-        console.log("Payment successful:", data);
-        if (data.status === "successful") {
-          saveSubmission(data.tx_ref);
-        }
-        modal.close();
-      },
-      onclose: function () {
-        console.log("Payment window closed");
-      },
-    });
+    setGatewayError((current) => ({ ...current, USD: "" }));
+
+    if (!FLUTTERWAVE_PUBLIC_KEY) {
+      setGatewayError((current) => ({
+        ...current,
+        USD: "Flutterwave is not configured for this site. Please contact support.",
+      }));
+      return;
+    }
+
+    if (!window.FlutterwaveCheckout) {
+      setGatewayError((current) => ({
+        ...current,
+        USD: "Flutterwave is still loading. Please wait a moment and try again.",
+      }));
+      return;
+    }
+
+    if (!formData.email || !formData.email.includes("@")) {
+      setGatewayError((current) => ({
+        ...current,
+        USD: "Enter a valid email address before continuing to payment.",
+      }));
+      return;
+    }
+
+    try {
+      let modal;
+      modal = window.FlutterwaveCheckout({
+        public_key: FLUTTERWAVE_PUBLIC_KEY,
+        tx_ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
+        amount: 50,
+        currency: "USD",
+        payment_options: "card,ussd,banktransfer",
+        customer: {
+          email: formData.email.trim(),
+          name: `${formData.first_name} ${formData.last_name}`,
+        },
+        customizations: {
+          title: "T.A.L.A. Book Submission",
+          description: "Book submission processing fee",
+          logo: "https://your-logo-url.com/logo.png",
+        },
+        callback: function (data) {
+          if (data.status === "successful") {
+            saveSubmission(data.tx_ref);
+          }
+          modal?.close();
+        },
+        onclose: function () {
+          console.log("Payment window closed");
+        },
+      });
+    } catch (error) {
+      console.error("Unable to open Flutterwave checkout:", error);
+      setGatewayError((current) => ({
+        ...current,
+        USD: "Flutterwave checkout could not open. Please refresh and try again.",
+      }));
+    }
   };
 
   const handlePaystackPayment = () => {
@@ -985,6 +1058,16 @@ https://www.theafricalaureateawards.org/Tala-admin
                 </div>
               </div>
 
+              {gatewayError[currency] && (
+                <div
+                  className="mb-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                  role="alert"
+                >
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                  <p>{gatewayError[currency]}</p>
+                </div>
+              )}
+
               <div className="flex gap-4">
                 <button
                   onClick={() => {
@@ -1127,12 +1210,16 @@ https://www.theafricalaureateawards.org/Tala-admin
                 </button>
                 <button
                   onClick={handlePayment}
-                  disabled={loading}
+                  disabled={loading || !gatewayReady[currency]}
                   className="flex-1 bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <CreditCard className="w-5 h-5" />
                   {loading
                     ? "Processing..."
+                    : !gatewayReady[currency]
+                      ? gatewayError[currency]
+                        ? "Payment Unavailable"
+                        : "Loading Payment..."
                     : `Pay ${currency} ${
                         currency === "USD" ? "$50" : "₦20,000"
                       }`}
