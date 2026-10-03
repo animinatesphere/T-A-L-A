@@ -2,12 +2,91 @@ const Submission = require('../models/Submission');
 const fs = require('fs');
 const path = require('path');
 
+const verifyPayment = async (reference, requestedCurrency) => {
+  const currency = String(requestedCurrency || '').toUpperCase();
+  let provider;
+  let secretKey;
+  let verificationUrl;
+
+  if (currency === 'NGN') {
+    provider = 'paystack';
+    secretKey = process.env.PAYSTACK_SECRET_KEY;
+    verificationUrl = `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`;
+  } else if (currency === 'USD') {
+    provider = 'flutterwave';
+    secretKey = process.env.FLUTTERWAVE_SECRET_KEY;
+    verificationUrl = `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${encodeURIComponent(reference)}`;
+  } else {
+    const error = new Error('Unsupported payment currency.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!secretKey) {
+    const error = new Error(`${provider} secret key is not configured.`);
+    error.statusCode = 500;
+    throw error;
+  }
+
+  const response = await fetch(verificationUrl, {
+    headers: { Authorization: `Bearer ${secretKey}` }
+  });
+  const result = await response.json().catch(() => null);
+  const transaction = result?.data;
+  const verifiedReference = provider === 'paystack' ? transaction?.reference : transaction?.tx_ref;
+  const validStatus = provider === 'paystack'
+    ? result?.status === true && transaction?.status === 'success'
+    : result?.status === 'success' && transaction?.status === 'successful';
+  const validAmount = provider === 'paystack'
+    ? Number(transaction?.amount) === 2000000
+    : Number(transaction?.amount) === 50;
+
+  if (
+    !response.ok ||
+    !validStatus ||
+    !validAmount ||
+    transaction?.currency !== currency ||
+    verifiedReference !== reference
+  ) {
+    return null;
+  }
+
+  return {
+    payment_status: 'completed',
+    payment_amount: Number(transaction.amount),
+    payment_currency: transaction.currency,
+    payment_reference: verifiedReference
+  };
+};
+
 // @desc    Create a new submission
 // @route   POST /api/submissions
 // @access  Public
 const createSubmission = async (req, res) => {
   try {
-    const submissionData = req.body;
+    const paymentReference = String(req.body.payment_reference || '').trim();
+    if (!paymentReference) {
+      return res.status(400).json({ success: false, error: 'Payment reference is required.' });
+    }
+
+    let verifiedPayment;
+    try {
+      verifiedPayment = await verifyPayment(paymentReference, req.body.payment_currency);
+    } catch (error) {
+      return res.status(error.statusCode || 502).json({
+        success: false,
+        error: error.statusCode ? error.message : 'Unable to verify payment with the provider.'
+      });
+    }
+
+    if (!verifiedPayment) {
+      return res.status(400).json({
+        success: false,
+        error: 'Payment verification failed. Confirm the payment amount, currency, and status.'
+      });
+    }
+
+    const submissionData = { ...req.body, ...verifiedPayment };
     
     // Files are handled by multer and URLs should be passed in the body or extracted from req.files
     // In this unified approach, req.files will contain the file info
@@ -32,6 +111,16 @@ const createSubmission = async (req, res) => {
       data: submission
     });
   } catch (error) {
+    if (
+      error.code === 11000 &&
+      (error.keyPattern?.payment_reference || error.keyValue?.payment_reference !== undefined)
+    ) {
+      return res.status(409).json({
+        success: false,
+        error: 'This payment reference has already been used.'
+      });
+    }
+
     res.status(400).json({
       success: false,
       error: error.message
