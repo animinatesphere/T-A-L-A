@@ -12,9 +12,9 @@ import {
 
 const API_URL = "https://www.theafricalaureateawards.org/api";
 
-const PAYSTACK_PUBLIC_KEY = "pk_live_6560af0a81f50cfdd244e08bf2e54169a3e434e9";
+const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 // Add Flutterwave public key at the top with other constants
-const FLUTTERWAVE_PUBLIC_KEY = "FLWPUBK-454bd6769e18e2102daaf9a567da00b3-X";
+const FLUTTERWAVE_PUBLIC_KEY = import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY;
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 export default function BookSubmissionForm() {
