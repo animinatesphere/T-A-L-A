@@ -22,6 +22,7 @@ import BecomeAReader from "./pages/BecomeAReade";
 import OurJudges from "./pages/OurJudges";
 import Bookme from "./pages/Bookme";
 import AwardWinningBooks from "./pages/AwardWinningBooks";
+import DonatePage from "./pages/DonatePage";
 import ScrollToTop from "./component/ScrollToTop";
 
 const PublicLayout = ({ children }) => (
@@ -47,6 +48,7 @@ const Routee = () => {
               <Route path="/about" element={<About />} />
               <Route path="/faq" element={<TALAFAQPage />} />
               <Route path="/contact" element={<TALAContactPage />} />
+              <Route path="/donate" element={<DonatePage />} />
               <Route path="/podcast" element={<TALAPodcastPage />} />
               <Route path="/submit-your-book" element={<BookSubmissionForm />} />
               <Route path="/terms" element={<TALATermsPage />} />

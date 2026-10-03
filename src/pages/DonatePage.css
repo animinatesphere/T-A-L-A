@@ -1,0 +1,475 @@
+.donate-page {
+  --donate-ink: #24221f;
+  --donate-muted: #666c66;
+  --donate-line: #deded7;
+  --donate-wine: #6b0c22;
+  --donate-green: #2c5947;
+  min-height: 70vh;
+  background: #f3f1e9;
+  color: var(--donate-ink);
+}
+
+.donate-shell {
+  width: min(1160px, calc(100% - 56px));
+  min-height: 650px;
+  margin: 0 auto;
+  padding: 62px 0 70px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 0.94fr);
+  align-items: center;
+  gap: clamp(42px, 7vw, 96px);
+}
+
+.donate-story {
+  max-width: 520px;
+  animation: donate-rise 500ms ease-out both;
+}
+
+.donate-eyebrow,
+.donation-kicker {
+  margin: 0;
+  color: var(--donate-wine);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.donate-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.donate-eyebrow span {
+  width: 8px;
+  height: 8px;
+  background: #c59a47;
+  transform: rotate(45deg);
+}
+
+.donate-story h1 {
+  margin: 24px 0 18px;
+  color: #25231f;
+  font-family: "Work Sans", sans-serif;
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: 0;
+}
+
+.donate-intro {
+  max-width: 440px;
+  margin: 0;
+  color: #555e58;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.donate-pillars {
+  margin-top: 38px;
+  border-top: 1px solid #d6d5cc;
+}
+
+.donate-pillars div {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #d6d5cc;
+}
+
+.donate-pillars span {
+  color: #a07730;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.donate-pillars strong {
+  color: #343b36;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.donate-note {
+  margin: 20px 0 0;
+  color: #737a73;
+  font-size: 13px;
+}
+
+.donation-panel {
+  padding: 30px;
+  border: 1px solid #e0ded5;
+  border-top: 4px solid var(--donate-wine);
+  background: #fff;
+  box-shadow: 0 18px 44px rgba(48, 43, 35, 0.08);
+  animation: donate-rise 600ms 80ms ease-out both;
+}
+
+.donation-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.donation-kicker {
+  color: var(--donate-green);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.donation-heading h2 {
+  margin: 8px 0 0;
+  color: var(--donate-ink);
+  font-family: "Work Sans", sans-serif;
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.donation-heart {
+  width: 20px;
+  height: 20px;
+  margin-top: 5px;
+  color: var(--donate-wine);
+  stroke-width: 1.7;
+}
+
+.currency-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 24px 0 22px;
+  padding: 4px;
+  background: #f2f2ed;
+}
+
+.currency-switch button {
+  min-height: 43px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #606860;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.currency-switch button[aria-pressed="true"] {
+  border-color: #e6e2dc;
+  background: #fff;
+  color: var(--donate-wine);
+  box-shadow: 0 1px 3px rgba(35, 33, 29, 0.06);
+}
+
+.currency-switch button span {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.donation-form > label,
+.donor-fields label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  color: #343a35;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.donation-form > label span,
+.donor-fields label span {
+  color: #828880;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.amount-input-wrap {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid #c9ccc4;
+  background: #fff;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.amount-input-wrap:focus-within,
+.donor-fields input:focus {
+  border-color: var(--donate-green);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(44, 89, 71, 0.12);
+}
+
+.amount-input-wrap > span {
+  padding-left: 16px;
+  color: var(--donate-wine);
+  font-family: "Work Sans", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.amount-input-wrap input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--donate-ink);
+  font: inherit;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.amount-input-wrap input::placeholder,
+.donor-fields input::placeholder {
+  color: #a0a49d;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.amount-input-wrap input:focus {
+  outline: 0;
+}
+
+.amount-input-wrap input::-webkit-inner-spin-button,
+.amount-input-wrap input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.amount-presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.amount-presets button {
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 5px;
+  border: 1px solid #dedfd8;
+  background: #fff;
+  color: #505950;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.amount-presets button:hover,
+.amount-presets button[aria-pressed="true"] {
+  border-color: var(--donate-green);
+  background: #edf3ee;
+  color: var(--donate-green);
+}
+
+.donor-fields {
+  display: grid;
+  gap: 15px;
+  margin-top: 22px;
+}
+
+.donor-fields input {
+  width: 100%;
+  height: 46px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #c9ccc4;
+  border-radius: 0;
+  outline: 0;
+  background: #fff;
+  color: var(--donate-ink);
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.donation-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 17px;
+  padding: 12px;
+  border: 1px solid;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.donation-message.success {
+  border-color: #c3d7c8;
+  background: #f0f6f0;
+  color: #28533a;
+}
+
+.donation-message.error {
+  border-color: #e8c6c1;
+  background: #fff5f2;
+  color: #842e27;
+}
+
+.donation-message > svg,
+.donation-message > span {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin-top: 1px;
+  font-weight: 700;
+}
+
+.donation-message p,
+.donation-reference {
+  margin: 0;
+}
+
+.donation-reference {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+
+.donate-submit {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+  border: 0;
+  background: var(--donate-wine);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.donate-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #4a0818;
+}
+
+.donate-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.donate-submit svg {
+  width: 17px;
+  height: 17px;
+}
+
+.donation-security {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-top: 17px;
+  color: #58665d;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.donation-security svg {
+  width: 16px;
+  height: 16px;
+  color: var(--donate-green);
+}
+
+.donation-footnote {
+  margin: 8px 0 0;
+  color: #858b84;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@keyframes donate-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .donate-shell {
+    width: min(620px, calc(100% - 40px));
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 34px;
+    padding: 48px 0 56px;
+  }
+
+  .donate-story {
+    max-width: none;
+  }
+
+  .donate-story h1 {
+    font-size: 46px;
+  }
+
+  .donate-pillars {
+    margin-top: 25px;
+  }
+
+  .donate-note {
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  .donate-shell {
+    width: calc(100% - 32px);
+    gap: 26px;
+    padding: 36px 0 44px;
+  }
+
+  .donate-story h1 {
+    margin-top: 19px;
+    font-size: 39px;
+  }
+
+  .donate-intro {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .donation-panel {
+    padding: 22px 18px;
+  }
+
+  .donation-heading h2 {
+    font-size: 24px;
+  }
+
+  .amount-presets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .donate-story,
+  .donation-panel {
+    animation: none;
+  }
+}
