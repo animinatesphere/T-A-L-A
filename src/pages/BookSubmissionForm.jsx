@@ -9,6 +9,7 @@ import {
   AlertCircle,
   File,
 } from "lucide-react";
+import "./BookSubmissionForm.css";
 
 const API_URL = "https://www.theafricalaureateawards.org/api";
 
@@ -362,7 +363,18 @@ export default function BookSubmissionForm() {
     }
 
     if (!PAYSTACK_PUBLIC_KEY) {
-      alert("Payment system configuration error. Please contact support.");
+      setGatewayError((current) => ({
+        ...current,
+        NGN: "Paystack is not configured. Add the Paystack public key to the frontend environment.",
+      }));
+      return;
+    }
+
+    if (!/^pk_(live|test)_/.test(PAYSTACK_PUBLIC_KEY)) {
+      setGatewayError((current) => ({
+        ...current,
+        NGN: "Paystack needs a public key beginning with pk_live_ or pk_test_. Secret keys belong only in the backend.",
+      }));
       return;
     }
 
@@ -589,8 +601,8 @@ https://www.theafricalaureateawards.org/Tala-admin
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="book-submission-page min-h-screen bg-gray-50 py-8 sm:py-12">
+      <div className="book-submission-content max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-[#6B0C22] rounded-full mb-4">
             <BookOpen className="w-8 h-8 text-white" />
@@ -603,7 +615,7 @@ https://www.theafricalaureateawards.org/Tala-admin
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-8 md:p-10 mb-8">
+        <div className="submission-intro bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-10 mb-6 sm:mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
             Are You a Self-Published or Indie Author?
           </h2>
@@ -677,7 +689,7 @@ https://www.theafricalaureateawards.org/Tala-admin
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-10">
+        <div className="submission-panel bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-10">
           {step === 1 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -1123,8 +1135,10 @@ https://www.theafricalaureateawards.org/Tala-admin
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Select Currency
                 </label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="submission-currency-options grid grid-cols-2 gap-3 sm:gap-4">
                   <button
+                    type="button"
+                    aria-pressed={currency === "USD"}
                     onClick={() => setCurrency("USD")}
                     className={`p-4 border-2 rounded-lg font-semibold ${
                       currency === "USD"
@@ -1135,19 +1149,19 @@ https://www.theafricalaureateawards.org/Tala-admin
                     <DollarSign className="w-6 h-6 mx-auto mb-2" />
                     USD $50.00
                   </button>
-               <div>
-  <button
-    disabled
-    onClick={() => setCurrency("NGN")}
-    className="w-full p-4 border-2 border-gray-300 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    <span className="text-2xl">₦</span>
-    <div className="mt-2">NGN ₦20,000</div>
-  </button>
-  <p className="mt-2 text-xs text-red-600 text-center">
-    Naira payment is temporarily unavailable.
-  </p>
-</div>
+                  <button
+                    type="button"
+                    aria-pressed={currency === "NGN"}
+                    onClick={() => setCurrency("NGN")}
+                    className={`w-full min-h-24 p-4 border-2 rounded-lg font-semibold transition-colors ${
+                      currency === "NGN"
+                        ? "border-[#6B0C22] bg-[#6B0C22]/5"
+                        : "border-gray-300 hover:border-[#6B0C22]"
+                    }`}
+                  >
+                    <span className="text-2xl">₦</span>
+                    <div className="mt-2">NGN ₦20,000</div>
+                  </button>
                 </div>
               </div>
 
