@@ -1,0 +1,84 @@
+.book-submission-page {
+  overflow-x: clip;
+}
+
+.book-submission-content {
+  min-width: 0;
+}
+
+.submission-progress,
+.submission-panel,
+.submission-intro {
+  min-width: 0;
+}
+
+.submission-summary-row > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .submission-intro,
+  .submission-panel {
+    border-radius: 14px;
+  }
+
+  .submission-section {
+    min-width: 0;
+    padding: 14px;
+  }
+
+  .book-submission-page .bg-gray-50.rounded-xl,
+  .book-submission-page .border-2.border-dashed {
+    padding: 14px;
+  }
+
+  .submission-actions {
+    flex-direction: column-reverse;
+  }
+
+  .submission-actions button {
+    width: 100%;
+    min-height: 48px;
+    flex: none;
+  }
+
+  .submission-currency-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .submission-currency-options button {
+    min-height: 76px;
+  }
+
+  .book-submission-page div:has(> button.flex-1) {
+    flex-direction: column-reverse;
+  }
+
+  .book-submission-page div:has(> button.flex-1) > button {
+    width: 100%;
+    min-height: 48px;
+    flex: none;
+  }
+
+  .book-submission-page .space-y-2.text-sm > div.flex.justify-between {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .book-submission-page .space-y-2.text-sm > div.flex.justify-between > span:last-child {
+    text-align: left;
+  }
+
+  .submission-summary-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .submission-summary-row > span:last-child {
+    text-align: left;
+  }
+}
