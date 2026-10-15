@@ -8,6 +8,7 @@ import {
   X,
   AlertCircle,
   File,
+  LoaderCircle,
 } from "lucide-react";
 import "./BookSubmissionForm.css";
 
@@ -24,6 +25,10 @@ export default function BookSubmissionForm() {
   const [submitStatus, setSubmitStatus] = useState(null);
   const [gatewayReady, setGatewayReady] = useState({ NGN: false, USD: false });
   const [gatewayError, setGatewayError] = useState({ NGN: "", USD: "" });
+  const [pendingPaymentReference, setPendingPaymentReference] = useState("");
+  const [submissionSaveMessage, setSubmissionSaveMessage] = useState("");
+  const [submissionSaveError, setSubmissionSaveError] = useState("");
+  const [submissionSaveConflict, setSubmissionSaveConflict] = useState(false);
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -204,6 +209,19 @@ export default function BookSubmissionForm() {
 
     return () => cleanupScripts.forEach((cleanup) => cleanup());
   }, []);
+
+  useEffect(() => {
+    if (!loading) return undefined;
+
+    const warnBeforeLeaving = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+    return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
+  }, [loading]);
+
   const handleFileChange = (fileType, file) => {
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
@@ -510,7 +528,16 @@ https://www.theafricalaureateawards.org/Tala-admin
   };
 
   const saveSubmission = async (paymentReference) => {
+    if (!paymentReference) {
+      setSubmissionSaveError("The payment provider did not return a transaction reference. Please contact support before paying again.");
+      return;
+    }
+
     setLoading(true);
+    setPendingPaymentReference(paymentReference);
+    setSubmissionSaveMessage("Payment reported successful. Verifying it and saving your details; please keep this page open.");
+    setSubmissionSaveError("");
+    setSubmissionSaveConflict(false);
 
     try {
       const submissionData = new FormData();
@@ -540,43 +567,51 @@ https://www.theafricalaureateawards.org/Tala-admin
         method: "POST",
         body: submissionData,
       });
+      const result = await submissionResponse.json().catch(() => ({}));
 
-      if (submissionResponse.ok) {
-        const result = await submissionResponse.json();
-
-        // Construct full URLs for the email since backend returns relative paths
-        const baseUrl = window.location.origin;
-        const fileUrls = {
-          cover_image_url: result.data.cover_image_url
-            ? `${baseUrl}${result.data.cover_image_url}`
-            : null,
-          author_image_url: result.data.author_image_url
-            ? `${baseUrl}${result.data.author_image_url}`
-            : null,
-          about_book_pdf_url: result.data.about_book_pdf_url
-            ? `${baseUrl}${result.data.about_book_pdf_url}`
-            : null,
-          ebook_url: result.data.ebook_url
-            ? `${baseUrl}${result.data.ebook_url}`
-            : null,
-        };
-
-        // Send email notification
-        await sendEmailNotification(result.data, fileUrls);
-
-        setSubmitStatus("success");
-        setStep(4);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } else {
-        setSubmitStatus("error");
-        setStep(4);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      if (!submissionResponse.ok || !result.success || !result.data) {
+        const error = new Error(
+          result.error || `The server could not save your submission (HTTP ${submissionResponse.status}).`,
+        );
+        error.status = submissionResponse.status;
+        throw error;
       }
-    } catch (error) {
-      console.error("Error saving submission:", error);
-      setSubmitStatus("error");
+
+      // Construct full URLs for the email since backend returns relative paths
+      const baseUrl = window.location.origin;
+      const fileUrls = {
+        cover_image_url: result.data.cover_image_url
+          ? `${baseUrl}${result.data.cover_image_url}`
+          : null,
+        author_image_url: result.data.author_image_url
+          ? `${baseUrl}${result.data.author_image_url}`
+          : null,
+        about_book_pdf_url: result.data.about_book_pdf_url
+          ? `${baseUrl}${result.data.about_book_pdf_url}`
+          : null,
+        ebook_url: result.data.ebook_url
+          ? `${baseUrl}${result.data.ebook_url}`
+          : null,
+      };
+
+      // Send email notification
+      await sendEmailNotification(result.data, fileUrls);
+
+      setSubmissionSaveMessage("");
+      setSubmissionSaveError("");
+      setPendingPaymentReference("");
+      setSubmitStatus("success");
       setStep(4);
       window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      console.error("Error saving submission:", error);
+      setSubmissionSaveMessage("");
+      setSubmissionSaveConflict(error.status === 409);
+      setSubmissionSaveError(
+        error.status === 409
+          ? "This payment reference has already been used. Contact support with the reference below; do not pay again."
+          : `Your payment may have succeeded, but we couldn't verify it and save your details. Do not pay again. ${error.message}`,
+      );
     } finally {
       setLoading(false);
     }
@@ -1070,6 +1105,46 @@ https://www.theafricalaureateawards.org/Tala-admin
                 </div>
               </div>
 
+              {submissionSaveMessage && (
+                <div
+                  className="mb-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <LoaderCircle className="mt-0.5 h-5 w-5 shrink-0 animate-spin" />
+                  <p>{submissionSaveMessage}</p>
+                </div>
+              )}
+
+              {submissionSaveError && (
+                <div
+                  className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+                  role="alert"
+                >
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                    <div className="min-w-0">
+                      <p>{submissionSaveError}</p>
+                      {pendingPaymentReference && (
+                        <p className="mt-2 break-all font-mono text-xs">
+                          Payment reference: {pendingPaymentReference}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {pendingPaymentReference && !submissionSaveConflict && (
+                    <button
+                      type="button"
+                      onClick={() => saveSubmission(pendingPaymentReference)}
+                      disabled={loading}
+                      className="mt-3 min-h-11 w-full rounded-md border border-red-300 bg-white px-4 py-2 font-semibold text-red-900 hover:bg-red-100 disabled:opacity-60"
+                    >
+                      {loading ? "Retrying save..." : "Retry saving details (no new payment)"}
+                    </button>
+                  )}
+                </div>
+              )}
+
               {gatewayError[currency] && (
                 <div
                   className="mb-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
@@ -1218,18 +1293,21 @@ https://www.theafricalaureateawards.org/Tala-admin
                     setStep(2);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
+                  disabled={loading || Boolean(pendingPaymentReference)}
                   className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-300"
                 >
                   Back
                 </button>
                 <button
                   onClick={handlePayment}
-                  disabled={loading || !gatewayReady[currency]}
+                  disabled={loading || Boolean(pendingPaymentReference) || !gatewayReady[currency]}
                   className="flex-1 bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <CreditCard className="w-5 h-5" />
                   {loading
-                    ? "Processing..."
+                    ? "Verifying payment..."
+                    : pendingPaymentReference
+                      ? "Payment received"
                     : !gatewayReady[currency]
                       ? gatewayError[currency]
                         ? "Payment Unavailable"
