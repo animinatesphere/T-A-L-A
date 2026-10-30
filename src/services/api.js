@@ -1,8 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || (
-  import.meta.env.DEV
-    ? "http://localhost:5000/api"
-    : "https://www.theafricalaureateawards.org/api"
-);
+export const API_URL = import.meta.env.VITE_API_URL || "https://www.theafricalaureateawards.org/api";
 
 export const TOKEN_KEY = "tala_admin_token";
 

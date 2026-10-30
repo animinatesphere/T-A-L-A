@@ -73,15 +73,11 @@ export default function SubmissionsSection() {
                       </p>
                       <p>
                         <span className="font-semibold">Genre:</span> {submission.genre} |
-                        <span className="font-semibold"> Payment:</span>{" "}
-                        {submission.payment_status === "completed"
-                          ? `${submission.payment_currency} ${submission.payment_amount}`
-                          : submission.payment_status === "pending"
-                            ? "Pending / unpaid"
-                            : "Not recorded"}
+                        <span className="font-semibold"> Payment:</span> {submission.payment_currency}{" "}
+                        {submission.payment_amount}
                       </p>
                       <p className="text-xs text-gray-500">
-                        Submitted: {new Date(submission.createdAt).toLocaleDateString()}
+                        Submitted: {new Date(submission.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>

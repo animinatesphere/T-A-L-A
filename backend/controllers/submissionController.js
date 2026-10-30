@@ -1,94 +1,6 @@
 const Submission = require('../models/Submission');
 const fs = require('fs');
 const path = require('path');
-const { randomUUID } = require('crypto');
-const { localFileTestMode } = require('../config/localTestMode');
-const {
-  readLocalTestSubmissions,
-  saveLocalTestSubmission
-} = require('../utils/localTestSubmissions');
-
-const testSubmissionsEnabled = () =>
-  process.env.NODE_ENV === 'development' &&
-  (process.env.ALLOW_TEST_SUBMISSIONS === 'true' || localFileTestMode());
-
-const addUploadedFiles = (submissionData, files) => {
-  if (!files) return;
-
-  if (files.book_cover) {
-    submissionData.cover_image_url = `/uploads/images/${files.book_cover[0].filename}`;
-  }
-  if (files.author_image) {
-    submissionData.author_image_url = `/uploads/images/${files.author_image[0].filename}`;
-  }
-  if (files.about_book_pdf) {
-    submissionData.about_book_pdf_url = `/uploads/documents/${files.about_book_pdf[0].filename}`;
-  }
-  if (files.ebook) {
-    submissionData.ebook_url = `/uploads/documents/${files.ebook[0].filename}`;
-  }
-};
-
-const respondToSubmissionError = (error, res) => {
-  if (
-    error.code === 11000 &&
-    (error.keyPattern?.payment_reference || error.keyValue?.payment_reference !== undefined)
-  ) {
-    return res.status(409).json({
-      success: false,
-      error: 'This payment reference has already been used.'
-    });
-  }
-
-  return res.status(400).json({
-    success: false,
-    error: error.message
-  });
-};
-
-const createTestSubmission = async (req, res) => {
-  if (!testSubmissionsEnabled()) {
-    return res.status(403).json({
-      success: false,
-      error: 'Unpaid test submissions are not enabled.'
-    });
-  }
-
-  try {
-    const submissionData = {
-      ...req.body,
-      payment_status: 'pending',
-      payment_amount: undefined,
-      payment_currency: undefined,
-      payment_reference: `TEST_${randomUUID()}`,
-      submission_status: 'pending'
-    };
-
-    addUploadedFiles(submissionData, req.files);
-    let submission;
-    if (localFileTestMode()) {
-      const submissionDocument = new Submission({
-        ...submissionData,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-      await submissionDocument.validate();
-      submission = JSON.parse(JSON.stringify(
-        submissionDocument.toObject({ virtuals: true })
-      ));
-      await saveLocalTestSubmission(submission);
-    } else {
-      submission = await Submission.create(submissionData);
-    }
-
-    return res.status(201).json({
-      success: true,
-      data: submission
-    });
-  } catch (error) {
-    return respondToSubmissionError(error, res);
-  }
-};
 
 const verifyPayment = async (reference, requestedCurrency) => {
   const currency = String(requestedCurrency || '').toUpperCase();
@@ -175,15 +87,44 @@ const createSubmission = async (req, res) => {
     }
 
     const submissionData = { ...req.body, ...verifiedPayment };
-    addUploadedFiles(submissionData, req.files);
+
+    // Files are handled by multer and URLs should be passed in the body or extracted from req.files
+    // In this unified approach, req.files will contain the file info
+    if (req.files) {
+      if (req.files.book_cover) {
+        submissionData.cover_image_url = `/uploads/images/${req.files.book_cover[0].filename}`;
+      }
+      if (req.files.author_image) {
+        submissionData.author_image_url = `/uploads/images/${req.files.author_image[0].filename}`;
+      }
+      if (req.files.about_book_pdf) {
+        submissionData.about_book_pdf_url = `/uploads/documents/${req.files.about_book_pdf[0].filename}`;
+      }
+      if (req.files.ebook) {
+        submissionData.ebook_url = `/uploads/documents/${req.files.ebook[0].filename}`;
+      }
+    }
 
     const submission = await Submission.create(submissionData);
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       data: submission
     });
   } catch (error) {
-    return respondToSubmissionError(error, res);
+    if (
+      error.code === 11000 &&
+      (error.keyPattern?.payment_reference || error.keyValue?.payment_reference !== undefined)
+    ) {
+      return res.status(409).json({
+        success: false,
+        error: 'This payment reference has already been used.'
+      });
+    }
+
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
   }
 };
 
@@ -192,9 +133,7 @@ const createSubmission = async (req, res) => {
 // @access  Private/Admin
 const getSubmissions = async (req, res) => {
   try {
-    const submissions = localFileTestMode()
-      ? await readLocalTestSubmissions()
-      : await Submission.find().sort({ createdAt: -1 });
+    const submissions = await Submission.find().sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       count: submissions.length,
@@ -285,8 +224,6 @@ const deleteSubmission = async (req, res) => {
 
 module.exports = {
   createSubmission,
-  createTestSubmission,
-  testSubmissionsEnabled,
   getSubmissions,
   updateSubmissionStatus,
   deleteSubmission
