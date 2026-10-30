@@ -129,7 +129,7 @@ export default function BookSubmissionForm() {
   });
 
   const [currency, setCurrency] = useState("USD");
-  const amount = currency === "USD" ? 50 : 20000;
+  const amount = currency === "USD" ? 50 : 100;
 
   const handleChange = (e) => {
     setFormData({
@@ -406,7 +406,7 @@ export default function BookSubmissionForm() {
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: formData.email.trim(),
-      amount: 10000, // 20,000 Naira in kobo
+      amount: amount * 100,
       currency: "NGN",
       ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
       callback: function (response) {
@@ -426,18 +426,6 @@ export default function BookSubmissionForm() {
       handlePaystackPayment();
     }
   };
-
-  // const handlePayment = () => {
-  //   // Comment out payment functions for testing
-  //   // if (currency === "USD") {
-  //   //   handleFlutterwavePayment();
-  //   // } else {
-  //   //   handlePaystackPayment();
-  //   // }ddddd
-
-  //   // Directly call saveSubmission with a test reference for testing
-  //   saveSubmission("TEST_" + Math.floor(Math.random() * 1000000000 + 1));
-  // };
 
   // const generateAuthorSlug = (name) => {
   //   return name
@@ -670,7 +658,8 @@ https://www.theafricalaureateawards.org/Tala-admin
             <p className="mb-4 text-gray-200">
               To submit your book, please complete the nomination form below. A
               processing fee of $50.00 applies for authors living outside of
-              Nigeria and N20,000 for authors based in Nigeria
+              Nigeria. The NGN fee is temporarily reduced to ₦100 for a live
+              payment test.
             </p>
           </div>
           {/* <div className="mt-8 bg-gradient-to-r from-[#6B0C22] to-[#4a0818] text-white rounded-xl p-6">
@@ -1237,7 +1226,7 @@ https://www.theafricalaureateawards.org/Tala-admin
                     }`}
                   >
                     <span className="text-2xl">₦</span>
-                    <div className="mt-2">NGN ₦20,000</div>
+                    <div className="mt-2">NGN ₦100 (temporary test fee)</div>
                   </button>
                 </div>
               </div>
@@ -1317,7 +1306,7 @@ https://www.theafricalaureateawards.org/Tala-admin
                           ? "Payment Unavailable"
                           : "Loading Payment..."
                         : `Pay ${currency} ${
-                            currency === "USD" ? "$50" : "₦20,000"
+                            currency === "USD" ? "$50" : "₦100 (test)"
                           }`}
                 </button>
               </div>
@@ -1330,15 +1319,15 @@ https://www.theafricalaureateawards.org/Tala-admin
                 <Check className="w-10 h-10 text-green-600" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                🎉 Submission Successful!
+                🎉 Payment Successful!
               </h2>
               <p className="text-lg text-gray-600 mb-4">
-                Thank you for submitting your book to T.A.L.A.
+                Your payment has been verified and your submission was received.
               </p>
               <p className="text-gray-600 mb-8">
                 Your book "<strong>{formData.book_title}</strong>" by{" "}
                 <strong>{formData.author_name}</strong> has been successfully
-                submitted and will be reviewed by our team.
+                submitted to T.A.L.A. and will be reviewed by our team.
               </p>
               <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
                 <h3 className="font-bold text-green-900 mb-3">
