@@ -1,7 +1,5 @@
 const Admin = require('../models/Admin');
 const jwt = require('jsonwebtoken');
-const { timingSafeEqual } = require('crypto');
-const { localFileTestMode } = require('../config/localTestMode');
 
 // Generate JWT
 const generateToken = (id) => {
@@ -50,32 +48,6 @@ const loginAdmin = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    if (localFileTestMode()) {
-      const expectedUsername = 'local-admin';
-      const expectedPassword = 'local-test-password';
-      const matches = (provided, expected) => {
-        if (typeof provided !== 'string') return false;
-        const providedBuffer = Buffer.from(provided);
-        const expectedBuffer = Buffer.from(expected);
-        return providedBuffer.length === expectedBuffer.length &&
-          timingSafeEqual(providedBuffer, expectedBuffer);
-      };
-
-      if (matches(username, expectedUsername) && matches(password, expectedPassword)) {
-        return res.json({
-          success: true,
-          _id: 'local-test-admin',
-          username: expectedUsername,
-          token: generateToken('local-test-admin')
-        });
-      }
-
-      return res.status(401).json({
-        success: false,
-        error: 'Invalid username or password'
-      });
-    }
-
     const admin = await Admin.findOne({ username });
 
     if (admin && (await admin.matchPassword(password))) {
