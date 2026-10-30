@@ -38,7 +38,7 @@ const verifyPayment = async (reference, requestedCurrency) => {
     ? result?.status === true && transaction?.status === 'success'
     : result?.status === 'success' && transaction?.status === 'successful';
   const validAmount = provider === 'paystack'
-    ? Number(transaction?.amount) === 2000000
+    ? [10000, 2000000].includes(Number(transaction?.amount))
     : Number(transaction?.amount) === 50;
 
   if (
@@ -53,7 +53,9 @@ const verifyPayment = async (reference, requestedCurrency) => {
 
   return {
     payment_status: 'completed',
-    payment_amount: Number(transaction.amount),
+    payment_amount: provider === 'paystack'
+      ? Number(transaction.amount) / 100
+      : Number(transaction.amount),
     payment_currency: transaction.currency,
     payment_reference: verifiedReference
   };
