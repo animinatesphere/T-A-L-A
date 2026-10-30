@@ -406,7 +406,7 @@ export default function BookSubmissionForm() {
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: formData.email.trim(),
-      amount: 10000, // 20,000 Naira in kobo
+      amount: 2000000, // 20,000 Naira in kobo
       currency: "NGN",
       ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
       callback: function (response) {
@@ -578,7 +578,7 @@ https://www.theafricalaureateawards.org/Tala-admin
       }
 
       // Construct full URLs for the email since backend returns relative paths
-      const baseUrl = window.location.origin;
+      const baseUrl = new URL(API_URL).origin;
       const fileUrls = {
         cover_image_url: result.data.cover_image_url
           ? `${baseUrl}${result.data.cover_image_url}`
@@ -725,6 +725,58 @@ https://www.theafricalaureateawards.org/Tala-admin
         </div>
 
         <div className="submission-panel bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-10">
+          {submissionSaveMessage && (
+            <div
+              className="mb-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900"
+              role="status"
+              aria-live="polite"
+            >
+              <LoaderCircle className="mt-0.5 h-5 w-5 shrink-0 animate-spin" />
+              <p>{submissionSaveMessage}</p>
+            </div>
+          )}
+
+          {submissionSaveError && (
+            <div
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+              role="alert"
+            >
+              <div className="flex items-start gap-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                <div className="min-w-0">
+                  <p>{submissionSaveError}</p>
+                  {pendingPaymentReference && (
+                    <p className="mt-2 break-all font-mono text-xs">
+                      Payment reference: {pendingPaymentReference}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {pendingPaymentReference && !submissionSaveConflict && (
+                <button
+                  type="button"
+                  onClick={() => saveSubmission(pendingPaymentReference)}
+                  disabled={loading}
+                  className="mt-3 min-h-11 w-full rounded-md border border-red-300 bg-white px-4 py-2 font-semibold text-red-900 hover:bg-red-100 disabled:opacity-60"
+                >
+                  {loading
+                    ? "Retrying save..."
+                    : "Retry saving details (no new payment)"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {gatewayError[currency] && (
+            <div
+              className="mb-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+              role="alert"
+            >
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+              <p>{gatewayError[currency]}</p>
+            </div>
+          )}
+
           {step === 1 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -1105,56 +1157,6 @@ https://www.theafricalaureateawards.org/Tala-admin
                 </div>
               </div>
 
-              {submissionSaveMessage && (
-                <div
-                  className="mb-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900"
-                  role="status"
-                  aria-live="polite"
-                >
-                  <LoaderCircle className="mt-0.5 h-5 w-5 shrink-0 animate-spin" />
-                  <p>{submissionSaveMessage}</p>
-                </div>
-              )}
-
-              {submissionSaveError && (
-                <div
-                  className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-                  role="alert"
-                >
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-                    <div className="min-w-0">
-                      <p>{submissionSaveError}</p>
-                      {pendingPaymentReference && (
-                        <p className="mt-2 break-all font-mono text-xs">
-                          Payment reference: {pendingPaymentReference}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  {pendingPaymentReference && !submissionSaveConflict && (
-                    <button
-                      type="button"
-                      onClick={() => saveSubmission(pendingPaymentReference)}
-                      disabled={loading}
-                      className="mt-3 min-h-11 w-full rounded-md border border-red-300 bg-white px-4 py-2 font-semibold text-red-900 hover:bg-red-100 disabled:opacity-60"
-                    >
-                      {loading ? "Retrying save..." : "Retry saving details (no new payment)"}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {gatewayError[currency] && (
-                <div
-                  className="mb-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"
-                  role="alert"
-                >
-                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-                  <p>{gatewayError[currency]}</p>
-                </div>
-              )}
-
               <div className="flex gap-4">
                 <button
                   onClick={() => {
@@ -1307,14 +1309,16 @@ https://www.theafricalaureateawards.org/Tala-admin
                   {loading
                     ? "Verifying payment..."
                     : pendingPaymentReference
-                      ? "Payment received"
-                    : !gatewayReady[currency]
-                      ? gatewayError[currency]
-                        ? "Payment Unavailable"
-                        : "Loading Payment..."
-                    : `Pay ${currency} ${
-                        currency === "USD" ? "$50" : "₦20,000"
-                      }`}
+                      ? submissionSaveError
+                          ? "Payment needs attention"
+                          : "Payment received — saving submission..."
+                      : !gatewayReady[currency]
+                        ? gatewayError[currency]
+                          ? "Payment Unavailable"
+                          : "Loading Payment..."
+                        : `Pay ${currency} ${
+                            currency === "USD" ? "$50" : "₦20,000"
+                          }`}
                 </button>
               </div>
             </div>
