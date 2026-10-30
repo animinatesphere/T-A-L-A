@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+backend/data/test-submissions.json
+backend/data/test-submissions.json.*.tmp
 
 # Env files (never commit real secrets)
 .env

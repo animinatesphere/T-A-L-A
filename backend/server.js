@@ -1,13 +1,25 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
+const { randomBytes } = require('crypto');
 const connectDB = require('./config/db');
+const { localFileTestMode } = require('./config/localTestMode');
 
 // Load env vars
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
+process.env.NODE_ENV ||= 'development';
 
-// Connect to database
-connectDB();
+if (process.env.NODE_ENV === 'development') {
+  process.env.ALLOW_TEST_SUBMISSIONS ||= 'true';
+  if (!process.env.MONGODB_URI) {
+    process.env.JWT_SECRET ||= randomBytes(32).toString('hex');
+  }
+}
+
+if (!localFileTestMode()) {
+  connectDB();
+}
 
 const app = express();
 
@@ -18,7 +30,6 @@ app.use(express.json());
 app.use(cors());
 
 // Static folder for uploads
-const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -36,8 +47,13 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const host = process.env.NODE_ENV === 'development' ? '127.0.0.1' : undefined;
+app.listen(PORT, host, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  const { startColdEmailEngine } = require('./utils/coldEmailScheduler');
-  startColdEmailEngine();
+  if (!localFileTestMode()) {
+    const { startColdEmailEngine } = require('./utils/coldEmailScheduler');
+    startColdEmailEngine();
+  } else {
+    console.log('Local test submissions are stored in backend/data/test-submissions.json.');
+  }
 });

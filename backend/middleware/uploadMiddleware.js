@@ -65,8 +65,7 @@ const uploadDocs = multer({ storage: diskStorage, fileFilter: fileFilter });
 const uploadFields = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
-      // Use absolute path for VPS deployment
-      const baseDir = '/var/www/tala/backend';
+      const baseDir = path.join(__dirname, '..');
       let dest = path.join(baseDir, 'uploads/others');
       
       if (file.fieldname === 'book_cover' || file.fieldname === 'author_image' || file.fieldname === 'featured_image' || file.fieldname === 'cover_image' || file.fieldname === 'image') {

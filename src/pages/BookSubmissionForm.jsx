@@ -11,12 +11,13 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import "./BookSubmissionForm.css";
-
-const API_URL = "https://www.theafricalaureateawards.org/api";
+import { API_URL } from "../services/api";
 
 const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 // Add Flutterwave public key at the top with other constants
 const FLUTTERWAVE_PUBLIC_KEY = import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY;
+const TEST_SUBMISSION_ENABLED =
+  import.meta.env.DEV;
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 export default function BookSubmissionForm() {
@@ -29,6 +30,8 @@ export default function BookSubmissionForm() {
   const [submissionSaveMessage, setSubmissionSaveMessage] = useState("");
   const [submissionSaveError, setSubmissionSaveError] = useState("");
   const [submissionSaveConflict, setSubmissionSaveConflict] = useState(false);
+  const [testSubmissionSaved, setTestSubmissionSaved] = useState(false);
+  const [notificationEmailError, setNotificationEmailError] = useState("");
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -156,6 +159,8 @@ export default function BookSubmissionForm() {
   //   };
   // }, []);
   useEffect(() => {
+    if (TEST_SUBMISSION_ENABLED) return undefined;
+
     const cleanupScripts = [];
     const paymentScripts = [
       {
@@ -420,6 +425,11 @@ export default function BookSubmissionForm() {
   };
 
   const handlePayment = () => {
+    if (TEST_SUBMISSION_ENABLED) {
+      saveSubmission(null, true);
+      return;
+    }
+
     if (currency === "USD") {
       handleFlutterwavePayment();
     } else {
@@ -463,6 +473,7 @@ export default function BookSubmissionForm() {
       // Clean Plain Text email body
       const emailBody = `
 🌟 NEW BOOK SUBMISSION RECEIVED 🌟
+${submissionData.payment_status === "completed" ? "" : "\nTEST SUBMISSION — NO PAYMENT WAS MADE"}
 
 -----------------------------------------
 SUBMITTER INFORMATION
@@ -499,13 +510,17 @@ UPLOADED FILES (Click to View/Download)
 -----------------------------------------
 PAYMENT & STATUS
 -----------------------------------------
-- Amount: ${submissionData.payment_currency} ${submissionData.payment_amount}
+- Amount: ${
+        submissionData.payment_status === "completed"
+          ? `${submissionData.payment_currency} ${submissionData.payment_amount}`
+          : "Not paid (local test submission)"
+      }
 - Reference: ${submissionData.payment_reference}
 - Status: ${submissionData.payment_status}
 
 -----------------------------------------
 Review this submission in your Admin Dashboard:
-https://www.theafricalaureateawards.org/Tala-admin
+${window.location.origin}/Tala-admin
 `;
 
       formData.append("message", emailBody);
@@ -515,29 +530,36 @@ https://www.theafricalaureateawards.org/Tala-admin
         body: formData,
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        console.log("Email notification sent successfully");
-      } else {
-        console.error("Failed to send email notification");
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) {
+        throw new Error(
+          result?.message || `Email provider rejected the notification (HTTP ${response.status}).`,
+        );
       }
+
+      console.log("Email notification sent successfully");
     } catch (error) {
       console.error("Error sending email notification:", error);
+      throw error;
     }
   };
 
-  const saveSubmission = async (paymentReference) => {
-    if (!paymentReference) {
+  const saveSubmission = async (paymentReference, testMode = false) => {
+    if (!testMode && !paymentReference) {
       setSubmissionSaveError("The payment provider did not return a transaction reference. Please contact support before paying again.");
       return;
     }
 
     setLoading(true);
-    setPendingPaymentReference(paymentReference);
-    setSubmissionSaveMessage("Payment reported successful. Verifying it and saving your details; please keep this page open.");
+    setPendingPaymentReference(testMode ? "" : paymentReference);
+    setSubmissionSaveMessage(
+      testMode
+        ? "Saving a local test submission..."
+        : "Payment reported successful. Verifying it and saving your details; please keep this page open.",
+    );
     setSubmissionSaveError("");
     setSubmissionSaveConflict(false);
+    setNotificationEmailError("");
 
     try {
       const submissionData = new FormData();
@@ -556,17 +578,21 @@ https://www.theafricalaureateawards.org/Tala-admin
         submissionData.append("about_book_pdf", files.about_book_pdf);
       if (files.ebook) submissionData.append("ebook", files.ebook);
 
-      // Add payment info
-      submissionData.append("payment_status", "completed");
-      submissionData.append("payment_amount", amount);
-      submissionData.append("payment_currency", currency);
-      submissionData.append("payment_reference", paymentReference);
-      submissionData.append("submission_status", "pending");
+      if (!testMode) {
+        submissionData.append("payment_status", "completed");
+        submissionData.append("payment_amount", amount);
+        submissionData.append("payment_currency", currency);
+        submissionData.append("payment_reference", paymentReference);
+        submissionData.append("submission_status", "pending");
+      }
 
-      const submissionResponse = await fetch(`${API_URL}/submissions`, {
-        method: "POST",
-        body: submissionData,
-      });
+      const submissionResponse = await fetch(
+        `${API_URL}/submissions${testMode ? "/test" : ""}`,
+        {
+          method: "POST",
+          body: submissionData,
+        },
+      );
       const result = await submissionResponse.json().catch(() => ({}));
 
       if (!submissionResponse.ok || !result.success || !result.data) {
@@ -578,7 +604,7 @@ https://www.theafricalaureateawards.org/Tala-admin
       }
 
       // Construct full URLs for the email since backend returns relative paths
-      const baseUrl = window.location.origin;
+      const baseUrl = new URL(API_URL, window.location.origin).origin;
       const fileUrls = {
         cover_image_url: result.data.cover_image_url
           ? `${baseUrl}${result.data.cover_image_url}`
@@ -594,12 +620,18 @@ https://www.theafricalaureateawards.org/Tala-admin
           : null,
       };
 
-      // Send email notification
-      await sendEmailNotification(result.data, fileUrls);
+      try {
+        await sendEmailNotification(result.data, fileUrls);
+      } catch (error) {
+        setNotificationEmailError(
+          `Your submission was saved, but the notification email could not be sent: ${error.message}`,
+        );
+      }
 
       setSubmissionSaveMessage("");
       setSubmissionSaveError("");
       setPendingPaymentReference("");
+      setTestSubmissionSaved(testMode);
       setSubmitStatus("success");
       setStep(4);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -610,7 +642,9 @@ https://www.theafricalaureateawards.org/Tala-admin
       setSubmissionSaveError(
         error.status === 409
           ? "This payment reference has already been used. Contact support with the reference below; do not pay again."
-          : `Your payment may have succeeded, but we couldn't verify it and save your details. Do not pay again. ${error.message}`,
+          : testMode
+            ? `The local test submission could not be saved. ${error.message}`
+            : `Your payment may have succeeded, but we couldn't verify it and save your details. Do not pay again. ${error.message}`,
       );
     } finally {
       setLoading(false);
@@ -708,7 +742,9 @@ https://www.theafricalaureateawards.org/Tala-admin
                       : stepNum === 2
                         ? "Upload Files"
                         : stepNum === 3
-                          ? "Payment"
+                          ? TEST_SUBMISSION_ENABLED
+                            ? "Submit"
+                            : "Payment"
                           : "Complete"}
                   </span>
                 </div>
@@ -1175,7 +1211,7 @@ https://www.theafricalaureateawards.org/Tala-admin
                   disabled={!validateStep2()}
                   className="flex-1 bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] transition-colors disabled:opacity-50"
                 >
-                  Continue to Payment
+                  {TEST_SUBMISSION_ENABLED ? "Continue to Submit" : "Continue to Payment"}
                 </button>
               </div>
             </div>
@@ -1183,7 +1219,9 @@ https://www.theafricalaureateawards.org/Tala-admin
 
           {step === 3 && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {TEST_SUBMISSION_ENABLED ? "Submit your book" : "Payment"}
+              </h2>
 
               <div className="bg-gray-50 rounded-xl p-6">
                 <h3 className="font-bold text-lg mb-4">Submission Summary</h3>
@@ -1206,6 +1244,8 @@ https://www.theafricalaureateawards.org/Tala-admin
                   </div>
                 </div>
               </div>
+              {!TEST_SUBMISSION_ENABLED && (
+                <>
               <div className="bg-gray-50 rounded-xl p-6 mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Select Currency
@@ -1286,6 +1326,18 @@ https://www.theafricalaureateawards.org/Tala-admin
                   </p>
                 </div>
               </div>
+                </>
+              )}
+              {TEST_SUBMISSION_ENABLED && (
+                <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+                  <p className="font-semibold">Local test mode</p>
+                  <p className="mt-1">
+                    The button below saves this submission as unpaid without
+                    opening Paystack or Flutterwave. This mode is only active
+                    on localhost.
+                  </p>
+                </div>
+              )}
 
               <div className="flex gap-4">
                 <button
@@ -1300,21 +1352,29 @@ https://www.theafricalaureateawards.org/Tala-admin
                 </button>
                 <button
                   onClick={handlePayment}
-                  disabled={loading || Boolean(pendingPaymentReference) || !gatewayReady[currency]}
+                  disabled={
+                    loading ||
+                    Boolean(pendingPaymentReference) ||
+                    (!TEST_SUBMISSION_ENABLED && !gatewayReady[currency])
+                  }
                   className="flex-1 bg-[#6B0C22] text-white py-3 rounded-lg font-bold hover:bg-[#8B1530] flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <CreditCard className="w-5 h-5" />
+                  {!TEST_SUBMISSION_ENABLED && <CreditCard className="w-5 h-5" />}
                   {loading
-                    ? "Verifying payment..."
+                    ? TEST_SUBMISSION_ENABLED
+                      ? "Saving test submission..."
+                      : "Verifying payment..."
                     : pendingPaymentReference
                       ? "Payment received"
-                    : !gatewayReady[currency]
+                    : !TEST_SUBMISSION_ENABLED && !gatewayReady[currency]
                       ? gatewayError[currency]
                         ? "Payment Unavailable"
                         : "Loading Payment..."
-                    : `Pay ${currency} ${
-                        currency === "USD" ? "$50" : "₦20,000"
-                      }`}
+                      : TEST_SUBMISSION_ENABLED
+                        ? "Submit without payment (test only)"
+                        : `Pay ${currency} ${
+                            currency === "USD" ? "$50" : "₦20,000"
+                          }`}
                 </button>
               </div>
             </div>
@@ -1326,25 +1386,53 @@ https://www.theafricalaureateawards.org/Tala-admin
                 <Check className="w-10 h-10 text-green-600" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                🎉 Submission Successful!
+                {testSubmissionSaved
+                  ? "Local test submission saved"
+                  : "🎉 Submission Successful!"}
               </h2>
               <p className="text-lg text-gray-600 mb-4">
-                Thank you for submitting your book to T.A.L.A.
+                {testSubmissionSaved
+                  ? "This local test submission is marked unpaid; no payment was processed."
+                  : "Thank you for submitting your book to T.A.L.A."}
               </p>
               <p className="text-gray-600 mb-8">
-                Your book "<strong>{formData.book_title}</strong>" by{" "}
-                <strong>{formData.author_name}</strong> has been successfully
-                submitted and will be reviewed by our team.
+                {testSubmissionSaved ? (
+                  "No payment was made. The normal submission notification email was sent."
+                ) : (
+                  <>
+                    Your book "<strong>{formData.book_title}</strong>" by{" "}
+                    <strong>{formData.author_name}</strong> has been successfully
+                    submitted and will be reviewed by our team.
+                  </>
+                )}
               </p>
+              {notificationEmailError && (
+                <p
+                  className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-left text-sm text-amber-900"
+                  role="alert"
+                >
+                  {notificationEmailError}
+                </p>
+              )}
               <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
                 <h3 className="font-bold text-green-900 mb-3">
                   What happens next?
                 </h3>
                 <ul className="text-left text-gray-700 space-y-2">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                    <span>You'll receive a confirmation email shortly</span>
-                  </li>
+                  {testSubmissionSaved ? (
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                      <span>
+                        The submission appears in the local admin list with
+                        payment pending. The notification email is sent as usual.
+                      </span>
+                    </li>
+                  ) : (
+                    <li className="flex items-start gap-2">
+                      <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                      <span>You'll receive a confirmation email shortly</span>
+                    </li>
+                  )}
                   <li className="flex items-start gap-2">
                     <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                     <span>
