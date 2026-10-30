@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const { localFileTestMode } = require('../config/localTestMode');
 
 const protect = async (req, res, next) => {
   let token;
@@ -14,6 +15,11 @@ const protect = async (req, res, next) => {
 
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      if (localFileTestMode() && decoded.id === 'local-test-admin') {
+        req.admin = { _id: decoded.id, username: 'local-admin' };
+        return next();
+      }
 
       // Get user from the token
       req.admin = await Admin.findById(decoded.id).select('-password');
