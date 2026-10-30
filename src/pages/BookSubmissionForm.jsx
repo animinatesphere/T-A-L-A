@@ -129,7 +129,7 @@ export default function BookSubmissionForm() {
   });
 
   const [currency, setCurrency] = useState("USD");
-  const amount = currency === "USD" ? 50 : 100;
+  const amount = currency === "USD" ? 50 : 20000;
 
   const handleChange = (e) => {
     setFormData({
@@ -658,8 +658,7 @@ https://www.theafricalaureateawards.org/Tala-admin
             <p className="mb-4 text-gray-200">
               To submit your book, please complete the nomination form below. A
               processing fee of $50.00 applies for authors living outside of
-              Nigeria. The NGN fee is temporarily reduced to ₦100 for a live
-              payment test.
+              Nigeria and ₦20,000 for authors based in Nigeria.
             </p>
           </div>
           {/* <div className="mt-8 bg-gradient-to-r from-[#6B0C22] to-[#4a0818] text-white rounded-xl p-6">
@@ -1226,7 +1225,7 @@ https://www.theafricalaureateawards.org/Tala-admin
                     }`}
                   >
                     <span className="text-2xl">₦</span>
-                    <div className="mt-2">NGN ₦100 (temporary test fee)</div>
+                    <div className="mt-2">NGN ₦20,000</div>
                   </button>
                 </div>
               </div>
@@ -1306,7 +1305,7 @@ https://www.theafricalaureateawards.org/Tala-admin
                           ? "Payment Unavailable"
                           : "Loading Payment..."
                         : `Pay ${currency} ${
-                            currency === "USD" ? "$50" : "₦100 (test)"
+                            currency === "USD" ? "$50" : "₦20,000"
                           }`}
                 </button>
               </div>
