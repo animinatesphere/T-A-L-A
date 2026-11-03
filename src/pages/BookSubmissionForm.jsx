@@ -23,6 +23,8 @@ export default function BookSubmissionForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [paymentVerificationPending, setPaymentVerificationPending] =
+    useState(false);
   const [gatewayReady, setGatewayReady] = useState({ NGN: false, USD: false });
   const [gatewayError, setGatewayError] = useState({ NGN: "", USD: "" });
   const [pendingPaymentReference, setPendingPaymentReference] = useState("");
@@ -444,7 +446,7 @@ export default function BookSubmissionForm() {
       // Email details
       formData.append(
         "subject",
-        `New Book Submission: ${submissionData.book_title}`,
+        `${submissionData.payment_status === "completed" ? "" : "[PAYMENT VERIFICATION PENDING] "}New Book Submission: ${submissionData.book_title}`,
       );
       formData.append("from_name", "T.A.L.A. Submission System");
 
@@ -487,9 +489,9 @@ UPLOADED FILES (Click to View/Download)
 -----------------------------------------
 PAYMENT & STATUS
 -----------------------------------------
-- Amount: ${submissionData.payment_currency} ${submissionData.payment_amount}
+- ${submissionData.payment_status === "completed" ? "Amount" : "Claimed amount (not verified)"}: ${submissionData.payment_currency} ${submissionData.payment_amount}
 - Reference: ${submissionData.payment_reference}
-- Status: ${submissionData.payment_status}
+- Status: ${submissionData.payment_status === "completed" ? "Payment verified" : "PAYMENT NOT VERIFIED — submission and files saved for admin review"}
 
 -----------------------------------------
 Review this submission in your Admin Dashboard:
@@ -565,6 +567,10 @@ https://www.theafricalaureateawards.org/Tala-admin
         throw error;
       }
 
+      const needsPaymentReview =
+        result.paymentVerificationPending ||
+        result.data.payment_status !== "completed";
+
       // Construct full URLs for the email since backend returns relative paths
       const baseUrl = new URL(API_URL).origin;
       const fileUrls = {
@@ -588,6 +594,7 @@ https://www.theafricalaureateawards.org/Tala-admin
       setSubmissionSaveMessage("");
       setSubmissionSaveError("");
       setPendingPaymentReference("");
+      setPaymentVerificationPending(needsPaymentReview);
       setSubmitStatus("success");
       setStep(4);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1318,10 +1325,14 @@ https://www.theafricalaureateawards.org/Tala-admin
                 <Check className="w-10 h-10 text-green-600" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                🎉 Payment Successful!
+                {paymentVerificationPending
+                  ? "Submission Received — Payment Verification Pending"
+                  : "🎉 Payment Successful!"}
               </h2>
               <p className="text-lg text-gray-600 mb-4">
-                Your payment has been verified and your submission was received.
+                {paymentVerificationPending
+                  ? "Your submission and uploaded files are saved for our team, but the payment provider has not confirmed the payment yet. Do not pay again; our team will review the payment reference."
+                  : "Your payment has been verified and your submission was received."}
               </p>
               <p className="text-gray-600 mb-8">
                 Your book "<strong>{formData.book_title}</strong>" by{" "}

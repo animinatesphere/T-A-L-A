@@ -74,10 +74,24 @@ export default function SubmissionsSection() {
                       <p>
                         <span className="font-semibold">Genre:</span> {submission.genre} |
                         <span className="font-semibold"> Payment:</span> {submission.payment_currency}{" "}
-                        {submission.payment_amount}
+                        {submission.payment_amount}{" "}
+                        <span
+                          className={`ml-1 inline-flex rounded px-2 py-0.5 text-xs font-bold ${
+                            submission.payment_status === "completed"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-amber-100 text-amber-900"
+                          }`}
+                        >
+                          {submission.payment_status === "verification_pending"
+                            ? "PAYMENT VERIFICATION PENDING"
+                            : (submission.payment_status || "UNKNOWN").replace("_", " ").toUpperCase()}
+                        </span>
                       </p>
                       <p className="text-xs text-gray-500">
-                        Submitted: {new Date(submission.created_at).toLocaleDateString()}
+                        Submitted:{" "}
+                        {new Date(
+                          submission.createdAt || submission.created_at,
+                        ).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -100,6 +114,11 @@ export default function SubmissionsSection() {
                 </div>
 
                 <div className="flex gap-2 flex-wrap">
+                  {submission.payment_status === "verification_pending" && (
+                    <span className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-900">
+                      Hold approval until payment is verified
+                    </span>
+                  )}
                   {submission.submission_status === "pending" && (
                     <>
                       <button
@@ -108,12 +127,14 @@ export default function SubmissionsSection() {
                       >
                         Mark Under Review
                       </button>
-                      <button
-                        onClick={() => approveAndAddToAwards(submission)}
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition-colors"
-                      >
-                        Approve & Add to Awards
-                      </button>
+                      {submission.payment_status === "completed" && (
+                        <button
+                          onClick={() => approveAndAddToAwards(submission)}
+                          className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition-colors"
+                        >
+                          Approve & Add to Awards
+                        </button>
+                      )}
                       <button
                         onClick={() => updateSubmissionStatus(submission._id, "rejected")}
                         className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors"
@@ -222,6 +243,20 @@ export default function SubmissionsSection() {
                     <h4 className="font-semibold text-gray-700 mb-1">Payment</h4>
                     <p className="text-gray-900">
                       {selectedSubmission.payment_currency} {selectedSubmission.payment_amount}
+                    </p>
+                    <p
+                      className={
+                        selectedSubmission.payment_status === "completed"
+                          ? "text-sm font-semibold text-green-700"
+                          : "text-sm font-semibold text-amber-700"
+                      }
+                    >
+                      {selectedSubmission.payment_status === "verification_pending"
+                        ? "Payment verification pending — review the reference before marking paid."
+                        : (selectedSubmission.payment_status || "UNKNOWN").replace("_", " ").toUpperCase()}
+                    </p>
+                    <p className="break-all text-xs text-gray-500">
+                      Reference: {selectedSubmission.payment_reference}
                     </p>
                   </div>
                 </div>
