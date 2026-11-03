@@ -70,28 +70,17 @@ const createSubmission = async (req, res) => {
     if (!paymentReference) {
       return res.status(400).json({ success: false, error: 'Payment reference is required.' });
     }
-
-    let verifiedPayment;
-    try {
-      verifiedPayment = await verifyPayment(paymentReference, req.body.payment_currency);
-    } catch (error) {
-      return res.status(error.statusCode || 502).json({
-        success: false,
-        error: error.statusCode ? error.message : 'Unable to verify payment with the provider.'
-      });
+    const paymentCurrency = String(req.body.payment_currency || '').toUpperCase();
+    if (!['NGN', 'USD'].includes(paymentCurrency)) {
+      return res.status(400).json({ success: false, error: 'Unsupported payment currency.' });
     }
 
-    if (!verifiedPayment) {
-      return res.status(400).json({
-        success: false,
-        error: 'Payment verification failed. Confirm the payment amount, currency, and status.'
-      });
-    }
+    const submissionData = { ...req.body };
+    submissionData.payment_reference = paymentReference;
+    submissionData.payment_currency = paymentCurrency;
+    submissionData.payment_status = 'verification_pending';
+    submissionData.payment_amount = Number(req.body.payment_amount) || 0;
 
-    const submissionData = { ...req.body, ...verifiedPayment };
-
-    // Files are handled by multer and URLs should be passed in the body or extracted from req.files
-    // In this unified approach, req.files will contain the file info
     if (req.files) {
       if (req.files.book_cover) {
         submissionData.cover_image_url = `/uploads/images/${req.files.book_cover[0].filename}`;
@@ -107,7 +96,79 @@ const createSubmission = async (req, res) => {
       }
     }
 
-    const submission = await Submission.create(submissionData);
+    let submission = await Submission.findOne({ payment_reference: paymentReference });
+    if (submission?.payment_status === 'completed') {
+      return res.status(200).json({
+        success: true,
+        alreadyCompleted: true,
+        data: submission
+      });
+    }
+
+    try {
+      if (submission) {
+        submission.set(submissionData);
+        await submission.save();
+      } else {
+        submission = await Submission.create(submissionData);
+      }
+    } catch (error) {
+      if (error.code === 11000) {
+        submission = await Submission.findOne({ payment_reference: paymentReference });
+        if (submission?.payment_status === 'completed') {
+          return res.status(200).json({
+            success: true,
+            alreadyCompleted: true,
+            data: submission
+          });
+        }
+        if (submission) {
+          submission.set(submissionData);
+          await submission.save();
+        } else {
+          throw error;
+        }
+      } else {
+        throw error;
+      }
+    }
+
+    let verifiedPayment;
+    try {
+      verifiedPayment = await verifyPayment(paymentReference, req.body.payment_currency);
+    } catch (error) {
+      console.error(`Payment verification is pending for ${paymentReference}: ${error.message}`);
+      return res.status(202).json({
+        success: true,
+        paymentVerificationPending: true,
+        message: 'Submission saved. Payment verification is pending; do not pay again.',
+        data: submission
+      });
+    }
+
+    if (!verifiedPayment) {
+      console.warn(`Payment could not yet be verified for ${paymentReference}.`);
+      return res.status(202).json({
+        success: true,
+        paymentVerificationPending: true,
+        message: 'Submission saved. Payment verification is pending; do not pay again.',
+        data: submission
+      });
+    }
+
+    try {
+      submission.set(verifiedPayment);
+      await submission.save();
+    } catch (error) {
+      console.error(`Payment verified but submission finalization is pending for ${paymentReference}: ${error.message}`);
+      return res.status(202).json({
+        success: true,
+        paymentVerificationPending: true,
+        message: 'Submission saved. Payment verification is pending; do not pay again.',
+        data: await Submission.findById(submission._id)
+      });
+    }
+
     res.status(201).json({
       success: true,
       data: submission
