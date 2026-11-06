@@ -131,7 +131,7 @@ export default function BookSubmissionForm() {
   });
 
   const [currency, setCurrency] = useState("USD");
-  const amount = currency === "USD" ? 1 : 20000;
+  const amount = currency === "USD" ? 50 : 20000;
 
   const handleChange = (e) => {
     setFormData({
@@ -343,7 +343,7 @@ export default function BookSubmissionForm() {
       modal = window.FlutterwaveCheckout({
         public_key: FLUTTERWAVE_PUBLIC_KEY,
         tx_ref: "TALA_" + Math.floor(Math.random() * 1000000000 + 1),
-        amount: 1,
+        amount: 50,
         currency: "USD",
         payment_options: "card,ussd,banktransfer",
         customer: {
@@ -1312,7 +1312,7 @@ https://www.theafricalaureateawards.org/Tala-admin
                           ? "Payment Unavailable"
                           : "Loading Payment..."
                         : `Pay ${currency} ${
-                            currency === "USD" ? "$1" : "₦20,000"
+                            currency === "USD" ? "$50" : "₦20,000"
                           }`}
                 </button>
               </div>
