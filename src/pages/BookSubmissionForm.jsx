@@ -131,7 +131,7 @@ export default function BookSubmissionForm() {
   });
 
   const [currency, setCurrency] = useState("USD");
-  const amount = currency === "USD" ? 50 : 20000;
+  const amount = currency === "USD" ? 1 : 20000;
 
   const handleChange = (e) => {
     setFormData({
@@ -1312,7 +1312,7 @@ https://www.theafricalaureateawards.org/Tala-admin
                           ? "Payment Unavailable"
                           : "Loading Payment..."
                         : `Pay ${currency} ${
-                            currency === "USD" ? "$50" : "₦20,000"
+                            currency === "USD" ? "$1" : "₦20,000"
                           }`}
                 </button>
               </div>
